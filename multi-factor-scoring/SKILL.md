@@ -1,0 +1,387 @@
+---
+name: multi-factor-scoring
+description: Multi-factor scoring quantitative trading system. Use this skill when the user wants to build a quantitative trading strategy based on multi-factor scoring (momentum, technical indicators, volume, fundamentals, macro, sector rotation), with support for A-shares, HK stocks, and US stocks across multiple timeframes (daily, 4H, 1H, 15M). Triggers include requests for multi-factor models, scoring systems, factor-based stock selection, rotational strategies, or quantitative trading framework setup.
+agent_created: true
+---
+
+# Multi-Factor Scoring Quantitative Trading System
+
+## Overview
+
+This skill provides a complete framework for building and deploying a multi-factor scoring quantitative trading system. It evaluates stocks across six factor categories (momentum, technical indicators, volume, fundamentals, macro, sector) with customizable weights, generates buy/sell signals based on dynamic thresholds, and supports backtesting and simulated trading across A-shares, HK stocks, and US stocks on multiple timeframes (daily swing, 4H, 1H, 15M).
+
+## Core Capabilities
+
+### 1. Multi-Factor Scoring Engine
+
+To calculate a composite score for each stock, the system evaluates six factor categories:
+
+**Factor Categories and Default Weights:**
+
+| Factor Category | Default Weight | Description |
+|----------------|----------------|-------------|
+| Momentum | 25% | Price momentum, returns over multiple periods |
+| Technical Indicators | 20% | RSI, MACD, Bollinger Bands, moving averages |
+| Volume | 15% | Volume change, volume-price divergence |
+| Fundamentals | 20% | P/E, P/B, ROE, revenue growth, profit margins |
+| Macro Economy | 10% | Interest rates, CPI, PMI, monetary policy |
+| Sector/Industry | 10% | Sector rotation, industry trends, relative strength |
+
+**Customizing Weights:**
+
+Users can customize factor weights by modifying the `factor_weights` dictionary in `scoring_engine.py`:
+
+```python
+factor_weights = {
+    'momentum': 0.25,
+    'technical': 0.20,
+    'volume': 0.15,
+    'fundamental': 0.20,
+    'macro': 0.10,
+    'sector': 0.10
+}
+```
+
+Total weights should sum to 1.0.
+
+### 2. Scoring Methodology
+
+**Momentum Factor (25%):**
+- 1-month, 3-month, 6-month returns
+- Risk-adjusted momentum (return / volatility)
+- Relative strength vs. benchmark
+
+**Technical Indicators (20%):**
+- RSI (14): Oversold/overbought conditions
+- MACD: Trend and momentum
+- Bollinger Bands: Volatility and mean reversion
+- Moving averages: Trend direction (MA20, MA60, MA200)
+
+**Volume (15%):**
+- Volume change vs. 20-day average
+- Volume-price divergence (price up, volume down = negative)
+- Accumulation/Distribution line
+
+**Fundamentals (20%):**
+- Valuation: P/E, P/B, EV/EBITDA
+- Profitability: ROE, ROA, profit margin
+- Growth: Revenue growth, earnings growth
+- Financial health: Debt/Equity, current ratio
+
+**Macro (10%):**
+- Interest rate trends
+- Inflation (CPI, PPI)
+- Economic growth (GDP, PMI)
+- Monetary policy stance
+
+**Sector (10%):**
+- Sector relative strength vs. market
+- Industry rotation signals
+- Sector momentum
+
+Each factor is normalized to a 0-100 score, then weighted and summed to produce a composite score.
+
+### 3. Dynamic Threshold Trading Signals
+
+Instead of fixed percentiles, the system uses **dynamic thresholds** based on the distribution of scores:
+
+**Buy Signal (Add to Position):**
+- Composite score rises above the 80th percentile of the universe
+- Or score improves by >20 points from previous period
+- Additional condition: score > 70 (out of 100)
+
+**Sell Signal (Reduce/Clear Position):**
+- Composite score falls below the 20th percentile of the universe
+- Or score declines by >20 points from previous period
+- Additional condition: score < 30 (out of 100)
+
+**Position Sizing:**
+
+Position size is proportional to the composite score:
+
+```
+Position Size (%) = (Composite Score - 50) / 50 * Max_Position_Size
+```
+
+Example: If max position size is 10% and score is 80, position size = (80-50)/50 * 10% = 6%.
+
+### 4. Multi-Market Support
+
+**A-Shares (China):**
+- Data source: `akshare` library
+- Trading hours: 9:30-11:30, 13:00-15:00 (Beijing time)
+- T+1 settlement, 10% price limit (main board)
+- Account: Required (user may provide access)
+
+**HK Stocks:**
+- Data source: `akshare`, `yfinance`
+- Trading hours: 9:30-12:00, 13:00-16:00 (Hong Kong time)
+- No price limit, T+2 settlement
+
+**US Stocks:**
+- Data source: `yfinance`, `akshare`
+- Trading hours: 9:30-16:00 (EST), pre/post market available
+- No price limit, T+2 settlement
+
+### 5. Multi-Timeframe Support
+
+The system supports four timeframes:
+
+| Timeframe | Use Case | Indicator Parameters |
+|-----------|----------|---------------------|
+| Daily | Swing trading (hold 5-20 days) | MA20, MA60, MACD(12,26,9) |
+| 4H | Medium-term trend | MA50, MA200, RSI(14) |
+| 1H | Short-term entries | MA20, Bollinger Bands(20,2) |
+| 15M | Intraday timing | MA10, RSI(14), volume spikes |
+
+Each timeframe has its own scoring calculation. Signals are generated by combining timeframes (e.g., daily score >70 AND 4H score >60 = strong buy).
+
+### 6. Workflow
+
+**Step 1: Data Collection**
+
+To collect market data for scoring:
+
+```python
+from data_loader import MultiMarketDataLoader
+
+loader = MultiMarketDataLoader()
+data = loader.load_data(
+    symbols=['600519.SH', '000858.SZ', 'AAPL', '0700.HK'],
+    start_date='2024-01-01',
+    end_date='2024-12-31',
+    timeframe='daily'  # or '4h', '1h', '15m'
+)
+```
+
+**Step 2: Calculate Factor Scores**
+
+To calculate scores for each stock:
+
+```python
+from scoring_engine import MultiFactorScorer
+
+scorer = MultiFactorScorer(factor_weights={
+    'momentum': 0.25,
+    'technical': 0.20,
+    'volume': 0.15,
+    'fundamental': 0.20,
+    'macro': 0.10,
+    'sector': 0.10
+})
+
+scores = scorer.calculate_scores(data)
+```
+
+**Step 3: Generate Trading Signals**
+
+To generate buy/sell signals based on dynamic thresholds:
+
+```python
+from signal_generator import SignalGenerator
+
+generator = SignalGenerator(
+    buy_threshold_percentile=80,
+    sell_threshold_percentile=20,
+    score_improvement_threshold=20
+)
+
+signals = generator.generate_signals(scores, historical_scores)
+```
+
+**Step 4: Backtest**
+
+To backtest the strategy:
+
+```python
+from backtest import BacktestEngine
+
+engine = BacktestEngine(
+    initial_capital=100000,
+    commission=0.0003,  # 0.03%
+    slippage=0.001  # 0.1%
+)
+
+results = engine.run_backtest(data, signals, scores)
+engine.print_results()
+engine.plot_results()
+```
+
+**Step 5: Simulate Trading**
+
+To run simulated trading:
+
+```python
+from simulated_broker import SimulatedBroker
+
+broker = SimulatedBroker(initial_capital=100000)
+broker.execute_signals(signals, data)
+broker.print_portfolio_summary()
+```
+
+### 7. File Structure
+
+To use this skill, create the following files:
+
+```
+multi_factor_scoring/
+├── data_loader.py          # Multi-market data loading (A-shares, HK, US)
+├── scoring_engine.py       # Multi-factor scoring calculation
+├── signal_generator.py     # Dynamic threshold signal generation
+├── backtest.py             # Backtest engine
+├── simulated_broker.py    # Simulated trading execution
+├── visualization.py        # Plotting and reporting
+├── config.py               # Configuration (weights, thresholds, symbols)
+└── main.py                 # Main execution script
+```
+
+### 8. Dependencies
+
+To install required libraries:
+
+```bash
+pip install pandas numpy matplotlib seaborn ta akshare yfinance scikit-optimize
+```
+
+**Key Libraries:**
+- `pandas`, `numpy`: Data manipulation
+- `matplotlib`, `seaborn`: Visualization
+- `ta`: Technical indicators
+- `akshare`: A-share and HK stock data
+- `yfinance`: US stock data
+- `scikit-optimize`: Parameter optimization (optional)
+
+### 9. Configuration Example
+
+To customize the strategy, edit `config.py`:
+
+```python
+# Factor weights (must sum to 1.0)
+FACTOR_WEIGHTS = {
+    'momentum': 0.25,
+    'technical': 0.20,
+    'volume': 0.15,
+    'fundamental': 0.20,
+    'macro': 0.10,
+    'sector': 0.10
+}
+
+# Trading universe
+SYMBOLS = {
+    'ashare': ['600519.SH', '000858.SZ', '601318.SH'],  # Moutai, Wuliangye, Ping An
+    'hk': ['0700.HK', '0941.HK', '9988.HK'],  # Tencent, China Mobile, Alibaba
+    'us': ['AAPL', 'MSFT', 'GOOGL']
+}
+
+# Timeframes to use
+TIMEFRAMES = ['daily', '4h', '1h', '15m']
+
+# Signal generation thresholds
+BUY_THRESHOLD_PERCENTILE = 80
+SELL_THRESHOLD_PERCENTILE = 20
+SCORE_IMPROVEMENT_THRESHOLD = 20  # points
+
+# Risk management
+MAX_POSITION_SIZE = 0.10  # 10% per stock
+MAX_SECTOR_EXPOSURE = 0.30  # 30% per sector
+STOP_LOSS = 0.08  # 8% stop loss
+TAKE_PROFIT = 0.20  # 20% take profit
+```
+
+### 10. Output and Reporting
+
+The system generates the following outputs:
+
+**Trading Signals:**
+- Current buy/hold/sell recommendations for each stock
+- Composite scores and factor breakdowns
+- Signal strength (weak/moderate/strong)
+
+**Portfolio:**
+- Current positions and scores
+- P&L for each position
+- Portfolio composite score
+
+**Performance:**
+- Backtest results (returns, Sharpe ratio, max drawdown)
+- Benchmark comparison (CSI 300, Hang Seng, S&P 500)
+- Factor contribution analysis
+
+**Visualization:**
+- Score heatmap (stocks × factors)
+- Portfolio composition pie chart
+- Equity curve with benchmark
+- Factor exposure breakdown
+
+## Usage Examples
+
+**Example 1: Build a multi-factor scoring system for A-shares**
+
+User: "帮我构建一个A股多因子评分系统，包含动量、技术指标、成交量、基本面、宏观经济、行业板块六个维度"
+
+To complete this task:
+1. Create the file structure (data_loader.py, scoring_engine.py, etc.)
+2. Implement data loading for A-shares using `akshare`
+3. Calculate factor scores with equal weights (16.7% each)
+4. Generate trading signals using dynamic thresholds
+5. Run backtest and visualize results
+
+**Example 2: Optimize factor weights**
+
+User: "帮我优化多因子模型的权重，动量因子的重要性更高"
+
+To complete this task:
+1. Run parameter optimization (`optimization.py`) to find best weights
+2. Use grid search or Bayesian optimization
+3. Evaluate performance with different weight combinations
+4. Update `config.py` with optimized weights
+
+**Example 3: Run simulated trading**
+
+User: "帮我运行模拟交易，初始资金10万，交易A股和港股"
+
+To complete this task:
+1. Initialize `SimulatedBroker` with 100,000 capital
+2. Load data for A-shares and HK stocks
+3. Calculate scores and generate signals
+4. Execute trades according to signals
+5. Track portfolio performance and generate report
+
+## Notes
+
+- **Data Quality:** Ensure data quality before calculating scores. Handle missing data, adjust for stock splits and dividends.
+- **Survivorship Bias:** Include delisted stocks in backtests to avoid survivorship bias.
+- **Transaction Costs:** Account for commissions, slippage, and market impact in backtests.
+- **Overfitting:** Avoid over-optimizing factor weights. Use out-of-sample testing.
+- **Regime Changes:** Factor performance varies across market regimes. Consider regime-dependent weights.
+
+## Troubleshooting
+
+**No trading signals generated:**
+- Check if factor weights sum to 1.0
+- Lower buy threshold percentile (e.g., from 80 to 70)
+- Verify data quality and indicator calculations
+
+**Poor backtest performance:**
+- Review factor definitions and calculations
+- Check for data snooping bias
+- Validate with out-of-sample testing
+- Consider transaction costs and slippage
+
+**Data loading fails:**
+- Verify symbol formats (A-shares: `600519.SH`, HK: `0700.HK`, US: `AAPL`)
+- Check internet connection for `akshare` and `yfinance`
+- Use local data cache to avoid repeated downloads
+
+## References
+
+For detailed implementation of each module, refer to the code files created in the user's project directory. Each file contains detailed comments and examples.
+
+**External References:**
+- `akshare` documentation: https://akshare.akfamily.xyz/
+- `yfinance` documentation: https://pypi.org/project/yfinance/
+- `ta` library documentation: https://technical-analysis-library-in-python.readthedocs.io/
+
+---
+
+**To use this skill:** Ask WorkBuddy to "build a multi-factor scoring trading system", "create a factor-based stock selection model", or "implement a quantitative trading strategy with momentum, technical, and fundamental factors".
