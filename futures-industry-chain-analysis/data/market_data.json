@@ -1,0 +1,2558 @@
+{
+  "symbols": [
+    {
+      "product_id": "rb",
+      "product_name": "螺纹钢",
+      "last_price": 3112.0,
+      "open_interest": 1790093,
+      "change_pct": -0.48,
+      "tech": {
+        "MA5": 3138.8,
+        "MA10": 3155.1,
+        "MA20": 3157.45,
+        "MACD_DIF": -12.9644,
+        "MACD_DEA": -7.6889,
+        "MACD_HIST": -10.551,
+        "RSI14": 32.47,
+        "ATR14": 26.9286,
+        "DMI_PDI": 17.76,
+        "DMI_MDI": 24.38,
+        "ADX": 15.7,
+        "OBV": -5450668,
+        "OBV_MA20": -3683877.75,
+        "recent_high": 3218.0,
+        "recent_low": 3105.0,
+        "volatility_pct": 0.8653149100257069,
+        "volatility_state": "low"
+      },
+      "trend": {
+        "score": -94.12724306688418,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "MDI>PDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "hc",
+      "product_name": "热卷",
+      "last_price": 3327.0,
+      "open_interest": 1538787,
+      "change_pct": -0.33,
+      "tech": {
+        "MA5": 3353.4,
+        "MA10": 3364.2,
+        "MA20": 3371.7,
+        "MACD_DIF": -12.4291,
+        "MACD_DEA": -6.8472,
+        "MACD_HIST": -11.1638,
+        "RSI14": 31.63,
+        "ATR14": 29.0,
+        "DMI_PDI": 14.67,
+        "DMI_MDI": 22.35,
+        "ADX": 20.75,
+        "OBV": -3330239,
+        "OBV_MA20": -2007565.25,
+        "recent_high": 3435.0,
+        "recent_low": 3315.0,
+        "volatility_pct": 0.8716561466786895,
+        "volatility_state": "low"
+      },
+      "trend": {
+        "score": -94.12724306688418,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "MDI>PDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "i",
+      "product_name": "铁矿石",
+      "last_price": 738.5,
+      "open_interest": 619453,
+      "change_pct": -0.14,
+      "tech": {
+        "MA5": 746.9,
+        "MA10": 756.55,
+        "MA20": 766.6,
+        "MACD_DIF": -12.1322,
+        "MACD_DEA": -9.2866,
+        "MACD_HIST": -5.6913,
+        "RSI14": 22.73,
+        "ATR14": 10.8929,
+        "DMI_PDI": 14.18,
+        "DMI_MDI": 30.04,
+        "ADX": 35.85,
+        "OBV": -1563990,
+        "OBV_MA20": -524932.4,
+        "recent_high": 795.0,
+        "recent_low": 734.0,
+        "volatility_pct": 1.4750033852403521,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -88.25448613376835,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "RSI超卖(23,6)",
+          "MDI>PDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "j",
+      "product_name": "焦炭",
+      "last_price": 1925.0,
+      "open_interest": 62886,
+      "change_pct": -4.49,
+      "tech": {
+        "MA5": 2023.3,
+        "MA10": 2024.25,
+        "MA20": 1992.625,
+        "MACD_DIF": 44.9221,
+        "MACD_DEA": 56.6712,
+        "MACD_HIST": -23.4982,
+        "RSI14": 43.95,
+        "ATR14": 68.8571,
+        "DMI_PDI": 26.44,
+        "DMI_MDI": 24.72,
+        "ADX": 3.36,
+        "OBV": -176167,
+        "OBV_MA20": 42564.45,
+        "recent_high": 2130.5,
+        "recent_low": 1821.0,
+        "volatility_pct": 3.576992207792208,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": 8.035714285714285,
+        "trend": "neutral",
+        "reasons": [
+          "MACD+(20)",
+          "PDI>MDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "jm",
+      "product_name": "焦煤",
+      "last_price": 1248.0,
+      "open_interest": 469029,
+      "change_pct": -2.16,
+      "tech": {
+        "MA5": 1296.0,
+        "MA10": 1328.45,
+        "MA20": 1341.7,
+        "MACD_DIF": 6.2189,
+        "MACD_DEA": 24.6409,
+        "MACD_HIST": -36.8441,
+        "RSI14": 33.19,
+        "ATR14": 53.6786,
+        "DMI_PDI": 22.01,
+        "DMI_MDI": 24.91,
+        "ADX": 6.17,
+        "OBV": -2824801,
+        "OBV_MA20": -11904.15,
+        "recent_high": 1486.5,
+        "recent_low": 1234.0,
+        "volatility_pct": 4.3011698717948725,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -50.046339202965704,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD+(20)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "SF",
+      "product_name": "硅铁",
+      "last_price": 5624.0,
+      "open_interest": 233853,
+      "change_pct": -0.57,
+      "tech": {
+        "MA5": 5677.6,
+        "MA10": 5758.2,
+        "MA20": 5827.3,
+        "MACD_DIF": -46.5205,
+        "MACD_DEA": -15.568,
+        "MACD_HIST": -61.9051,
+        "RSI14": 24.52,
+        "ATR14": 82.0,
+        "DMI_PDI": 13.73,
+        "DMI_MDI": 24.53,
+        "ADX": 28.23,
+        "OBV": 1605266,
+        "OBV_MA20": 2455557.6,
+        "recent_high": 6008.0,
+        "recent_low": 5614.0,
+        "volatility_pct": 1.4580369843527738,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -88.25448613376835,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "RSI超卖(25,6)",
+          "MDI>PDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "SM",
+      "product_name": "锰硅",
+      "last_price": 5804.0,
+      "open_interest": 496028,
+      "change_pct": -0.75,
+      "tech": {
+        "MA5": 5842.0,
+        "MA10": 5917.0,
+        "MA20": 5964.6,
+        "MACD_DIF": -49.0421,
+        "MACD_DEA": -32.3746,
+        "MACD_HIST": -33.3351,
+        "RSI14": 26.56,
+        "ATR14": 73.8571,
+        "DMI_PDI": 15.3,
+        "DMI_MDI": 29.5,
+        "ADX": 31.69,
+        "OBV": 2236512,
+        "OBV_MA20": 2905727.45,
+        "recent_high": 6114.0,
+        "recent_low": 5780.0,
+        "volatility_pct": 1.2725206753962783,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -88.25448613376835,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "RSI超卖(27,6)",
+          "MDI>PDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "sc",
+      "product_name": "原油",
+      "last_price": 491.4,
+      "open_interest": 54918,
+      "change_pct": -3.12,
+      "tech": {
+        "MA5": 508.96,
+        "MA10": 536.36,
+        "MA20": 568.015,
+        "MACD_DIF": -34.2966,
+        "MACD_DEA": -26.4735,
+        "MACD_HIST": -15.6462,
+        "RSI14": 22.87,
+        "ATR14": 24.6,
+        "DMI_PDI": 13.11,
+        "DMI_MDI": 32.37,
+        "ADX": 42.36,
+        "OBV": 1080785,
+        "OBV_MA20": 1298400.2,
+        "recent_high": 619.6,
+        "recent_low": 488.4,
+        "volatility_pct": 5.006105006105006,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(23,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "lu",
+      "product_name": "低硫燃油",
+      "last_price": 3823.0,
+      "open_interest": 47591,
+      "change_pct": -3.53,
+      "tech": {
+        "MA5": 3944.4,
+        "MA10": 4208.1,
+        "MA20": 4485.75,
+        "MACD_DIF": -246.1925,
+        "MACD_DEA": -160.2047,
+        "MACD_HIST": -171.9756,
+        "RSI14": 21.82,
+        "ATR14": 203.8571,
+        "DMI_PDI": 16.57,
+        "DMI_MDI": 32.12,
+        "ADX": 31.94,
+        "OBV": 835960,
+        "OBV_MA20": 997389.0,
+        "recent_high": 4974.0,
+        "recent_low": 3799.0,
+        "volatility_pct": 5.332385561077688,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(22,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "fu",
+      "product_name": "燃料油",
+      "last_price": 2989.0,
+      "open_interest": 248703,
+      "change_pct": -3.61,
+      "tech": {
+        "MA5": 3136.2,
+        "MA10": 3385.2,
+        "MA20": 3628.0,
+        "MACD_DIF": -256.559,
+        "MACD_DEA": -183.1366,
+        "MACD_HIST": -146.8448,
+        "RSI14": 21.78,
+        "ATR14": 164.3571,
+        "DMI_PDI": 13.99,
+        "DMI_MDI": 37.9,
+        "ADX": 46.09,
+        "OBV": 5886141,
+        "OBV_MA20": 7600452.6,
+        "recent_high": 4027.0,
+        "recent_low": 2982.0,
+        "volatility_pct": 5.498732017397122,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(22,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "bu",
+      "product_name": "沥青",
+      "last_price": 3766.0,
+      "open_interest": 284091,
+      "change_pct": -2.84,
+      "tech": {
+        "MA5": 3930.4,
+        "MA10": 4164.6,
+        "MA20": 4226.55,
+        "MACD_DIF": -98.5864,
+        "MACD_DEA": -29.8273,
+        "MACD_HIST": -137.5181,
+        "RSI14": 25.72,
+        "ATR14": 146.2143,
+        "DMI_PDI": 16.29,
+        "DMI_MDI": 36.49,
+        "ADX": 38.28,
+        "OBV": -2561170,
+        "OBV_MA20": 1127885.9,
+        "recent_high": 4586.0,
+        "recent_low": 3760.0,
+        "volatility_pct": 3.8824827403080193,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(26,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "pg",
+      "product_name": "LPG",
+      "last_price": 4486.0,
+      "open_interest": 91405,
+      "change_pct": -2.5,
+      "tech": {
+        "MA5": 4733.0,
+        "MA10": 5120.9,
+        "MA20": 5394.6,
+        "MACD_DIF": -298.5327,
+        "MACD_DEA": -176.6705,
+        "MACD_HIST": -243.7243,
+        "RSI14": 25.48,
+        "ATR14": 273.1429,
+        "DMI_PDI": 12.22,
+        "DMI_MDI": 36.09,
+        "ADX": 49.42,
+        "OBV": -309188,
+        "OBV_MA20": 139609.65,
+        "recent_high": 5975.0,
+        "recent_low": 4464.0,
+        "volatility_pct": 6.088785109228711,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(25,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "PX",
+      "product_name": "PX",
+      "last_price": 7954.0,
+      "open_interest": 191158,
+      "change_pct": -1.0,
+      "tech": {
+        "MA5": 8041.6,
+        "MA10": 8352.4,
+        "MA20": 8530.5,
+        "MACD_DIF": -247.6714,
+        "MACD_DEA": -180.3099,
+        "MACD_HIST": -134.7232,
+        "RSI14": 30.33,
+        "ATR14": 262.7143,
+        "DMI_PDI": 13.17,
+        "DMI_MDI": 28.22,
+        "ADX": 36.37,
+        "OBV": 1169202,
+        "OBV_MA20": 1669380.9,
+        "recent_high": 9004.0,
+        "recent_low": 7918.0,
+        "volatility_pct": 3.3029205431229567,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -90.82483781278961,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "TA",
+      "product_name": "PTA",
+      "last_price": 5776.0,
+      "open_interest": 1027937,
+      "change_pct": -0.48,
+      "tech": {
+        "MA5": 5813.6,
+        "MA10": 6024.0,
+        "MA20": 6113.2,
+        "MACD_DIF": -135.4506,
+        "MACD_DEA": -90.5852,
+        "MACD_HIST": -89.7307,
+        "RSI14": 35.71,
+        "ATR14": 192.8571,
+        "DMI_PDI": 14.44,
+        "DMI_MDI": 27.3,
+        "ADX": 30.8,
+        "OBV": 6014897,
+        "OBV_MA20": 6399835.4,
+        "recent_high": 6470.0,
+        "recent_low": 5716.0,
+        "volatility_pct": 3.338938711911357,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -90.82483781278961,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "PF",
+      "product_name": "短纤",
+      "last_price": 7274.0,
+      "open_interest": 131588,
+      "change_pct": 0.19,
+      "tech": {
+        "MA5": 7296.0,
+        "MA10": 7495.2,
+        "MA20": 7612.7,
+        "MACD_DIF": -166.324,
+        "MACD_DEA": -125.7204,
+        "MACD_HIST": -81.2071,
+        "RSI14": 36.95,
+        "ATR14": 205.2857,
+        "DMI_PDI": 11.76,
+        "DMI_MDI": 25.61,
+        "ADX": 37.05,
+        "OBV": 912710,
+        "OBV_MA20": 750377.2,
+        "recent_high": 7958.0,
+        "recent_low": 7186.0,
+        "volatility_pct": 2.822184492713775,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -66.72845227062095,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV>MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "PR",
+      "product_name": "瓶片",
+      "last_price": 6940.0,
+      "open_interest": 43024,
+      "change_pct": -0.63,
+      "tech": {
+        "MA5": 7016.0,
+        "MA10": 7274.8,
+        "MA20": 7528.3,
+        "MACD_DIF": -286.0662,
+        "MACD_DEA": -225.2544,
+        "MACD_HIST": -121.6234,
+        "RSI14": 34.07,
+        "ATR14": 256.8571,
+        "DMI_PDI": 14.18,
+        "DMI_MDI": 26.65,
+        "ADX": 30.55,
+        "OBV": 80829,
+        "OBV_MA20": 435969.05,
+        "recent_high": 8074.0,
+        "recent_low": 6918.0,
+        "volatility_pct": 3.701110951008645,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -90.82483781278961,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "eg",
+      "product_name": "乙二醇",
+      "last_price": 4233.0,
+      "open_interest": 310289,
+      "change_pct": -0.31,
+      "tech": {
+        "MA5": 4249.4,
+        "MA10": 4401.9,
+        "MA20": 4447.95,
+        "MACD_DIF": -116.8146,
+        "MACD_DEA": -93.9441,
+        "MACD_HIST": -45.7409,
+        "RSI14": 37.83,
+        "ATR14": 163.2143,
+        "DMI_PDI": 13.37,
+        "DMI_MDI": 24.64,
+        "ADX": 29.64,
+        "OBV": 9360446,
+        "OBV_MA20": 10002594.35,
+        "recent_high": 4764.0,
+        "recent_low": 4152.0,
+        "volatility_pct": 3.855759508622726,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -90.82483781278961,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "eb",
+      "product_name": "苯乙烯",
+      "last_price": 7535.0,
+      "open_interest": 399542,
+      "change_pct": -1.96,
+      "tech": {
+        "MA5": 7732.6,
+        "MA10": 8093.5,
+        "MA20": 8422.65,
+        "MACD_DIF": -408.4257,
+        "MACD_DEA": -325.3654,
+        "MACD_HIST": -166.1205,
+        "RSI14": 23.79,
+        "ATR14": 277.0714,
+        "DMI_PDI": 7.43,
+        "DMI_MDI": 31.42,
+        "ADX": 61.76,
+        "OBV": 5134327,
+        "OBV_MA20": 7003693.6,
+        "recent_high": 8995.0,
+        "recent_low": 7490.0,
+        "volatility_pct": 3.677125414731254,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(24,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "v",
+      "product_name": "PVC",
+      "last_price": 4444.0,
+      "open_interest": 1389523,
+      "change_pct": -2.01,
+      "tech": {
+        "MA5": 4570.0,
+        "MA10": 4642.2,
+        "MA20": 4763.1,
+        "MACD_DIF": -133.7957,
+        "MACD_DEA": -114.3788,
+        "MACD_HIST": -38.8338,
+        "RSI14": 7.69,
+        "ATR14": 91.2143,
+        "DMI_PDI": 11.37,
+        "DMI_MDI": 31.1,
+        "ADX": 46.46,
+        "OBV": -1816295,
+        "OBV_MA20": 3333535.8,
+        "recent_high": 5032.0,
+        "recent_low": 4439.0,
+        "volatility_pct": 2.05252700270027,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(8,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "pp",
+      "product_name": "聚丙烯",
+      "last_price": 7379.0,
+      "open_interest": 530793,
+      "change_pct": -2.36,
+      "tech": {
+        "MA5": 7683.0,
+        "MA10": 8138.4,
+        "MA20": 8386.25,
+        "MACD_DIF": -270.0799,
+        "MACD_DEA": -127.3723,
+        "MACD_HIST": -285.4153,
+        "RSI14": 22.32,
+        "ATR14": 259.7143,
+        "DMI_PDI": 12.74,
+        "DMI_MDI": 36.67,
+        "ADX": 48.43,
+        "OBV": -2122451,
+        "OBV_MA20": 2361558.15,
+        "recent_high": 9008.0,
+        "recent_low": 7366.0,
+        "volatility_pct": 3.519640872746985,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(22,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "l",
+      "product_name": "塑料",
+      "last_price": 7051.0,
+      "open_interest": 419033,
+      "change_pct": -1.52,
+      "tech": {
+        "MA5": 7253.0,
+        "MA10": 7555.9,
+        "MA20": 7730.95,
+        "MACD_DIF": -222.605,
+        "MACD_DEA": -139.7196,
+        "MACD_HIST": -165.7709,
+        "RSI14": 24.83,
+        "ATR14": 206.0714,
+        "DMI_PDI": 12.81,
+        "DMI_MDI": 32.36,
+        "ADX": 43.27,
+        "OBV": 427112,
+        "OBV_MA20": 3376921.2,
+        "recent_high": 8149.0,
+        "recent_low": 7047.0,
+        "volatility_pct": 2.922584030633953,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(25,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "MA",
+      "product_name": "甲醇",
+      "last_price": 2493.0,
+      "open_interest": 682499,
+      "change_pct": -1.38,
+      "tech": {
+        "MA5": 2577.0,
+        "MA10": 2762.5,
+        "MA20": 2819.8,
+        "MACD_DIF": -90.1319,
+        "MACD_DEA": -42.1439,
+        "MACD_HIST": -95.9758,
+        "RSI14": 28.82,
+        "ATR14": 111.5,
+        "DMI_PDI": 13.44,
+        "DMI_MDI": 32.62,
+        "ADX": 41.65,
+        "OBV": 9943159,
+        "OBV_MA20": 14887884.15,
+        "recent_high": 3074.0,
+        "recent_low": 2485.0,
+        "volatility_pct": 4.472523064580827,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(29,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "SH",
+      "product_name": "烧碱",
+      "last_price": 1951.0,
+      "open_interest": 283857,
+      "change_pct": -1.27,
+      "tech": {
+        "MA5": 1984.2,
+        "MA10": 1932.1,
+        "MA20": 1933.75,
+        "MACD_DIF": -18.2609,
+        "MACD_DEA": -33.55,
+        "MACD_HIST": 30.5782,
+        "RSI14": 50.71,
+        "ATR14": 61.0714,
+        "DMI_PDI": 20.79,
+        "DMI_MDI": 20.15,
+        "ADX": 1.55,
+        "OBV": -598556,
+        "OBV_MA20": -633547.8,
+        "recent_high": 2054.0,
+        "recent_low": 1842.0,
+        "volatility_pct": 3.1302614044079955,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": 25.297619047619047,
+        "trend": "weak_bull",
+        "reasons": [
+          "MACD-(20)",
+          "PDI>MDI(17)",
+          "价格>MA20(16)",
+          "OBV>MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "cu",
+      "product_name": "沪铜",
+      "last_price": 103580.0,
+      "open_interest": 148166,
+      "change_pct": -1.35,
+      "tech": {
+        "MA5": 104704.0,
+        "MA10": 104569.0,
+        "MA20": 104829.0,
+        "MACD_DIF": 189.6755,
+        "MACD_DEA": 369.3341,
+        "MACD_HIST": -359.3171,
+        "RSI14": 36.13,
+        "ATR14": 1572.1429,
+        "DMI_PDI": 20.81,
+        "DMI_MDI": 21.31,
+        "ADX": 1.19,
+        "OBV": -651659,
+        "OBV_MA20": -467859.55,
+        "recent_high": 107420.0,
+        "recent_low": 102640.0,
+        "volatility_pct": 1.5178054643753622,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -25.297619047619047,
+        "trend": "weak_bear",
+        "reasons": [
+          "MACD+(20)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "al",
+      "product_name": "沪铝",
+      "last_price": 23520.0,
+      "open_interest": 261603,
+      "change_pct": -2.69,
+      "tech": {
+        "MA5": 23876.0,
+        "MA10": 23978.5,
+        "MA20": 24191.0,
+        "MACD_DIF": -180.1452,
+        "MACD_DEA": -143.9649,
+        "MACD_HIST": -72.3605,
+        "RSI14": 24.16,
+        "ATR14": 295.3571,
+        "DMI_PDI": 18.61,
+        "DMI_MDI": 32.25,
+        "ADX": 26.82,
+        "OBV": -1565100,
+        "OBV_MA20": -1491344.5,
+        "recent_high": 24840.0,
+        "recent_low": 23460.0,
+        "volatility_pct": 1.2557699829931972,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -88.25448613376835,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "RSI超卖(24,6)",
+          "MDI>PDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "zn",
+      "product_name": "沪锌",
+      "last_price": 24570.0,
+      "open_interest": 101223,
+      "change_pct": -0.81,
+      "tech": {
+        "MA5": 24733.0,
+        "MA10": 24644.5,
+        "MA20": 24748.0,
+        "MACD_DIF": 44.4889,
+        "MACD_DEA": 72.2806,
+        "MACD_HIST": -55.5834,
+        "RSI14": 41.97,
+        "ATR14": 344.2857,
+        "DMI_PDI": 27.91,
+        "DMI_MDI": 22.51,
+        "ADX": 10.7,
+        "OBV": 379974,
+        "OBV_MA20": 670220.1,
+        "recent_high": 25355.0,
+        "recent_low": 24070.0,
+        "volatility_pct": 1.4012442002442003,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": 8.035714285714285,
+        "trend": "neutral",
+        "reasons": [
+          "MACD+(20)",
+          "PDI>MDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "pb",
+      "product_name": "沪铅",
+      "last_price": 16350.0,
+      "open_interest": 79430,
+      "change_pct": -0.21,
+      "tech": {
+        "MA5": 16393.0,
+        "MA10": 16278.0,
+        "MA20": 16419.75,
+        "MACD_DIF": -72.5927,
+        "MACD_DEA": -87.2384,
+        "MACD_HIST": 29.2914,
+        "RSI14": 40.6,
+        "ATR14": 180.0,
+        "DMI_PDI": 22.2,
+        "DMI_MDI": 23.63,
+        "ADX": 3.11,
+        "OBV": -552982,
+        "OBV_MA20": -422344.9,
+        "recent_high": 16810.0,
+        "recent_low": 16000.0,
+        "volatility_pct": 1.1009174311926606,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -64.58333333333334,
+        "trend": "strong_bear",
+        "reasons": [
+          "MACD-(20)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "ni",
+      "product_name": "沪镍",
+      "last_price": 133250.0,
+      "open_interest": 137507,
+      "change_pct": -2.73,
+      "tech": {
+        "MA5": 135710.0,
+        "MA10": 135628.0,
+        "MA20": 138872.5,
+        "MACD_DIF": -2193.2759,
+        "MACD_DEA": -1876.6152,
+        "MACD_HIST": -633.3214,
+        "RSI14": 21.46,
+        "ATR14": 2767.1429,
+        "DMI_PDI": 15.96,
+        "DMI_MDI": 25.8,
+        "ADX": 23.56,
+        "OBV": -241283,
+        "OBV_MA20": 173655.7,
+        "recent_high": 145900.0,
+        "recent_low": 133130.0,
+        "volatility_pct": 2.0766550844277676,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -52.97619047619048,
+        "trend": "strong_bear",
+        "reasons": [
+          "MACD-(20)",
+          "RSI超卖(21,12)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "sn",
+      "product_name": "沪锡",
+      "last_price": 400070.0,
+      "open_interest": 23313,
+      "change_pct": -5.35,
+      "tech": {
+        "MA5": 416356.0,
+        "MA10": 412114.0,
+        "MA20": 419403.0,
+        "MACD_DIF": 212.2994,
+        "MACD_DEA": 1962.043,
+        "MACD_HIST": -3499.4873,
+        "RSI14": 32.57,
+        "ATR14": 15385.0,
+        "DMI_PDI": 18.38,
+        "DMI_MDI": 25.26,
+        "ADX": 15.78,
+        "OBV": -798574,
+        "OBV_MA20": -707530.2,
+        "recent_high": 451860.0,
+        "recent_low": 390060.0,
+        "volatility_pct": 3.8455770240207965,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -25.297619047619047,
+        "trend": "weak_bear",
+        "reasons": [
+          "MACD+(20)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "ao",
+      "product_name": "氧化铝",
+      "last_price": 2843.0,
+      "open_interest": 284194,
+      "change_pct": -2.54,
+      "tech": {
+        "MA5": 2895.8,
+        "MA10": 2894.1,
+        "MA20": 2863.75,
+        "MACD_DIF": 23.8155,
+        "MACD_DEA": 21.7902,
+        "MACD_HIST": 4.0504,
+        "RSI14": 48.96,
+        "ATR14": 66.4286,
+        "DMI_PDI": 25.01,
+        "DMI_MDI": 16.96,
+        "ADX": 19.18,
+        "OBV": 7605050,
+        "OBV_MA20": 7229991.9,
+        "recent_high": 2980.0,
+        "recent_low": 2731.0,
+        "volatility_pct": 2.3365670066830813,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": 68.5820203892493,
+        "trend": "strong_bull",
+        "reasons": [
+          "MA多头排列(25)",
+          "MACD+(20)",
+          "PDI>MDI(22)",
+          "价格<MA20(11)",
+          "OBV>MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "SS",
+      "product_name": "不锈钢",
+      "last_price": 14885.0,
+      "open_interest": 119960,
+      "change_pct": -1.81,
+      "tech": {
+        "MA5": 15105.0,
+        "MA10": 14857.0,
+        "MA20": 14847.5,
+        "MACD_DIF": 42.7277,
+        "MACD_DEA": 1.3767,
+        "MACD_HIST": 82.7019,
+        "RSI14": 45.21,
+        "ATR14": 226.0714,
+        "DMI_PDI": 25.39,
+        "DMI_MDI": 26.26,
+        "ADX": 1.68,
+        "OBV": 380523,
+        "OBV_MA20": 554184.45,
+        "recent_high": 15205.0,
+        "recent_low": 14280.0,
+        "volatility_pct": 1.5187866980181393,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": 28.548123980424144,
+        "trend": "weak_bull",
+        "reasons": [
+          "MA多头排列(29)",
+          "MACD+(20)",
+          "MDI>PDI(25)",
+          "价格>MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "au",
+      "product_name": "沪金",
+      "last_price": 897.9,
+      "open_interest": 169010,
+      "change_pct": -2.07,
+      "tech": {
+        "MA5": 927.488,
+        "MA10": 924.936,
+        "MA20": 951.196,
+        "MACD_DIF": -24.2972,
+        "MACD_DEA": -22.8379,
+        "MACD_HIST": -2.9186,
+        "RSI14": 26.82,
+        "ATR14": 23.85,
+        "DMI_PDI": 14.82,
+        "DMI_MDI": 39.85,
+        "ADX": 45.77,
+        "OBV": -2100398,
+        "OBV_MA20": -1721438.15,
+        "recent_high": 1005.22,
+        "recent_low": 885.44,
+        "volatility_pct": 2.656197794854661,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -52.97619047619048,
+        "trend": "strong_bear",
+        "reasons": [
+          "MACD-(20)",
+          "RSI超卖(27,12)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "ag",
+      "product_name": "沪银",
+      "last_price": 14997.0,
+      "open_interest": 250386,
+      "change_pct": -6.64,
+      "tech": {
+        "MA5": 16226.8,
+        "MA10": 16147.8,
+        "MA20": 17035.45,
+        "MACD_DIF": -771.0213,
+        "MACD_DEA": -690.514,
+        "MACD_HIST": -161.0147,
+        "RSI14": 25.69,
+        "ATR14": 857.8571,
+        "DMI_PDI": 14.44,
+        "DMI_MDI": 36.08,
+        "ADX": 42.83,
+        "OBV": -3309644,
+        "OBV_MA20": -840389.8,
+        "recent_high": 19225.0,
+        "recent_low": 14970.0,
+        "volatility_pct": 5.720191371607655,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -52.97619047619048,
+        "trend": "strong_bear",
+        "reasons": [
+          "MACD-(20)",
+          "RSI超卖(26,12)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "a",
+      "product_name": "豆一",
+      "last_price": 4733.0,
+      "open_interest": 241269,
+      "change_pct": 0.96,
+      "tech": {
+        "MA5": 4714.8,
+        "MA10": 4723.9,
+        "MA20": 4742.65,
+        "MACD_DIF": -19.2516,
+        "MACD_DEA": -18.7714,
+        "MACD_HIST": -0.9603,
+        "RSI14": 52.37,
+        "ATR14": 67.1429,
+        "DMI_PDI": 20.06,
+        "DMI_MDI": 18.78,
+        "ADX": 3.31,
+        "OBV": 1901121,
+        "OBV_MA20": 2068756.5,
+        "recent_high": 4882.0,
+        "recent_low": 4644.0,
+        "volatility_pct": 1.418611874075639,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -43.2300163132137,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "PDI>MDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "b",
+      "product_name": "豆二",
+      "last_price": 3670.0,
+      "open_interest": 119291,
+      "change_pct": 0.38,
+      "tech": {
+        "MA5": 3609.4,
+        "MA10": 3552.8,
+        "MA20": 3554.65,
+        "MACD_DIF": 4.5002,
+        "MACD_DEA": -16.6321,
+        "MACD_HIST": 42.2646,
+        "RSI14": 62.44,
+        "ATR14": 53.7143,
+        "DMI_PDI": 29.59,
+        "DMI_MDI": 18.22,
+        "ADX": 23.78,
+        "OBV": -328619,
+        "OBV_MA20": -410916.1,
+        "recent_high": 3694.0,
+        "recent_low": 3448.0,
+        "volatility_pct": 1.4636049046321526,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": 64.58333333333334,
+        "trend": "strong_bull",
+        "reasons": [
+          "MACD+(20)",
+          "PDI>MDI(17)",
+          "价格>MA20(16)",
+          "OBV>MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "m",
+      "product_name": "豆粕",
+      "last_price": 2947.0,
+      "open_interest": 2015289,
+      "change_pct": 0.44,
+      "tech": {
+        "MA5": 2945.0,
+        "MA10": 2935.9,
+        "MA20": 2949.7,
+        "MACD_DIF": -11.6552,
+        "MACD_DEA": -13.3531,
+        "MACD_HIST": 3.3958,
+        "RSI14": 42.86,
+        "ATR14": 29.6429,
+        "DMI_PDI": 18.64,
+        "DMI_MDI": 20.44,
+        "ADX": 4.61,
+        "OBV": 1101073,
+        "OBV_MA20": 238372.25,
+        "recent_high": 3010.0,
+        "recent_low": 2887.0,
+        "volatility_pct": 1.0058669833729217,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -40.773809523809526,
+        "trend": "strong_bear",
+        "reasons": [
+          "MACD-(20)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV>MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "y",
+      "product_name": "豆油",
+      "last_price": 8353.0,
+      "open_interest": 592722,
+      "change_pct": -0.12,
+      "tech": {
+        "MA5": 8359.6,
+        "MA10": 8348.2,
+        "MA20": 8424.45,
+        "MACD_DIF": -46.6827,
+        "MACD_DEA": -43.3091,
+        "MACD_HIST": -6.7472,
+        "RSI14": 28.95,
+        "ATR14": 86.2143,
+        "DMI_PDI": 16.42,
+        "DMI_MDI": 22.18,
+        "ADX": 14.91,
+        "OBV": 3230686,
+        "OBV_MA20": 3575909.2,
+        "recent_high": 8630.0,
+        "recent_low": 8270.0,
+        "volatility_pct": 1.0321357596073266,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -52.97619047619048,
+        "trend": "strong_bear",
+        "reasons": [
+          "MACD-(20)",
+          "RSI超卖(29,12)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "p",
+      "product_name": "棕榈油",
+      "last_price": 9308.0,
+      "open_interest": 495107,
+      "change_pct": -0.62,
+      "tech": {
+        "MA5": 9336.2,
+        "MA10": 9320.8,
+        "MA20": 9447.5,
+        "MACD_DIF": -76.0633,
+        "MACD_DEA": -68.8457,
+        "MACD_HIST": -14.4351,
+        "RSI14": 32.84,
+        "ATR14": 166.2857,
+        "DMI_PDI": 17.8,
+        "DMI_MDI": 23.86,
+        "ADX": 14.57,
+        "OBV": -675893,
+        "OBV_MA20": 625978.7,
+        "recent_high": 9825.0,
+        "recent_low": 9151.0,
+        "volatility_pct": 1.786481521272024,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -64.58333333333334,
+        "trend": "strong_bear",
+        "reasons": [
+          "MACD-(20)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "OI",
+      "product_name": "菜油",
+      "last_price": 9659.0,
+      "open_interest": 265716,
+      "change_pct": -0.1,
+      "tech": {
+        "MA5": 9734.4,
+        "MA10": 9812.5,
+        "MA20": 9890.2,
+        "MACD_DIF": -16.9963,
+        "MACD_DEA": 28.5623,
+        "MACD_HIST": -91.1173,
+        "RSI14": 37.57,
+        "ATR14": 177.9286,
+        "DMI_PDI": 19.17,
+        "DMI_MDI": 22.77,
+        "ADX": 8.58,
+        "OBV": 2036300,
+        "OBV_MA20": 2980665.45,
+        "recent_high": 10416.0,
+        "recent_low": 9603.0,
+        "volatility_pct": 1.8421016668392174,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -94.12724306688418,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "MDI>PDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "RM",
+      "product_name": "菜粕",
+      "last_price": 2303.0,
+      "open_interest": 899203,
+      "change_pct": 1.41,
+      "tech": {
+        "MA5": 2284.0,
+        "MA10": 2266.1,
+        "MA20": 2278.35,
+        "MACD_DIF": -13.8242,
+        "MACD_DEA": -19.6318,
+        "MACD_HIST": 11.6152,
+        "RSI14": 51.04,
+        "ATR14": 32.0,
+        "DMI_PDI": 17.59,
+        "DMI_MDI": 20.9,
+        "ADX": 8.6,
+        "OBV": 3617258,
+        "OBV_MA20": 2164068.65,
+        "recent_high": 2329.0,
+        "recent_low": 2214.0,
+        "volatility_pct": 1.3894919669995658,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -8.035714285714285,
+        "trend": "neutral",
+        "reasons": [
+          "MACD-(20)",
+          "MDI>PDI(17)",
+          "价格>MA20(16)",
+          "OBV>MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "PK",
+      "product_name": "花生",
+      "last_price": 8302.0,
+      "open_interest": 193391,
+      "change_pct": 0.24,
+      "tech": {
+        "MA5": 8340.0,
+        "MA10": 8369.6,
+        "MA20": 8286.3,
+        "MACD_DIF": 28.228,
+        "MACD_DEA": 29.1363,
+        "MACD_HIST": -1.8167,
+        "RSI14": 66.36,
+        "ATR14": 77.0,
+        "DMI_PDI": 21.15,
+        "DMI_MDI": 21.15,
+        "ADX": 0.02,
+        "OBV": 424424,
+        "OBV_MA20": 135587.0,
+        "recent_high": 8464.0,
+        "recent_low": 8106.0,
+        "volatility_pct": 0.927487352445194,
+        "volatility_state": "low"
+      },
+      "trend": {
+        "score": 31.250000000000004,
+        "trend": "strong_bull",
+        "reasons": [
+          "MACD+(20)",
+          "MDI>PDI(17)",
+          "价格>MA20(16)",
+          "OBV>MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "c",
+      "product_name": "玉米",
+      "last_price": 2315.0,
+      "open_interest": 909470,
+      "change_pct": -0.52,
+      "tech": {
+        "MA5": 2323.8,
+        "MA10": 2331.0,
+        "MA20": 2324.7,
+        "MACD_DIF": -7.8246,
+        "MACD_DEA": -9.0028,
+        "MACD_HIST": 2.3565,
+        "RSI14": 44.0,
+        "ATR14": 19.5,
+        "DMI_PDI": 21.51,
+        "DMI_MDI": 26.96,
+        "ADX": 11.25,
+        "OBV": 4120456,
+        "OBV_MA20": 4083730.15,
+        "recent_high": 2355.0,
+        "recent_low": 2291.0,
+        "volatility_pct": 0.8423326133909287,
+        "volatility_state": "low"
+      },
+      "trend": {
+        "score": -40.773809523809526,
+        "trend": "strong_bear",
+        "reasons": [
+          "MACD-(20)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV>MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "cs",
+      "product_name": "玉米淀粉",
+      "last_price": 2694.0,
+      "open_interest": 182132,
+      "change_pct": -0.26,
+      "tech": {
+        "MA5": 2699.4,
+        "MA10": 2708.8,
+        "MA20": 2694.95,
+        "MACD_DIF": -1.1082,
+        "MACD_DEA": -2.4362,
+        "MACD_HIST": 2.656,
+        "RSI14": 49.46,
+        "ATR14": 27.0714,
+        "DMI_PDI": 20.36,
+        "DMI_MDI": 21.99,
+        "ADX": 3.86,
+        "OBV": -184381,
+        "OBV_MA20": -47640.95,
+        "recent_high": 2739.0,
+        "recent_low": 2641.0,
+        "volatility_pct": 1.0048775055679287,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -64.58333333333334,
+        "trend": "strong_bear",
+        "reasons": [
+          "MACD-(20)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "SR",
+      "product_name": "白糖",
+      "last_price": 5264.0,
+      "open_interest": 751698,
+      "change_pct": -1.52,
+      "tech": {
+        "MA5": 5316.8,
+        "MA10": 5313.5,
+        "MA20": 5352.85,
+        "MACD_DIF": -25.1131,
+        "MACD_DEA": -20.6297,
+        "MACD_HIST": -8.9666,
+        "RSI14": 25.07,
+        "ATR14": 46.7143,
+        "DMI_PDI": 12.58,
+        "DMI_MDI": 25.21,
+        "ADX": 33.43,
+        "OBV": 1536322,
+        "OBV_MA20": 2186393.65,
+        "recent_high": 5455.0,
+        "recent_low": 5253.0,
+        "volatility_pct": 0.8874297112462006,
+        "volatility_state": "low"
+      },
+      "trend": {
+        "score": -52.97619047619048,
+        "trend": "strong_bear",
+        "reasons": [
+          "MACD-(20)",
+          "RSI超卖(25,12)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "CF",
+      "product_name": "棉花",
+      "last_price": 15905.0,
+      "open_interest": 565299,
+      "change_pct": -0.97,
+      "tech": {
+        "MA5": 15954.0,
+        "MA10": 15843.5,
+        "MA20": 15989.25,
+        "MACD_DIF": -42.7808,
+        "MACD_DEA": -48.203,
+        "MACD_HIST": 10.8444,
+        "RSI14": 32.14,
+        "ATR14": 200.3571,
+        "DMI_PDI": 19.14,
+        "DMI_MDI": 21.3,
+        "ADX": 5.33,
+        "OBV": 3367197,
+        "OBV_MA20": 3197785.75,
+        "recent_high": 16440.0,
+        "recent_low": 15590.0,
+        "volatility_pct": 1.259711411505816,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -40.773809523809526,
+        "trend": "strong_bear",
+        "reasons": [
+          "MACD-(20)",
+          "MDI>PDI(17)",
+          "价格<MA20(16)",
+          "OBV>MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "jd",
+      "product_name": "鸡蛋",
+      "last_price": 4378.0,
+      "open_interest": 386541,
+      "change_pct": 0.76,
+      "tech": {
+        "MA5": 4523.0,
+        "MA10": 4620.7,
+        "MA20": 4654.2,
+        "MACD_DIF": 73.9567,
+        "MACD_DEA": 151.0477,
+        "MACD_HIST": -154.182,
+        "RSI14": 26.69,
+        "ATR14": 106.5,
+        "DMI_PDI": 21.84,
+        "DMI_MDI": 31.61,
+        "ADX": 18.29,
+        "OBV": 154198,
+        "OBV_MA20": 2147337.55,
+        "recent_high": 4936.0,
+        "recent_low": 4306.0,
+        "volatility_pct": 2.432617633622659,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -40.87117701575533,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD+(20)",
+          "RSI超卖(27,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "lh",
+      "product_name": "生猪",
+      "last_price": 11740.0,
+      "open_interest": 219761,
+      "change_pct": -0.17,
+      "tech": {
+        "MA5": 11788.0,
+        "MA10": 11890.5,
+        "MA20": 11739.25,
+        "MACD_DIF": 187.2077,
+        "MACD_DEA": 239.6149,
+        "MACD_HIST": -104.8143,
+        "RSI14": 44.85,
+        "ATR14": 232.1429,
+        "DMI_PDI": 30.0,
+        "DMI_MDI": 24.52,
+        "ADX": 10.04,
+        "OBV": -897008,
+        "OBV_MA20": -702538.25,
+        "recent_high": 12220.0,
+        "recent_low": 10625.0,
+        "volatility_pct": 1.9773671209540034,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": 40.773809523809526,
+        "trend": "strong_bull",
+        "reasons": [
+          "MACD+(20)",
+          "PDI>MDI(17)",
+          "价格>MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "AP",
+      "product_name": "苹果",
+      "last_price": 7574.0,
+      "open_interest": 97402,
+      "change_pct": 0.92,
+      "tech": {
+        "MA5": 7578.8,
+        "MA10": 7565.4,
+        "MA20": 7569.8,
+        "MACD_DIF": -56.8454,
+        "MACD_DEA": -84.336,
+        "MACD_HIST": 54.9811,
+        "RSI14": 48.67,
+        "ATR14": 150.0,
+        "DMI_PDI": 18.02,
+        "DMI_MDI": 27.07,
+        "ADX": 20.07,
+        "OBV": 112914,
+        "OBV_MA20": -101170.75,
+        "recent_high": 7799.0,
+        "recent_low": 7306.0,
+        "volatility_pct": 1.9804594665962503,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -8.035714285714285,
+        "trend": "neutral",
+        "reasons": [
+          "MACD-(20)",
+          "MDI>PDI(17)",
+          "价格>MA20(16)",
+          "OBV>MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "CJ",
+      "product_name": "红枣",
+      "last_price": 8590.0,
+      "open_interest": 141844,
+      "change_pct": -1.04,
+      "tech": {
+        "MA5": 8672.0,
+        "MA10": 8797.5,
+        "MA20": 9062.25,
+        "MACD_DIF": -137.9393,
+        "MACD_DEA": -77.4305,
+        "MACD_HIST": -121.0177,
+        "RSI14": 11.55,
+        "ATR14": 186.0714,
+        "DMI_PDI": 12.59,
+        "DMI_MDI": 35.29,
+        "ADX": 47.41,
+        "OBV": 515971,
+        "OBV_MA20": 837174.8,
+        "recent_high": 9670.0,
+        "recent_low": 8505.0,
+        "volatility_pct": 2.166139697322468,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(12,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "FG",
+      "product_name": "玻璃",
+      "last_price": 967.0,
+      "open_interest": 1863497,
+      "change_pct": -1.02,
+      "tech": {
+        "MA5": 984.4,
+        "MA10": 989.8,
+        "MA20": 1012.3,
+        "MACD_DIF": -16.3841,
+        "MACD_DEA": -12.549,
+        "MACD_HIST": -7.6703,
+        "RSI14": 23.97,
+        "ATR14": 18.6429,
+        "DMI_PDI": 14.74,
+        "DMI_MDI": 27.25,
+        "ADX": 29.79,
+        "OBV": -7142971,
+        "OBV_MA20": -1386227.05,
+        "recent_high": 1065.0,
+        "recent_low": 962.0,
+        "volatility_pct": 1.9279110651499485,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -88.25448613376835,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "RSI超卖(24,6)",
+          "MDI>PDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "SA",
+      "product_name": "纯碱",
+      "last_price": 1132.0,
+      "open_interest": 1384548,
+      "change_pct": 0.35,
+      "tech": {
+        "MA5": 1140.0,
+        "MA10": 1148.0,
+        "MA20": 1171.35,
+        "MACD_DIF": -19.2796,
+        "MACD_DEA": -15.9195,
+        "MACD_HIST": -6.7202,
+        "RSI14": 21.97,
+        "ATR14": 18.2857,
+        "DMI_PDI": 16.66,
+        "DMI_MDI": 28.83,
+        "ADX": 26.76,
+        "OBV": -2900551,
+        "OBV_MA20": -1730880.7,
+        "recent_high": 1234.0,
+        "recent_low": 1118.0,
+        "volatility_pct": 1.6153445229681977,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -88.25448613376835,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "RSI超卖(22,6)",
+          "MDI>PDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "UR",
+      "product_name": "尿素",
+      "last_price": 1785.0,
+      "open_interest": 277746,
+      "change_pct": 0.56,
+      "tech": {
+        "MA5": 1795.4,
+        "MA10": 1795.8,
+        "MA20": 1808.7,
+        "MACD_DIF": -20.9191,
+        "MACD_DEA": -23.0875,
+        "MACD_HIST": 4.3369,
+        "RSI14": 49.15,
+        "ATR14": 42.2857,
+        "DMI_PDI": 22.92,
+        "DMI_MDI": 25.49,
+        "ADX": 5.32,
+        "OBV": 618266,
+        "OBV_MA20": 1002219.8,
+        "recent_high": 1905.0,
+        "recent_low": 1753.0,
+        "volatility_pct": 2.3689467787114844,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -90.82483781278961,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "ru",
+      "product_name": "橡胶",
+      "last_price": 17675.0,
+      "open_interest": 150558,
+      "change_pct": -0.95,
+      "tech": {
+        "MA5": 17866.0,
+        "MA10": 17704.5,
+        "MA20": 17762.75,
+        "MACD_DIF": 65.7621,
+        "MACD_DEA": 80.4607,
+        "MACD_HIST": -29.3972,
+        "RSI14": 39.12,
+        "ATR14": 325.0,
+        "DMI_PDI": 23.7,
+        "DMI_MDI": 17.31,
+        "ADX": 15.58,
+        "OBV": 1794273,
+        "OBV_MA20": 1970808.95,
+        "recent_high": 18440.0,
+        "recent_low": 17220.0,
+        "volatility_pct": 1.8387553041018387,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": 8.035714285714285,
+        "trend": "neutral",
+        "reasons": [
+          "MACD+(20)",
+          "PDI>MDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "nr",
+      "product_name": "20号胶",
+      "last_price": 15595.0,
+      "open_interest": 66200,
+      "change_pct": -0.38,
+      "tech": {
+        "MA5": 15607.0,
+        "MA10": 15376.5,
+        "MA20": 15378.5,
+        "MACD_DIF": 192.7183,
+        "MACD_DEA": 197.8007,
+        "MACD_HIST": -10.1649,
+        "RSI14": 44.73,
+        "ATR14": 367.1429,
+        "DMI_PDI": 30.47,
+        "DMI_MDI": 15.49,
+        "ADX": 32.58,
+        "OBV": 476166,
+        "OBV_MA20": 596637.6,
+        "recent_high": 16135.0,
+        "recent_low": 14510.0,
+        "volatility_pct": 2.3542346906059635,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": 40.773809523809526,
+        "trend": "strong_bull",
+        "reasons": [
+          "MACD+(20)",
+          "PDI>MDI(17)",
+          "价格>MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "br",
+      "product_name": "BR橡胶",
+      "last_price": 12615.0,
+      "open_interest": 91072,
+      "change_pct": -2.62,
+      "tech": {
+        "MA5": 13008.0,
+        "MA10": 13138.5,
+        "MA20": 13761.5,
+        "MACD_DIF": -640.3666,
+        "MACD_DEA": -584.5592,
+        "MACD_HIST": -111.615,
+        "RSI14": 17.97,
+        "ATR14": 454.6429,
+        "DMI_PDI": 10.03,
+        "DMI_MDI": 31.58,
+        "ADX": 51.79,
+        "OBV": -787296,
+        "OBV_MA20": -341288.35,
+        "recent_high": 14925.0,
+        "recent_low": 12520.0,
+        "volatility_pct": 3.6039865239793896,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(18,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "sp",
+      "product_name": "纸浆",
+      "last_price": 4726.0,
+      "open_interest": 381793,
+      "change_pct": -1.91,
+      "tech": {
+        "MA5": 4857.6,
+        "MA10": 4874.2,
+        "MA20": 4884.3,
+        "MACD_DIF": -47.8444,
+        "MACD_DEA": -43.4501,
+        "MACD_HIST": -8.7886,
+        "RSI14": 34.12,
+        "ATR14": 64.7143,
+        "DMI_PDI": 10.56,
+        "DMI_MDI": 36.8,
+        "ADX": 55.42,
+        "OBV": -873529,
+        "OBV_MA20": -171498.5,
+        "recent_high": 4994.0,
+        "recent_low": 4722.0,
+        "volatility_pct": 1.3693250105797714,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -94.12724306688418,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "MDI>PDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "op",
+      "product_name": "双胶纸",
+      "last_price": 3872.0,
+      "open_interest": 15209,
+      "change_pct": -1.02,
+      "tech": {
+        "MA5": 3923.6,
+        "MA10": 3962.8,
+        "MA20": 3982.0,
+        "MACD_DIF": -33.3233,
+        "MACD_DEA": -23.8303,
+        "MACD_HIST": -18.986,
+        "RSI14": 18.81,
+        "ATR14": 31.0,
+        "DMI_PDI": 13.56,
+        "DMI_MDI": 37.27,
+        "ADX": 46.65,
+        "OBV": -24034,
+        "OBV_MA20": -4045.8,
+        "recent_high": 4076.0,
+        "recent_low": 3872.0,
+        "volatility_pct": 0.8006198347107437,
+        "volatility_state": "low"
+      },
+      "trend": {
+        "score": -88.25448613376835,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "RSI超卖(19,6)",
+          "MDI>PDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "lc",
+      "product_name": "碳酸锂",
+      "last_price": 157220.0,
+      "open_interest": 449841,
+      "change_pct": -2.79,
+      "tech": {
+        "MA5": 164148.0,
+        "MA10": 168094.0,
+        "MA20": 169779.0,
+        "MACD_DIF": -4331.5996,
+        "MACD_DEA": -3231.1961,
+        "MACD_HIST": -2200.8069,
+        "RSI14": 35.45,
+        "ATR14": 7361.4286,
+        "DMI_PDI": 13.15,
+        "DMI_MDI": 34.02,
+        "ADX": 44.26,
+        "OBV": 700784,
+        "OBV_MA20": 997010.35,
+        "recent_high": 182720.0,
+        "recent_low": 150860.0,
+        "volatility_pct": 4.682246915150745,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -90.82483781278961,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "si",
+      "product_name": "工业硅",
+      "last_price": 8505.0,
+      "open_interest": 272886,
+      "change_pct": -0.41,
+      "tech": {
+        "MA5": 8565.0,
+        "MA10": 8630.0,
+        "MA20": 8643.0,
+        "MACD_DIF": -16.6914,
+        "MACD_DEA": 3.2985,
+        "MACD_HIST": -39.9798,
+        "RSI14": 39.18,
+        "ATR14": 150.3571,
+        "DMI_PDI": 19.2,
+        "DMI_MDI": 22.26,
+        "ADX": 7.39,
+        "OBV": -3803201,
+        "OBV_MA20": -2334183.4,
+        "recent_high": 8875.0,
+        "recent_low": 8465.0,
+        "volatility_pct": 1.7678671369782482,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": -94.12724306688418,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(29)",
+          "MACD-(20)",
+          "MDI>PDI(25)",
+          "价格<MA20(12)",
+          "OBV<MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "ps",
+      "product_name": "多晶硅",
+      "last_price": 35800.0,
+      "open_interest": 105821,
+      "change_pct": -0.8,
+      "tech": {
+        "MA5": 35935.0,
+        "MA10": 36306.0,
+        "MA20": 36497.25,
+        "MACD_DIF": -423.527,
+        "MACD_DEA": -433.816,
+        "MACD_HIST": 20.578,
+        "RSI14": 43.49,
+        "ATR14": 1530.3571,
+        "DMI_PDI": 18.85,
+        "DMI_MDI": 21.92,
+        "ADX": 7.54,
+        "OBV": -1315042,
+        "OBV_MA20": -1171430.55,
+        "recent_high": 39030.0,
+        "recent_low": 33700.0,
+        "volatility_pct": 4.274740502793295,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -90.82483781278961,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "ec",
+      "product_name": "集运指数欧线",
+      "last_price": 3780.0,
+      "open_interest": 23885,
+      "change_pct": 0.47,
+      "tech": {
+        "MA5": 3768.0,
+        "MA10": 3848.55,
+        "MA20": 3658.65,
+        "MACD_DIF": 274.6242,
+        "MACD_DEA": 326.9094,
+        "MACD_HIST": -104.5703,
+        "RSI14": 55.85,
+        "ATR14": 197.6429,
+        "DMI_PDI": 30.49,
+        "DMI_MDI": 10.23,
+        "ADX": 49.74,
+        "OBV": 407627,
+        "OBV_MA20": 423512.05,
+        "recent_high": 4096.0,
+        "recent_low": 2848.0,
+        "volatility_pct": 5.228648148148149,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": 40.773809523809526,
+        "trend": "strong_bull",
+        "reasons": [
+          "MACD+(20)",
+          "PDI>MDI(17)",
+          "价格>MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "rr",
+      "product_name": "粳米",
+      "last_price": 3596.0,
+      "open_interest": 41392,
+      "change_pct": -0.08,
+      "tech": {
+        "MA5": 3603.6,
+        "MA10": 3606.1,
+        "MA20": 3583.75,
+        "MACD_DIF": 8.8803,
+        "MACD_DEA": 6.9622,
+        "MACD_HIST": 3.8361,
+        "RSI14": 58.28,
+        "ATR14": 33.7143,
+        "DMI_PDI": 15.37,
+        "DMI_MDI": 30.32,
+        "ADX": 32.72,
+        "OBV": 55538,
+        "OBV_MA20": 70602.6,
+        "recent_high": 3631.0,
+        "recent_low": 3510.0,
+        "volatility_pct": 0.9375500556173526,
+        "volatility_state": "low"
+      },
+      "trend": {
+        "score": 7.440476190476193,
+        "trend": "neutral",
+        "reasons": [
+          "MACD+(20)",
+          "MDI>PDI(17)",
+          "价格>MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "PL",
+      "product_name": "丙烯",
+      "last_price": 6818.0,
+      "open_interest": 18291,
+      "change_pct": -2.95,
+      "tech": {
+        "MA5": 7140.2,
+        "MA10": 7627.4,
+        "MA20": 7975.85,
+        "MACD_DIF": -350.8219,
+        "MACD_DEA": -197.4451,
+        "MACD_HIST": -306.7536,
+        "RSI14": 23.31,
+        "ATR14": 293.7143,
+        "DMI_PDI": 11.75,
+        "DMI_MDI": 38.07,
+        "ADX": 52.83,
+        "OBV": -122906,
+        "OBV_MA20": 73879.8,
+        "recent_high": 8627.0,
+        "recent_low": 6806.0,
+        "volatility_pct": 4.307924611322968,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(23,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "ad",
+      "product_name": "铸造铝合金",
+      "last_price": 23180.0,
+      "open_interest": 16518,
+      "change_pct": -1.99,
+      "tech": {
+        "MA5": 23337.0,
+        "MA10": 23284.0,
+        "MA20": 23196.25,
+        "MACD_DIF": 43.547,
+        "MACD_DEA": 12.9283,
+        "MACD_HIST": 61.2374,
+        "RSI14": 43.16,
+        "ATR14": 310.0,
+        "DMI_PDI": 24.41,
+        "DMI_MDI": 18.87,
+        "ADX": 12.78,
+        "OBV": 102411,
+        "OBV_MA20": 87748.25,
+        "recent_high": 23655.0,
+        "recent_low": 22780.0,
+        "volatility_pct": 1.3373597929249352,
+        "volatility_state": "normal"
+      },
+      "trend": {
+        "score": 69.65742251223492,
+        "trend": "strong_bull",
+        "reasons": [
+          "MA多头排列(29)",
+          "MACD+(20)",
+          "PDI>MDI(25)",
+          "价格<MA20(12)",
+          "OBV>MA20(7)"
+        ],
+        "market_state": "trending"
+      }
+    },
+    {
+      "product_id": "CY",
+      "product_name": "棉纱",
+      "last_price": 22325.0,
+      "open_interest": 14176,
+      "change_pct": -0.62,
+      "tech": {
+        "MA5": 22398.0,
+        "MA10": 22258.0,
+        "MA20": 22341.75,
+        "MACD_DIF": 39.2475,
+        "MACD_DEA": 33.7205,
+        "MACD_HIST": 11.054,
+        "RSI14": 34.51,
+        "ATR14": 214.6429,
+        "DMI_PDI": 22.96,
+        "DMI_MDI": 17.61,
+        "ADX": 13.19,
+        "OBV": 34255,
+        "OBV_MA20": 44980.9,
+        "recent_high": 22855.0,
+        "recent_low": 21980.0,
+        "volatility_pct": 0.9614463605823069,
+        "volatility_state": "low"
+      },
+      "trend": {
+        "score": 8.035714285714285,
+        "trend": "neutral",
+        "reasons": [
+          "MACD+(20)",
+          "PDI>MDI(17)",
+          "价格<MA20(16)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "ranging"
+      }
+    },
+    {
+      "product_id": "bz",
+      "product_name": "纯苯",
+      "last_price": 6560.0,
+      "open_interest": 13613,
+      "change_pct": -2.81,
+      "tech": {
+        "MA5": 6792.2,
+        "MA10": 7118.8,
+        "MA20": 7343.15,
+        "MACD_DIF": -330.4386,
+        "MACD_DEA": -253.7541,
+        "MACD_HIST": -153.3689,
+        "RSI14": 23.46,
+        "ATR14": 223.9286,
+        "DMI_PDI": 9.58,
+        "DMI_MDI": 35.75,
+        "ADX": 57.73,
+        "OBV": 151579,
+        "OBV_MA20": 182897.75,
+        "recent_high": 7781.0,
+        "recent_low": 6526.0,
+        "volatility_pct": 3.4135457317073166,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(23,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    },
+    {
+      "product_id": "pt",
+      "product_name": "铂",
+      "last_price": 404.2,
+      "open_interest": 12822,
+      "change_pct": -3.65,
+      "tech": {
+        "MA5": 427.08,
+        "MA10": 427.65,
+        "MA20": 449.7575,
+        "MACD_DIF": -20.039,
+        "MACD_DEA": -18.1282,
+        "MACD_HIST": -3.8217,
+        "RSI14": 18.7,
+        "ATR14": 15.5286,
+        "DMI_PDI": 19.18,
+        "DMI_MDI": 46.13,
+        "ADX": 41.26,
+        "OBV": -62248,
+        "OBV_MA20": -48896.7,
+        "recent_high": 491.9,
+        "recent_low": 401.8,
+        "volatility_pct": 3.841810984661059,
+        "volatility_state": "high"
+      },
+      "trend": {
+        "score": -81.64967562557925,
+        "trend": "strong_bear",
+        "reasons": [
+          "MA空头排列(25)",
+          "MACD-(20)",
+          "RSI超卖(19,9)",
+          "MDI>PDI(22)",
+          "价格<MA20(11)",
+          "OBV<MA20(12)"
+        ],
+        "market_state": "volatile"
+      }
+    }
+  ],
+  "meta": {
+    "source": "akshare",
+    "timestamp": "2026-06-24T03:40:37.884066",
+    "count": 67,
+    "min_open_interest": 10000
+  }
+}

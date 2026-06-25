@@ -1,0 +1,89 @@
+{
+    "exchanges": {
+        "DCE": {
+            "name": "大连商品交易所",
+            "api_type": "official",
+            "base_url": "http://www.dce.com.cn",
+            "endpoints": {
+                "daily_data": "/publicweb/quotesdata/exportDayQuotesChData.html",
+                "daily_quotes": "/publicweb/quotesdata/dayQuotesCh.html"
+            },
+            "data_format": "tsv",
+            "update_frequency": "daily",
+            "requires_auth": false,
+            "rate_limit": "unknown",
+            "notes": "免费开放，支持日周月行情、合约参数、仓单、持仓统计"
+        },
+        "SHFE": {
+            "name": "上海期货交易所",
+            "api_type": "official",
+            "base_url": "http://www.shfe.com.cn",
+            "endpoints": {
+                "daily_data": "/data/dailydata/kx/kx{date}.dat"
+            },
+            "data_format": "json",
+            "update_frequency": "daily",
+            "requires_auth": false,
+            "rate_limit": "unknown",
+            "notes": "JSON格式，数据结构清晰，包含成交额字段"
+        },
+        "CZCE": {
+            "name": "郑州商品交易所",
+            "api_type": "official",
+            "base_url": "http://www.czce.com.cn",
+            "endpoints": {
+                "daily_data_new": "/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataDaily.htm",
+                "daily_data_old": "/cn/exchange/{year}/datadaily/{date}.htm"
+            },
+            "data_format": "html",
+            "update_frequency": "daily",
+            "requires_auth": false,
+            "rate_limit": "unknown",
+            "notes": "2015年11月11日前后接口切换，HTML格式需要解析"
+        },
+        "CFFEX": {
+            "name": "中国金融期货交易所",
+            "api_type": "official",
+            "base_url": "http://www.cffex.com.cn",
+            "endpoints": {
+                "daily_data": "/sj/hqsj/rtj/{year_month}/{day}/lsjy.dll"
+            },
+            "data_format": "csv",
+            "update_frequency": "daily",
+            "requires_auth": false,
+            "rate_limit": "unknown",
+            "notes": "股指期货、国债期货日线数据"
+        },
+        "GFEX": {
+            "name": "广州期货交易所",
+            "api_type": "official",
+            "base_url": "http://www.gfex.com.cn",
+            "endpoints": {
+                "daily_data": "/gfex/rihq/{date}.js"
+            },
+            "data_format": "json",
+            "update_frequency": "daily",
+            "requires_auth": false,
+            "rate_limit": "unknown",
+            "notes": "碳酸锂、工业硅期货数据"
+        }
+    },
+    "data_fields": {
+        "symbol": "合约代码",
+        "trade_date": "交易日期",
+        "open": "开盘价",
+        "high": "最高价",
+        "low": "最低价",
+        "close": "收盘价",
+        "settle": "结算价",
+        "volume": "成交量",
+        "open_interest": "持仓量",
+        "turnover": "成交额"
+    },
+    "usage_notes": {
+        "priority": "交易所官方API > AKShare > TqSdk > 通达信MCP",
+        "compliance": "交易所官方数据无爬虫合规风险，最权威",
+        "limitations": "仅支持日频数据，无实时Tick",
+        "rate_limits": "各交易所均有调用频率限制，建议间隔1秒以上"
+    }
+}
