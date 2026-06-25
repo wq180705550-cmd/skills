@@ -41,6 +41,7 @@
 ### 🧠 量化框架
 | Skill | 说明 | 版本 |
 |-------|------|------|
+| [efficient-frontier](./efficient-frontier/) | 将昂贵前沿模型的判断力用在刀刃上：委托子 Agent 处理高 token 消耗任务，保留主 Agent 做架构规划与最终审查 | - |
 | [skillevolver](./skillevolver/) | 面向在线技能学习的元技能自演化框架 | v2.0 |
 | [skill-adaptor](./skill-adaptor/) | 基于轨迹的LLM智能体自适应技能，显式故障归因 | - |
 | [factorengine](./factorengine/) | 程序级知识注入因子挖掘框架 | v2.0 |
@@ -54,7 +55,7 @@
 
 ## 统计
 
-- 总数：**18** 个自建 Skill
+- 总数：**19** 个自建 Skill
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等
