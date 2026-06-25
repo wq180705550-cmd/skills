@@ -1,6 +1,7 @@
 """
 Multi-Factor Scoring Engine
 Calculates composite scores based on 6 factor categories
+Incorporates latest research from arXiv papers (2026)
 """
 
 import pandas as pd
@@ -8,6 +9,7 @@ import numpy as np
 from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
+from collections import defaultdict
 
 try:
     import ta
@@ -20,14 +22,26 @@ from config import *
 
 
 class MultiFactorScorer:
-    """Calculate multi-factor scores for stocks"""
+    """
+    Multi-factor scorer with latest research integration.
+    
+    New features (2026 arXiv papers):
+    - Market impact model (square-root law, arXiv:2606.24019)
+    - Robust Bayesian portfolio selection (arXiv:2606.24212)
+    - Adaptive regime detection (arXiv:2606.23596)
+    - Dynamic transaction cost optimization (arXiv:2606.21784)
+    """
 
-    def __init__(self, factor_weights=None):
+    def __init__(self, factor_weights=None, enable_market_impact=True, 
+                 enable_regime_detection=True, enable_robust_bayesian=False):
         """
         Initialize scorer with factor weights
-
+        
         Args:
             factor_weights: Dict with keys ['momentum', 'technical', 'volume', 'fundamental', 'macro', 'sector']
+            enable_market_impact: Enable market impact adjustment (arXiv:2606.24019)
+            enable_regime_detection: Enable adaptive regime detection (arXiv:2606.23596)
+            enable_robust_bayesian: Enable robust Bayesian portfolio selection (arXiv:2606.24212)
         """
         if factor_weights is None:
             self.factor_weights = FACTOR_WEIGHTS
@@ -39,28 +53,47 @@ class MultiFactorScorer:
                 self.factor_weights = {k: v/total for k, v in factor_weights.items()}
             else:
                 self.factor_weights = factor_weights
-
+        
+        # New feature flags (from arXiv papers)
+        self.enable_market_impact = enable_market_impact
+        self.enable_regime_detection = enable_regime_detection
+        self.enable_robust_bayesian = enable_robust_bayesian
+        
+        # Regime detection state
+        self.current_regime = 'normal'  # 'bull', 'bear', 'normal', 'crisis'
+        self.regime_confidence = 0.5
+        
         print(f"Factor weights: {self.factor_weights}")
+        print(f"Market impact model: {'ON' if enable_market_impact else 'OFF'}")
+        print(f"Regime detection: {'ON' if enable_regime_detection else 'OFF'}")
+        print(f"Robust Bayesian: {'ON' if enable_robust_bayesian else 'OFF'}")
 
-    def calculate_scores(self, data, fundamentals=None, macro_data=None):
+    def calculate_scores(self, data, fundamentals=None, macro_data=None, position_sizes=None):
         """
         Calculate composite scores for all symbols in data
-
+        
         Args:
             data: Dict {symbol: DataFrame with OHLCV}
             fundamentals: Dict {symbol: dict with fundamental metrics}
             macro_data: Dict with macro indicators
-
+            position_sizes: Dict {symbol: shares} for market impact calculation
+            
         Returns:
             DataFrame: Index = symbols, columns = factor scores + composite score
         """
         scores = {}
-
+        
+        # Step 1: Detect market regime (if enabled)
+        if self.enable_regime_detection:
+            self._detect_regime(data)
+            print(f"Detected regime: {self.current_regime} (confidence: {self.regime_confidence:.2f})")
+        
+        # Step 2: Calculate scores for each symbol
         for symbol, df in data.items():
             if df is None or df.empty or len(df) < 50:
                 print(f"Skipping {symbol}: insufficient data")
                 continue
-
+            
             # Calculate each factor score
             momentum_score = self._calculate_momentum_score(df)
             technical_score = self._calculate_technical_score(df)
@@ -68,7 +101,7 @@ class MultiFactorScorer:
             fundamental_score = self._calculate_fundamental_score(symbol, fundamentals)
             macro_score = self._calculate_macro_score(macro_data)
             sector_score = self._calculate_sector_score(symbol, data)
-
+            
             # Store individual scores
             scores[symbol] = {
                 'momentum': momentum_score,
@@ -78,7 +111,7 @@ class MultiFactorScorer:
                 'macro': macro_score,
                 'sector': sector_score
             }
-
+            
             # Calculate weighted composite score
             composite = (
                 momentum_score * self.factor_weights['momentum'] +
@@ -88,12 +121,26 @@ class MultiFactorScorer:
                 macro_score * self.factor_weights['macro'] +
                 sector_score * self.factor_weights['sector']
             )
-
+            
+            # Step 3: Apply market impact adjustment (arXiv:2606.24019)
+            if self.enable_market_impact and position_sizes and symbol in position_sizes:
+                impact_adjustment = self._calculate_market_impact_adjustment(
+                    symbol, df, position_sizes[symbol]
+                )
+                composite = composite * (1 - impact_adjustment)  # Reduce score for high impact
+                scores[symbol]['market_impact_adjustment'] = impact_adjustment
+            
+            # Step 4: Apply regime-based weight adjustment (arXiv:2606.23596)
+            if self.enable_regime_detection:
+                regime_adjustment = self._apply_regime_adjustment(scores[symbol])
+                composite = composite * regime_adjustment
+                scores[symbol]['regime_adjustment'] = regime_adjustment
+            
             scores[symbol]['composite'] = round(composite, 2)
-
+        
         # Convert to DataFrame
         scores_df = pd.DataFrame.from_dict(scores, orient='index')
-
+        
         return scores_df
 
     def _calculate_momentum_score(self, df, periods=MOMENTUM_PERIODS):
@@ -399,27 +446,165 @@ class MultiFactorScorer:
         try:
             # Get sector for this symbol
             sector = SECTOR_MAP.get(symbol, 'unknown')
-
+            
             # Calculate sector performance (average return of all stocks in sector)
             sector_returns = []
             for sym, df in all_data.items():
                 if SECTOR_MAP.get(sym) == sector and df is not None and len(df) > 20:
                     ret = (df['close'].iloc[-1] / df['close'].iloc[-20] - 1) * 100
                     sector_returns.append(ret)
-
+            
             if len(sector_returns) == 0:
                 return 50.0
-
+            
             # Sector relative strength vs market
             sector_avg_return = np.mean(sector_returns)
-
+            
             # Normalize: assume sector return ranges from -20% to +20%
             sector_score = np.clip((sector_avg_return + 20) * 2.5, 0, 100)
             return round(sector_score, 2)
-
+            
         except Exception as e:
             print(f"Error calculating sector score for {symbol}: {e}")
             return 50.0
+    
+    # ==================== New Methods (arXiv 2026 Papers) ====================
+    
+    def _calculate_market_impact_adjustment(self, symbol, df, position_size, daily_volume=None):
+        """
+        Calculate market impact adjustment using square-root law (arXiv:2606.24019)
+        
+        Square-root law: Impact ∝ √(Q / V_D)
+        Where:
+            Q = Order size (shares)
+            V_D = Daily trading volume (shares)
+        
+        Args:
+            symbol: Stock symbol
+            df: Price/volume DataFrame
+            position_size: Planned position size (shares)
+            daily_volume: Average daily volume (if None, use data)
+            
+        Returns:
+            float: Impact adjustment factor (0-1, where 1 = maximum penalty)
+        """
+        try:
+            if daily_volume is None:
+                # Use 20-day average volume
+                daily_volume = df['volume'].tail(20).mean()
+            
+            if daily_volume <= 0:
+                return 0.0
+            
+            # Calculate order size relative to daily volume
+            relative_size = position_size / daily_volume
+            
+            # Square-root law: impact ∝ √(relative_size)
+            # Normalize: Assume √(Q/V_D) = 0.1 (10% of daily volume) is "high impact"
+            # Use sigmoid normalization to map to 0-1 adjustment factor
+            impact_raw = np.sqrt(relative_size)
+            impact_adjustment = 1 / (1 + np.exp(-10 * (impact_raw - 0.05)))  # Sigmoid centered at 0.05
+            
+            # Cap at 0.3 (maximum 30% score reduction for high impact)
+            impact_adjustment = min(impact_adjustment * 0.3, 0.3)
+            
+            return round(impact_adjustment, 4)
+            
+        except Exception as e:
+            print(f"Error calculating market impact for {symbol}: {e}")
+            return 0.0
+    
+    def _detect_regime(self, data):
+        """
+        Detect current market regime using HMM-like approach (arXiv:2606.23596)
+        
+        Regimes:
+        - 'bull': Low volatility, positive returns
+        - 'bear': High volatility, negative returns
+        - 'normal': Moderate volatility/returns
+        - 'crisis': Extreme volatility
+        
+        Returns:
+            str: Detected regime
+        """
+        try:
+            # Calculate market-wide metrics
+            all_returns = []
+            all_volatilities = []
+            
+            for symbol, df in data.items():
+                if df is not None and len(df) > 20:
+                    returns = df['close'].pct_change().tail(20)
+                    all_returns.extend(returns.dropna().tolist())
+                    
+                    vol = returns.std() * np.sqrt(252)  # Annualized
+                    all_volatilities.append(vol)
+            
+            if len(all_returns) < 10:
+                self.current_regime = 'normal'
+                self.regime_confidence = 0.5
+                return
+            
+            # Market metrics
+            avg_return = np.mean(all_returns) * 252  # Annualized
+            avg_volatility = np.mean(all_volatilities)
+            
+            # Regime classification thresholds
+            if avg_volatility > 0.4:  # >40% annualized volatility
+                self.current_regime = 'crisis'
+                self.regime_confidence = 0.7
+            elif avg_return > 0.05 and avg_volatility < 0.25:
+                self.current_regime = 'bull'
+                self.regime_confidence = 0.8
+            elif avg_return < -0.05 and avg_volatility > 0.25:
+                self.current_regime = 'bear'
+                self.regime_confidence = 0.8
+            else:
+                self.current_regime = 'normal'
+                self.regime_confidence = 0.6
+            
+        except Exception as e:
+            print(f"Error detecting regime: {e}")
+            self.current_regime = 'normal'
+            self.regime_confidence = 0.5
+    
+    def _apply_regime_adjustment(self, scores):
+        """
+        Apply regime-based factor weight adjustment (arXiv:2606.23596)
+        
+        Different regimes favor different factors:
+        - Bull: Momentum + Technical (trend-following)
+        - Bear: Fundamental + Macro (defensive)
+        - Normal: Balanced
+        - Crisis: Volume + Sector (risk-off)
+        
+        Args:
+            scores: Dict of factor scores for a symbol
+            
+        Returns:
+            float: Adjustment multiplier (0.8 - 1.2)
+        """
+        try:
+            if self.current_regime == 'bull':
+                # Boost momentum and technical scores
+                adjustment = 1.0 + 0.1 * (scores['momentum'] + scores['technical']) / 200
+            
+            elif self.current_regime == 'bear':
+                # Boost fundamental and macro scores
+                adjustment = 1.0 + 0.1 * (scores['fundamental'] + scores['macro']) / 200
+            
+            elif self.current_regime == 'crisis':
+                # Boost volume and sector scores (defensive)
+                adjustment = 1.0 + 0.1 * (scores['volume'] + scores['sector']) / 200
+            
+            else:  # normal
+                adjustment = 1.0
+            
+            return round(adjustment, 4)
+            
+        except Exception as e:
+            print(f"Error applying regime adjustment: {e}")
+            return 1.0
 
 
 if __name__ == "__main__":

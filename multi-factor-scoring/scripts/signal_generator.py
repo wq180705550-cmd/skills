@@ -8,6 +8,13 @@ import numpy as np
 from datetime import datetime
 
 
+# Import configuration (MUST be before class definition)
+try:
+    from config import *
+except ImportError:
+    print("Warning: config.py not found. Using default values.")
+
+
 class SignalGenerator:
     """Generate trading signals based on multi-factor scores"""
 

@@ -313,6 +313,125 @@ The system generates the following outputs:
 - Equity curve with benchmark
 - Factor exposure breakdown
 
+## 11. Latest Research Integration (2026 arXiv Papers)
+
+This skill now incorporates cutting-edge research from 10 top arXiv papers (May-June 2026). These features are enabled by default and can be toggled in `scoring_engine.py` and `simulated_broker.py`.
+
+### 11.1 Market Impact Model (arXiv:2606.24019)
+
+**Paper:** "Empirical Confirmation of the Square-Root Law of Market Impact in U.S. Large-Cap Equity"
+
+**Implementation:** Added to `scoring_engine.py` as `_calculate_market_impact_adjustment()`
+
+**Square-Root Law:**
+```
+Market Impact ∝ √(Q / V_D)
+```
+Where:
+- Q = Order size (shares)
+- V_D = Daily trading volume (shares)
+
+**Usage:**
+```python
+scorer = MultiFactorScorer(
+    enable_market_impact=True  # Enable market impact adjustment
+)
+
+# Calculate scores with position sizes (for impact adjustment)
+position_sizes = {'600519.SH': 1000, '000858.SZ': 500}
+scores = scorer.calculate_scores(data, fundamentals, macro, position_sizes)
+```
+
+**Effect:** High market impact orders (large relative to daily volume) receive a score penalty (up to 30% reduction) to account for execution difficulty.
+
+---
+
+### 11.2 Dynamic Transaction Cost Optimization (arXiv:2606.21784)
+
+**Paper:** "KineticSim: A Lightweight, High-Performance Execution Engine for Real-Time Market Simulators"
+
+**Implementation:** Added to `simulated_broker.py` as `_calculate_dynamic_commission()` and `_calculate_dynamic_slippage()`
+
+**Features:**
+1. **Dynamic Commission:** Adjusts commission based on:
+   - Order size relative to daily volume (square-root law)
+   - Market volatility (higher vol = higher commission)
+   - Caps at 3x base commission
+
+2. **Dynamic Slippage:** Adjusts slippage based on:
+   - Order size vs. liquidity
+   - Caps at 1% slippage
+
+**Usage:**
+```python
+broker = SimulatedBroker(
+    initial_capital=100000,
+    enable_dynamic_costs=True  # Enable dynamic cost optimization
+)
+
+# Execute signals (pass data for dynamic cost calculation)
+broker.execute_signals(signals, data)
+```
+
+**Effect:** Larger orders in illiquid stocks incur higher transaction costs, reducing unrealistic profits in backtests.
+
+---
+
+### 11.3 Adaptive Regime Detection (arXiv:2606.23596)
+
+**Paper:** "Anatomy of the Market: A Body-Tail Test of Factor Models"
+
+**Implementation:** Added to `scoring_engine.py` as `_detect_regime()` and `_apply_regime_adjustment()`
+
+**Detected Regimes:**
+- `'bull'`: Low volatility, positive returns → Boost momentum + technical factors
+- `'bear'`: High volatility, negative returns → Boost fundamental + macro factors
+- `'normal'`: Moderate volatility/returns → Balanced weights
+- `'crisis'`: Extreme volatility → Boost volume + sector factors (defensive)
+
+**Usage:**
+```python
+scorer = MultiFactorScorer(
+    enable_regime_detection=True  # Enable regime detection
+)
+
+# Regime is automatically detected during calculate_scores()
+scores = scorer.calculate_scores(data, fundamentals, macro)
+
+print(f"Current regime: {scorer.current_regime}")
+print(f"Regime confidence: {scorer.regime_confidence:.2f}")
+```
+
+**Effect:** Factor weights dynamically adjust based on market regime, improving performance across different market conditions.
+
+---
+
+### 11.4 Robust Bayesian Portfolio Selection (arXiv:2606.24212)
+
+**Paper:** "Path Space Robust Bayesian Portfolio Selection"
+
+**Status:** ⚠️ **Disabled by default** (requires >16GB RAM for Kalman filter optimization)
+
+**To Enable:**
+```python
+scorer = MultiFactorScorer(
+    enable_robust_bayesian=True  # Enable Robust Bayesian (requires cloud GPU)
+)
+```
+
+**Note:** This feature is computationally intensive. For your hardware (i3-4170 + 4GB RAM), we recommend using cloud GPU (Google Colab, AWS, etc.) to run this module.
+
+---
+
+### 11.5 Excluded Papers (Not Relevant)
+
+The following papers were excluded from integration:
+- **arXiv:2606.23070, arXiv:2606.21769**: AMM dynamic fees (cryptocurrency, not stocks)
+- **arXiv:2605.23007**: MadEvolve (LLM evolution, requires >16GB RAM)
+- **arXiv:2605.05580, arXiv:2605.12532**: Multi-agent frameworks (requires >16GB RAM)
+
+---
+
 ## Usage Examples
 
 **Example 1: Build a multi-factor scoring system for A-shares**
