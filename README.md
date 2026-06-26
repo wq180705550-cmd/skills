@@ -19,7 +19,7 @@
 | [precious-metals-data-validation](./precious-metals-data-validation/) | 贵金属数据标准化采集与验证，多源交叉校验 | v2.0.0 |
 | [precious-metals-trading-decision](./precious-metals-trading-decision/) | 三层架构贵金属交易决策（宏观→载体→多周期），R1-R5 Regime诊断 | v3.0.0 |
 
-### 🔩 期货
+### 🚜 期货
 | Skill | 说明 | 版本 |
 |-------|------|------|
 | [futures-industry-chain-analysis](./futures-industry-chain-analysis/) | 12大产业链自动化分析，自下而上+置信度优先，67+品种 | v2.9.1 |
@@ -48,10 +48,11 @@
 | [agentic-factor-investing](./agentic-factor-investing/) | AI 自主因子发现与系统化投资框架 | v2.0 |
 | [embodiskill](./embodiskill/) | 面向具身技能自演化的技能感知反思与进化 | v2.0 |
 
-### 📐 量化策略
+### 📘 量化策略
 | Skill | 说明 |
 |-------|------|
 | [multi-factor-scoring](./multi-factor-scoring/) | 多因子量化交易系统，支持因子打分、回测和模拟 |
+| [auto-research-stock-selection](./auto-research-stock-selection/) | 基于华泰证券自进化Skill框架的稳健低波价值优选策略，支持训练集/验证集/测试集样本隔离和版本化管理 |
 
 ### 💡 投资思维
 | Skill | 说明 | 版本 |
@@ -70,7 +71,7 @@
 
 ## 统计
 
-- 总数：**22** 个自建 Skill
+- 总数：**23** 个自建 Skill
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等

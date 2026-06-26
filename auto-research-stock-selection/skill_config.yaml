@@ -1,0 +1,78 @@
+# 股票池参数
+stock_pool:
+  base_pool: "全A股"
+  roe_threshold: 0
+  market_cap_percentile: 0.35
+  turnover_percentile: 0.40
+
+# 因子组定义
+factors:
+  value:
+    name: "EP_TTM"
+    description: "市盈率倒数的TTM版本"
+  profitability:
+    name: "ROE_TTM"
+    description: "净资产收益率TTM"
+  quality:
+    name: "ROIC_TTM"
+    description: "投入资本回报率TTM"
+  dividend:
+    names: ["两年平均股息收益", "两年平均股利价格比", "经营现金流收益"]
+  volatility:
+    name: "60日波动率"
+    description: "用于衡量低波特征"
+  growth:
+    names: ["净利润增速", "利润增长稳定性"]
+
+# 组合规则
+portfolio:
+  rebalance_frequency: "M"
+  target_holdings: 30
+  buffer_pool: 45
+  max_weight: 0.05
+  weighting_method: "下行波动率倒数定权"
+
+# 可调参数（迭代边界）
+tunable_params:
+  dividend_weight:
+    default: 0.33
+    range: [0.20, 0.50]
+    description: "红利防守权重"
+  value_pool_percentile:
+    default: 0.33
+    range: [0.25, 0.50]
+    description: "价值基础池阈值（保留较优的百分比）"
+  buffer_pool_size:
+    default: 45
+    range: [35, 60]
+    description: "组合缓冲持仓数"
+  max_weight:
+    default: 0.05
+    range: [0.03, 0.08]
+    description: "个股权重上限"
+  liquidity_threshold:
+    default: 0.40
+    range: [0.30, 0.50]
+    description: "流动性约束阈值"
+
+# 样本隔离
+sample_isolation:
+  training_set:
+    start_date: "2015-01-01"
+    end_date: "2020-12-31"
+    description: "用于提出和筛选策略假设"
+  validation_set:
+    start_date: "2021-01-01"
+    end_date: "2023-12-31"
+    description: "用于判断某一版本是否值得保留"
+  test_set:
+    start_date: "2024-01-01"
+    end_date: "2025-12-31"
+    description: "只用于最终人工复核，不进入自动调参闭环"
+
+# 回测参数
+backtest:
+  benchmark: "000300.SH"  # 沪深300
+  risk_free_rate: 0.03  # 无风险利率3%
+  consider_transaction_cost: true
+  transaction_cost_rate: 0.001  # 双边各0.1%
