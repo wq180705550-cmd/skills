@@ -1,0 +1,290 @@
+#!/usr/bin/env python3
+"""
+wb-hook CLI - WorkBuddy Hook System 命令行工具
+复刻 Claude Code /hook 体验
+
+用法:
+  wb-hook init
+  wb-hook add <event> <matcher> --command <cmd>
+  wb-hook list
+  wb-hook remove <event> <matcher>
+  wb-hook test <event> <tool> [--params <json>]
+"""
+
+import sys
+import json
+import os
+import argparse
+from pathlib import Path
+
+HOOKS_DIR = Path(".claude-hooks")
+HOOKS_YAML = HOOKS_DIR / "hooks.yaml"
+LOGS_DIR = HOOKS_DIR / "logs"
+
+
+def init():
+    """初始化 hook 系统"""
+    if HOOKS_DIR.exists():
+        print("⚠️  Hook 系统已初始化")
+        return
+
+    HOOKS_DIR.mkdir()
+    (HOOKS_DIR / "hooks").mkdir()
+    LOGS_DIR.mkdir()
+
+    # 创建默认 hooks.yaml
+    default_config = {
+        "hooks": {
+            "PreToolUse": [],
+            "PostToolUse": [],
+            "Stop": []
+        }
+    }
+
+    import yaml
+    with open(HOOKS_YAML, "w") as f:
+        yaml.dump(default_config, f, default_flow_style=False)
+
+    # 创建示例 hook 脚本
+    create_example_hooks()
+
+    print("✅ Hook 系统初始化完成")
+    print(f"   配置文件：{HOOKS_YAML}")
+    print(f"   Hook 脚本目录：{HOOKS_DIR / 'hooks'}")
+
+
+def create_example_hooks():
+    """创建示例 hook 脚本"""
+    hooks_dir = HOOKS_DIR / "hooks"
+
+    # block_node_modules.py
+    with open(hooks_dir / "block_node_modules.py", "w") as f:
+        f.write('''#!/usr/bin/env python3
+import sys
+import json
+
+event = json.load(sys.stdin)
+params = event.get("params", {})
+
+if "node_modules" in params.get("file_path", ""):
+    print(json.dumps({
+        "decision": "block",
+        "reason": "❌ 禁止写入 node_modules"
+    }))
+else:
+    print(json.dumps({"decision": "allow"}))
+
+sys.exit(0)
+''')
+
+    # log_read.py
+    with open(hooks_dir / "log_read.py", "w") as f:
+        f.write('''#!/usr/bin/env python3
+import sys
+import json
+import time
+
+event = json.load(sys.stdin)
+
+log_entry = {
+    "timestamp": time.time(),
+    "tool": event.get("tool"),
+    "file_path": event.get("params", {}).get("file_path")
+}
+
+with open(".claude-hooks/logs/hook.log", "a") as f:
+    f.write(json.dumps(log_entry) + "\\n")
+
+print(f"[LOG] {log_entry['tool']} {log_entry['file_path']}")
+sys.exit(0)
+''')
+
+    # 设置执行权限
+    for hook_file in hooks_dir.iterdir():
+        hook_file.chmod(0o755)
+
+
+def add_hook(event, matcher, command, timeout=3000):
+    """添加 hook"""
+    import yaml
+
+    if not HOOKS_YAML.exists():
+        print("❌ Hook 系统未初始化，请先运行 `wb-hook init`")
+        sys.exit(1)
+
+    with open(HOOKS_YAML, "r") as f:
+        config = yaml.safe_load(f)
+
+    if event not in config["hooks"]:
+        print(f"❌ 无效事件类型：{event}")
+        print(f"   支持的事件：{list(config['hooks'].keys())}")
+        sys.exit(1)
+
+    new_hook = {
+        "matcher": matcher,
+        "command": command,
+        "timeout": timeout
+    }
+
+    config["hooks"][event].append(new_hook)
+
+    with open(HOOKS_YAML, "w") as f:
+        yaml.dump(config, f, default_flow_style=False)
+
+    print(f"✅ 已添加 hook：{event}:{matcher} → {command}")
+
+
+def list_hooks():
+    """列出所有 hooks"""
+    import yaml
+
+    if not HOOKS_YAML.exists():
+        print("❌ Hook 系统未初始化")
+        sys.exit(1)
+
+    with open(HOOKS_YAML, "r") as f:
+        config = yaml.safe_load(f)
+
+    print("📋 Hook 列表\n")
+
+    for event, hooks in config["hooks"].items():
+        if hooks:
+            print(f"  {event}:")
+            for i, hook in enumerate(hooks):
+                print(f"    [{i}] matcher: {hook['matcher']}")
+                print(f"        command: {hook['command']}")
+                print(f"        timeout: {hook.get('timeout', 3000)}ms")
+            print()
+
+
+def remove_hook(event, matcher):
+    """删除 hook"""
+    import yaml
+
+    if not HOOKS_YAML.exists():
+        print("❌ Hook 系统未初始化")
+        sys.exit(1)
+
+    with open(HOOKS_YAML, "r") as f:
+        config = yaml.safe_load(f)
+
+    if event not in config["hooks"]:
+        print(f"❌ 无效事件类型：{event}")
+        sys.exit(1)
+
+    original_count = len(config["hooks"][event])
+    config["hooks"][event] = [h for h in config["hooks"][event] if h["matcher"] != matcher]
+
+    if len(config["hooks"][event]) == original_count:
+        print(f"❌ 未找到 matcher={matcher} 的 hook")
+        sys.exit(1)
+
+    with open(HOOKS_YAML, "w") as f:
+        yaml.dump(config, f, default_flow_style=False)
+
+    print(f"✅ 已删除 hook：{event}:{matcher}")
+
+
+def test_hook(event, tool, params_json):
+    """测试 hook"""
+    import yaml
+
+    if not HOOKS_YAML.exists():
+        print("❌ Hook 系统未初始化")
+        sys.exit(1)
+
+    with open(HOOKS_YAML, "r") as f:
+        config = yaml.safe_load(f)
+
+    event_data = {
+        "event": event,
+        "tool": tool,
+        "params": json.loads(params_json) if params_json else {}
+    }
+
+    print(f"🧪 测试 {event}:{tool}\n")
+
+    hooks = config["hooks"].get(event, [])
+    for hook in hooks:
+        matcher = hook["matcher"]
+        command = hook["command"]
+
+        # 简单匹配（支持 * 和 |）
+        if matcher == "*" or matcher == tool or tool in matcher.split("|"):
+            print(f"  ✓ 匹配 hook：{matcher}")
+            print(f"    执行：{command}")
+
+            # 执行 hook 脚本
+            import subprocess
+            try:
+                result = subprocess.run(
+                    command,
+                    input=json.dumps(event_data),
+                    capture_output=True,
+                    text=True,
+                    timeout=hook.get("timeout", 3000) / 1000
+                )
+
+                if result.stdout:
+                    decision = json.loads(result.stdout)
+                    print(f"    决策：{decision['decision']}")
+                    if decision.get("reason"):
+                        print(f"    原因：{decision['reason']}")
+                else:
+                    print(f"    ⚠️  Hook 无输出")
+            except subprocess.TimeoutExpired:
+                print(f"    ❌ Hook 超时")
+            except Exception as e:
+                print(f"    ❌ Hook 执行失败：{e}")
+        else:
+            print(f"  ✗ 不匹配：{matcher}")
+
+    print("\n✅ 测试完成")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="WorkBuddy Hook System CLI")
+    subparsers = parser.add_subparsers(dest="command", help="命令")
+
+    # init
+    subparsers.add_parser("init", help="初始化 hook 系统")
+
+    # add
+    add_parser = subparsers.add_parser("add", help="添加 hook")
+    add_parser.add_argument("event", choices=["PreToolUse", "PostToolUse", "Stop"])
+    add_parser.add_argument("matcher", help="工具名匹配器")
+    add_parser.add_argument("--command", required=True, help="hook 脚本命令")
+    add_parser.add_argument("--timeout", type=int, default=3000, help="超时时间（ms）")
+
+    # list
+    subparsers.add_parser("list", help="列出所有 hooks")
+
+    # remove
+    remove_parser = subparsers.add_parser("remove", help="删除 hook")
+    remove_parser.add_argument("event", choices=["PreToolUse", "PostToolUse", "Stop"])
+    remove_parser.add_argument("matcher", help="工具名匹配器")
+
+    # test
+    test_parser = subparsers.add_parser("test", help="测试 hook")
+    test_parser.add_argument("event", choices=["PreToolUse", "PostToolUse", "Stop"])
+    test_parser.add_argument("tool", help="工具名")
+    test_parser.add_argument("--params", help="参数 JSON")
+
+    args = parser.parse_args()
+
+    if args.command == "init":
+        init()
+    elif args.command == "add":
+        add_hook(args.event, args.matcher, args.command, args.timeout)
+    elif args.command == "list":
+        list_hooks()
+    elif args.command == "remove":
+        remove_hook(args.event, args.matcher)
+    elif args.command == "test":
+        test_hook(args.event, args.tool, args.params)
+    else:
+        parser.print_help()
+
+
+if __name__ == "__main__":
+    main()
