@@ -1,65 +1,44 @@
 #!/usr/bin/env python3
 """
-PostToolUse Hook 调度脚本
-在工具调用后执行，只读记录
+PostToolUse Hook 示例 — 记录所有 Read 操作到审计日志
 """
 
 import sys
 import json
-import subprocess
-import yaml
-from pathlib import Path
-
-HOOKS_YAML = Path(".claude-hooks/hooks.yaml")
-
+import time
+import os
+from datetime import datetime
 
 def main():
-    # 从 stdin 读取事件数据
-    event_data = json.load(sys.stdin)
-    
-    if not HOOKS_YAML.exists():
-        sys.exit(0)
-    
-    with open(HOOKS_YAML, "r") as f:
-        config = yaml.safe_load(f)
-    
-    hooks = config.get("hooks", {}).get("PostToolUse", [])
-    
-    for hook in hooks:
-        matcher = hook.get("matcher", "")
-        command = hook.get("command", "")
-        timeout = hook.get("timeout", 1000) / 1000
-        
-        # 匹配工具名
-        tool = event_data.get("tool", "")
-        if not match(matcher, tool):
-            continue
-        
-        # 异步执行 hook 脚本（不阻塞）
-        try:
-            subprocess.Popen(
-                command,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            ).communicate(input=json.dumps(event_data), timeout=timeout)
-        except:
-            pass  # PostToolUse hook 失败不阻断
-    
+    # 读取事件 JSON
+    event = json.load(sys.stdin)
+    tool = event.get("tool")
+    params = event.get("params", {})
+    result = event.get("result", {})
+
+    # 构造日志条目
+    log_entry = {
+        "timestamp": time.time(),
+        "datetime": datetime.now().isoformat(),
+        "event": "PostToolUse",
+        "tool": tool,
+        "params": params,
+        "result": result,
+        "session_id": event.get("session_id", "unknown")
+    }
+
+    # 写入日志文件
+    log_dir = ".claude-hooks/logs"
+    os.makedirs(log_dir, exist_ok=True)
+
+    log_file = f"{log_dir}/hook_audit.log"
+    with open(log_file, "a", encoding="utf-8") as f:
+        f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+
+    # 输出到 stdout（记录）
+    print(f"[LOG] {tool} {params.get('file_path', '')} -> {result.get('status', 'unknown')}")
+
     sys.exit(0)
-
-
-def match(matcher, tool):
-    """匹配工具名"""
-    if matcher == "*":
-        return True
-    if matcher == tool:
-        return True
-    if tool in matcher.split("|"):
-        return True
-    return False
-
 
 if __name__ == "__main__":
     main()
