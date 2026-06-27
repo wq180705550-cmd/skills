@@ -1,342 +1,526 @@
 ---
 name: efficient-frontier
 description: >
-  将昂贵前沿模型（frontier model）的判断力用在刀刃上：把可并行、可重复、
-  高 token 消耗的研究/编码/测试工作委托给更便宜的子 Agent，
-  保留架构规划、优先级判断、歧义消解、风险决策、结果综合和最终审查
-  给主 Agent。适用于多步骤复杂任务的成本优化。
-  触发场景：任务涉及大量研究扫描、多文件编辑、并行测试、或用户提到
-  「节省 token」、「并行处理」、「子 Agent 分工」等。
+  基于现代投资组合理论（MPT）的有效前沿计算与投资组合优化工具。
+  支持A股市场股票数据获取、收益率计算、协方差矩阵估计、投资组合优化、
+  有效前沿绘制等功能。适用于量化投资、资产配置、风险管理等场景。
+  触发场景：用户提到「投资组合优化」、「有效前沿」、「资产配置」、
+  「夏普比率」、「最小化风险」、「最大化收益」等。
 agent_created: true
 ---
 
-# Efficient Frontier — 高效前沿模型编排
+# Efficient Frontier — 投资组合有效前沿
 
-将昂贵模型的能力用在判断上，把体力活交给便宜的子 Agent。
+基于 Modern Portfolio Theory (MPT) 的投资组合优化工具，实现 Markowitz 有效前沿计算。
 
-## 核心原则
+## 核心概念
 
-> **用前沿模型做指挥和审查，用便宜 Agent 做研究和执行。**
+### 现代投资组合理论（MPT）核心思想
 
-昂贵 token 应该花在：
-- 架构决策
-- 优先级判断
-- 歧义消解
-- 风险评估
-- 结果综合
-- 最终审查
+1. **风险-收益权衡**：投资者是风险厌恶的，承担更高风险需要更高的预期收益补偿
+2. **分散化价值**：投资组合的风险不等于组合内个股风险的加权平均，而是取决于资产之间的相关性
+3. **有效前沿**：在所有"给定风险水平下收益最高、或给定收益水平下风险最低"的投资组合构成的边界
 
-可以委托出去的：
-- 代码库扫描、文件搜索
-- 文档提取、资料搜集
-- 重复性编码、机械化编辑
-- 测试执行、日志归纳
-- 失败聚类、Bug 复现
+### 关键公式
+
+**组合预期收益率**：
+$$E(R_p) = \sum_{i=1}^n w_i E(R_i)$$
+
+**组合风险（方差）**：
+$$\sigma_p^2 = \mathbf{w}^T \mathbf{\Sigma} \mathbf{w}$$
+
+**夏普比率**：
+$$Sharpe\ Ratio = \frac{E(R_p) - R_f}{\sigma_p}$$
+
+其中：
+- $w_i$：资产 i 的权重
+- $E(R_i)$：资产 i 的预期收益率
+- $\mathbf{\Sigma}$：资产收益率的协方差矩阵
+- $R_f$：无风险利率
 
 ---
 
 ## 工作流
 
-### 第 1 步：识别不可委托的决策
+### 第 1 步：数据获取与预处理
 
-以下必须由主 Agent（frontier model）完成：
+#### A股市场数据获取
 
-| 决策类型 | 说明 |
-|----------|------|
-| 架构规划 | 模块划分、接口设计、依赖选择 |
-| 优先级 | 先做什么后做什么 |
-| 歧义消解 | 需求不明确时的判断 |
-| 风险评估 | 哪些地方容易出错 |
-| 结果综合 | 把子 Agent 的输出整合成最终答案 |
-| 最终审查 | 验证结果是否正确 |
-
-### 第 2 步：识别可委托的工作
-
-以下可以安全地委托给子 Agent：
-
-| 工作类型 | 示例 |
-|----------|------|
-| 研究扫描 | 扫描代码库、搜索文档、提取 API 用法 |
-| 仓库盘点 | 列出所有路由、查找所有 TODO、统计测试覆盖 |
-| 浏览器/测试 | 运行测试套件、截图对比、日志过滤 |
-| 编码（有界） | 明确范围内的补丁、重构、样板代码生成 |
-| 机械化编辑 | 批量重命名、格式统一、依赖更新 |
-
-### 第 3 步：并行派发子 Agent
-
-使用 WorkBuddy 的 `Agent` 工具并行派发独立任务。在同一轮 response 中发起多个 `Agent` 调用实现并行。
-
-**Agent 工具关键参数**：
-
-| 参数 | 说明 | 示例 |
-|------|------|------|
-| `description` | 简短描述（3-5 词），用于 UI 显示 | `"扫描 API 路由定义"` |
-| `prompt` | 完整任务指令（即 handoff packet） | 见下方模板 |
-| `subagent_type` | 子 Agent 类型 | `"general-purpose"` 或 `"Explore"` |
-| `model` | 子 Agent 使用的模型 | `"lite"`（省钱）/`"default"`/`"reasoning"` |
-| `run_in_background` | 是否后台运行 | `true`（并行时必须） |
-
-**Handoff Packet 模板**（放入 `prompt` 参数）：
-
-```
-## 任务
-[明确描述要做什么]
-
-## 范围
-- 包含：[目录/文件/主题]
-- 不包含：[明确边界]
-
-## 上下文
-- 工作目录：{cwd}
-- 相关文件：[列出关键文件]
-- 搜索关键词：[如有]
-
-## 返回格式
-[期望的输出结构，例如：Markdown 表格 / JSON / 文件列表]
-
-## 验证
-[子 Agent 完成后应自行运行的验证步骤]
-
-## 停止条件（遇到以下情况立即停止并上报）
-1. [条件 1]
-2. [条件 2]
-```
-
-**实际调用示例**（主 Agent 执行，以下为伪代码用于说明参数结构，实际工具调用由 AI 自动完成）：
+使用 `westock-data` skill 或 `akshare` 库获取A股股票数据：
 
 ```python
-# 并行派发两个子 Agent
-Agent(
-    description="扫描 API 路由",
-    prompt="""## 任务
-扫描 src/routes/ 下所有路由定义。
+import akshare as ak
+import pandas as pd
+import numpy as np
 
-## 范围
-- 包含：src/routes/**/*.py
-- 不包含：测试文件
-
-## 返回格式
-Markdown 表格：| 路径 | 方法 | 处理函数 |
-
-## 验证
-对照实际文件确认每个路由都存在
-
-## 停止条件
-1. 找不到路由文件立即上报""",
-    subagent_type="Explore",
-    model="lite",
-    run_in_background=True
-)
-
-Agent(
-    description="提取数据库 Schema",
-    prompt="""## 任务
-读取 src/models/ 下所有模型定义，列出每个模型的字段。
-
-## 返回格式
-Markdown 表格：| 模型名 | 字段名 | 类型 | 是否必填 |""",
-    subagent_type="Explore",
-    model="lite",
-    run_in_background=True
-)
-# 两个 Agent 并行运行，主 Agent 继续后续工作
+def fetch_stock_data(stocks, start_date, end_date):
+    """
+    获取A股股票日度调整后收盘价
+    
+    Args:
+        stocks: 股票代码列表，如 ['600519.SH', '000858.SZ']
+        start_date: 开始日期，格式 'YYYYMMDD'
+        end_date: 结束日期，格式 'YYYYMMDD'
+    
+    Returns:
+        DataFrame: 宽表格式，索引为日期，列为股票代码
+    """
+    data = {}
+    for stock in stocks:
+        # 使用 akshare 获取日度数据
+        df = ak.stock_zh_a_hist(
+            symbol=stock.replace('.SH', '').replace('.SZ', ''),
+            start_date=start_date,
+            end_date=end_date,
+            adjust="qfq"  # 前复权
+        )
+        data[stock] = df.set_index('日期')['收盘']
+    
+    # 合并为宽表
+    price_data = pd.DataFrame(data)
+    return price_data
 ```
 
-**注意**：`run_in_background=True` 时，子 Agent 完成后通过 `SendMessage` 回传结果；主 Agent 用 `TaskOutput` 工具获取输出。
+**推荐使用 `westock-data` skill**（已针对A股优化）：
 
-### 第 4 步：要求紧凑返回
+```
+使用 @skill:westock-data 获取股票日度价格数据
+参数：
+  - 股票代码：如 600519.SH（贵州茅台）、000858.SZ（五粮液）
+  - 字段：close（收盘价）
+  - 频率：daily
+  - 复权：前复权（qfq）
+```
 
-子 Agent 的返回必须包含：
-- **发现**：关键结论
-- **变更文件**：如有编辑，列出文件路径
-- **运行命令**：执行了哪些命令
-- **残余风险**：还有什么没解决
-- **触发停止条件**：是否遇到了 handoff 中的停止条件
-- **需要主 Agent 决策的事项**：哪些需要人工判断
+#### 数据预处理
 
-### 第 5 步：集中整合与审查
-
-在呈现结果之前：
-1. 重新打开重要的引用文件核实
-2. 检查高风险 diff
-3. 重新运行或抽查关键的验证步骤
-4. 如果子 Agent 之间有分歧，由主 Agent 裁决
-
----
-
-## 完整工作流示例
-
-### 场景：重构 API 层并添加测试
-
-**主 Agent（frontier model）负责**：
-1. 决策：是否保持向后兼容
-2. 规划：哪些路由需要重构、测试策略
-3. 审查：子 Agent 返回的代码是否正确
-
-**子 Agent A（研究扫描，`model="lite"`）**：
 ```python
-Agent(
-    description="扫描现有 API 路由",
-    prompt="""## 任务
-列出 src/routes/ 下所有路由的路径、HTTP 方法、处理函数、是否已有测试。
-
-## 范围
-- 包含：src/routes/**/*.py
-- 不包含：src/tests/ 目录
-
-## 返回格式
-Markdown 表格：
-| 文件 | 路由路径 | 方法 | 处理函数 | 已有测试？ |
-
-## 验证
-每个列出的路由都在文件中实际存在
-
-## 停止条件
-1. 找不到 src/routes/ 目录立即上报
-2. 发现非 .py 文件立即跳过并说明""",
-    subagent_type="Explore",
-    model="lite",
-    run_in_background=True
-)
+def preprocess_data(price_data):
+    """
+    预处理价格数据：处理缺失值、计算收益率
+    
+    Args:
+        price_data: DataFrame，索引为日期，列为股票代码
+        
+    Returns:
+        returns: DataFrame，日度对数收益率
+        annual_returns: Series，年化收益率
+        cov_matrix: DataFrame，年化协方差矩阵
+    """
+    # 1. 删除交易天数不足的股票（如上市不足1年）
+    min_trading_days = 252  # 约1年
+    valid_stocks = price_data.columns[price_data.notna().sum() >= min_trading_days]
+    price_data = price_data[valid_stocks]
+    
+    # 2. 填充缺失值（使用前向填充）
+    price_data = price_data.fillna(method='ffill')
+    
+    # 3. 计算对数收益率
+    returns = np.log(price_data / price_data.shift(1)).dropna()
+    
+    # 4. 转换为年化收益率（假设一年252个交易日）
+    annual_returns = returns.mean() * 252
+    
+    # 5. 计算年化协方差矩阵
+    cov_matrix = returns.cov() * 252
+    
+    return returns, annual_returns, cov_matrix
 ```
 
-**子 Agent B（测试生成，`model="default"`）**：
+---
+
+### 第 2 步：投资组合优化
+
+使用 `scipy.optimize` 实现两类优化：
+
+#### 2.1 最小化风险（给定目标收益率）
+
 ```python
-Agent(
-    description="为缺失测试的路由生成测试用例",
-    prompt="""## 任务
-根据子 Agent A 返回的路由列表，为没有测试的路由生成 pytest 用例。
+import scipy.optimize as sco
 
-## 上下文
-等待子 Agent A 完成并返回路由列表。
-
-## 返回格式
-完整的 test_*.py 文件内容，可直接写入。
-
-## 验证
-生成的测试可以用 pytest 运行（语法正确）。
-
-## 停止条件
-1. 如果某个路由逻辑过于复杂（需要 mock 外部服务），标注出来交给主 Agent 决策
-2. 生成的测试语法错误，修复一次后仍然失败，上报""",
-    subagent_type="general-purpose",
-    model="default",
-    run_in_background=True
-)
+def minimize_risk(target_return, annual_returns, cov_matrix, allow_short=False):
+    """
+    在给定目标收益率下，最小化投资组合风险
+    
+    Args:
+        target_return: 目标年化收益率
+        annual_returns: Series，年化收益率
+        cov_matrix: DataFrame，年化协方差矩阵
+        allow_short: 是否允许做空（权重为负）
+    
+    Returns:
+        dict: 最优权重、预期收益率、风险（波动率）、夏普比率
+    """
+    n_assets = len(annual_returns)
+    
+    # 目标函数：最小化组合方差
+    def portfolio_variance(weights):
+        return np.dot(weights.T, np.dot(cov_matrix, weights))
+    
+    # 约束条件
+    constraints = [
+        {'type': 'eq', 'fun': lambda x: np.sum(x) - 1},  # 权重之和为1
+        {'type': 'eq', 'fun': lambda x: np.dot(x, annual_returns) - target_return}  # 达到目标收益率
+    ]
+    
+    # 边界条件
+    if allow_short:
+        bounds = tuple((-1, 1) for _ in range(n_assets))  # 允许做空
+    else:
+        bounds = tuple((0, 1) for _ in range(n_assets))  # 不允许做空
+    
+    # 初始猜测：等权重
+    initial_guess = np.array([1.0 / n_assets] * n_assets)
+    
+    # 优化
+    result = sco.minimize(
+        portfolio_variance,
+        initial_guess,
+        method='SLSQP',
+        bounds=bounds,
+        constraints=constraints
+    )
+    
+    if not result.success:
+        raise ValueError("优化失败，请检查约束条件")
+    
+    optimal_weights = result.x
+    portfolio_return = np.dot(optimal_weights, annual_returns)
+    portfolio_risk = np.sqrt(result.fun)
+    sharpe_ratio = portfolio_return / portfolio_risk  # 假设无风险利率为0
+    
+    return {
+        'weights': optimal_weights,
+        'return': portfolio_return,
+        'risk': portfolio_risk,
+        'sharpe_ratio': sharpe_ratio
+    }
 ```
 
-**主 Agent 整合结果**：
-1. 等待两个子 Agent 完成（通过 `TaskOutput` 获取结果）
-2. 审查子 Agent A 的路由列表是否完整（抽查 2-3 个文件）
-3. 审查子 Agent B 生成的测试是否覆盖了关键路径
-4. 如有分歧或遗漏，派发补丁子 Agent 修复
-5. 最终输出：重构后的代码 + 测试文件
+#### 2.2 最大化夏普比率
+
+```python
+def maximize_sharpe(annual_returns, cov_matrix, risk_free_rate=0.025, allow_short=False):
+    """
+    最大化夏普比率
+    
+    Args:
+        annual_returns: Series，年化收益率
+        cov_matrix: DataFrame，年化协方差矩阵
+        risk_free_rate: 无风险利率（默认2.5%，对应10年期国债收益率）
+        allow_short: 是否允许做空
+    
+    Returns:
+        dict: 最优权重、预期收益率、风险（波动率）、夏普比率
+    """
+    n_assets = len(annual_returns)
+    
+    # 目标函数：最小化夏普比率的负值（即最大化夏普比率）
+    def negative_sharpe(weights):
+        portfolio_return = np.dot(weights, annual_returns)
+        portfolio_risk = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
+        return -(portfolio_return - risk_free_rate) / portfolio_risk
+    
+    # 约束条件：权重之和为1
+    constraints = {'type': 'eq', 'fun': lambda x: np.sum(x) - 1}
+    
+    # 边界条件
+    if allow_short:
+        bounds = tuple((-1, 1) for _ in range(n_assets))
+    else:
+        bounds = tuple((0, 1) for _ in range(n_assets))
+    
+    # 初始猜测：等权重
+    initial_guess = np.array([1.0 / n_assets] * n_assets)
+    
+    # 优化
+    result = sco.minimize(
+        negative_sharpe,
+        initial_guess,
+        method='SLSQP',
+        bounds=bounds,
+        constraints=constraints
+    )
+    
+    if not result.success:
+        raise ValueError("优化失败，请检查约束条件")
+    
+    optimal_weights = result.x
+    portfolio_return = np.dot(optimal_weights, annual_returns)
+    portfolio_risk = np.sqrt(np.dot(optimal_weights.T, np.dot(cov_matrix, optimal_weights)))
+    sharpe_ratio = (portfolio_return - risk_free_rate) / portfolio_risk
+    
+    return {
+        'weights': optimal_weights,
+        'return': portfolio_return,
+        'risk': portfolio_risk,
+        'sharpe_ratio': sharpe_ratio
+    }
+```
 
 ---
 
-## 子 Agent 结果解析与整合
+### 第 3 步：计算有效前沿
 
-主 Agent 收到子 Agent 返回后，按以下流程处理：
-
-1. **完整性检查**：返回结果是否包含了 handoff packet 中要求的所有字段？
-2. **证据核实**：子 Agent 声称「X 文件存在 Y 函数」，主 Agent 重新打开 X 文件核实
-3. **交叉验证**：如果多个子 Agent 涉及同一区域，对比它们的结论是否一致
-4. **风险标注**：子 Agent 标注的「残余风险」逐一评估，决定是否需要额外 Agent 处理
-5. **整合输出**：将所有子 Agent 的结果合成为最终答案，明确标注哪些部分来自哪个子 Agent
-
-**禁止行为**：
-- 直接把子 Agent 的原始返回转发给用户（必须经审查整合）
-- 子 Agent 之间存在矛盾时，不调查就选一个
-
----
-
-## 常用场景
-
-### 研究任务
-- 委托：broad repo scan、文档提取、源码对比
-- 保留：判断哪些信息重要
-
-### 编码任务
-- 委托：有界补丁、重构、机械化编辑（文件归属清晰时）
-- 保留：集成和审查
-
-### 测试任务
-- 委托：运行单元测试、浏览器流、截图、日志归纳
-- 保留：选择验证策略和脚本
-
-### 调试任务
-- 委托：独立 Agent 分别追查不同理论、日志、复现路径
-- 保留：最终诊断
-
----
-
-## 停止条件（子 Agent 遇到以下情况应停止并上报）
-
-在 handoff packet 中写入停止条件，子 Agent 遇到时应停止并上报：
-
-- 实际代码与 handoff 中的假设不符
-- 验证命令失败两次（经过合理修复后）
-- 工作似乎需要超出分配范围的文件
-- Agent 无法为其主张提供具体证据
+```python
+def calculate_efficient_frontier(annual_returns, cov_matrix, n_points=100, allow_short=False):
+    """
+    计算有效前沿上的点
+    
+    Args:
+        annual_returns: Series，年化收益率
+        cov_matrix: DataFrame，年化协方差矩阵
+        n_points: 有效前沿上的点数
+        allow_short: 是否允许做空
+    
+    Returns:
+        tuple: (风险列表, 收益率列表)
+    """
+    # 确定目标收益率范围
+    min_return = annual_returns.min()
+    max_return = annual_returns.max()
+    target_returns = np.linspace(min_return, max_return, n_points)
+    
+    efficient_portfolios = []
+    for target_return in target_returns:
+        try:
+            portfolio = minimize_risk(target_return, annual_returns, cov_matrix, allow_short)
+            efficient_portfolios.append(portfolio)
+        except ValueError:
+            continue
+    
+    # 提取风险和收益率
+    risks = [p['risk'] for p in efficient_portfolios]
+    returns = [p['return'] for p in efficient_portfolios]
+    
+    return risks, returns
+```
 
 ---
 
-## 守护规则
+### 第 4 步：可视化有效前沿
 
-1. **不要委托即时阻塞项**：如果下一步依赖于某个结果，不要把它委托出去
-2. **不要多 Agent 同时编辑同一文件**：避免冲突
-3. **高风险时不要盲目信任子 Agent 结论**：亲自检查重要证据
-4. **不要声称普遍节省**：这种模式在可并行化的场景下效果最好
+```python
+import matplotlib.pyplot as plt
+
+def plot_efficient_frontier(returns, cov_matrix, n_random=5000, allow_short=False):
+    """
+    绘制有效前沿和蒙特卡洛模拟散点
+    
+    Args:
+        returns: Series，年化收益率
+        cov_matrix: DataFrame，年化协方差矩阵
+        n_random: 蒙特卡洛模拟的随机组合数量
+        allow_short: 是否允许做空
+    """
+    # 1. 蒙特卡洛模拟：生成随机权重组合
+    n_assets = len(returns)
+    random_returns = []
+    random_risks = []
+    
+    for _ in range(n_random):
+        if allow_short:
+            weights = np.random.uniform(-1, 1, n_assets)
+        else:
+            weights = np.random.random(n_assets)
+        weights /= np.sum(weights)  # 归一化
+        
+        portfolio_return = np.dot(weights, returns)
+        portfolio_risk = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
+        
+        random_returns.append(portfolio_return)
+        random_risks.append(portfolio_risk)
+    
+    # 2. 计算有效前沿
+    efficient_risks, efficient_returns = calculate_efficient_frontier(
+        returns, cov_matrix, allow_short=allow_short
+    )
+    
+    # 3. 计算最大夏普比率组合
+    max_sharpe_portfolio = maximize_sharpe(returns, cov_matrix, allow_short=allow_short)
+    
+    # 4. 绘图
+    plt.figure(figsize=(12, 8))
+    
+    # 随机组合散点
+    plt.scatter(random_risks, random_returns, c='lightgray', alpha=0.3, s=10, label='随机组合')
+    
+    # 有效前沿曲线
+    plt.plot(efficient_risks, efficient_returns, 'b-', linewidth=3, label='有效前沿')
+    
+    # 最大夏普比率组合
+    plt.scatter(
+        max_sharpe_portfolio['risk'],
+        max_sharpe_portfolio['return'],
+        c='red',
+        s=100,
+        marker='*',
+        label=f'最大夏普比率 (SR={max_sharpe_portfolio["sharpe_ratio"]:.2f})'
+    )
+    
+    plt.xlabel('风险（年化波动率）', fontsize=12)
+    plt.ylabel('预期收益率（年化）', fontsize=12)
+    plt.title('投资组合有效前沿', fontsize=14, fontweight='bold')
+    plt.grid(True, alpha=0.3)
+    plt.legend(fontsize=10)
+    
+    # 显示数值
+    print(f"最大夏普比率组合：")
+    print(f"  预期收益率：{max_sharpe_portfolio['return']:.2%}")
+    print(f"  风险（波动率）：{max_sharpe_portfolio['risk']:.2%}")
+    print(f"  夏普比率：{max_sharpe_portfolio['sharpe_ratio']:.2f}")
+    print(f"\n权重分配：")
+    for stock, weight in zip(returns.index, max_sharpe_portfolio['weights']):
+        print(f"  {stock}: {weight:.2%}")
+    
+    plt.show()
+```
 
 ---
 
-## WorkBuddy 实现说明
+## 完整示例
 
-在 WorkBuddy 中，本 skill 通过以下工具实现子 Agent 编排：
+### 场景：优化A股消费板块投资组合
 
-| 操作 | 工具 |
-|------|------|
-| 派发子 Agent | `Agent` 工具（subagent_type: general-purpose / Explore / Plan） |
-| 并行派发 | 在同一 response 中发起多个 `Agent` 调用 |
-| 子 Agent 返回 | 通过 `SendMessage` 或直接返回结果 |
-| 集中审查 | 主 Agent 收到所有结果后整合 |
+```python
+# 1. 定义股票池（消费板块龙头）
+stocks = ['600519.SH', '000858.SZ', '603288.SH', '600887.SH']  # 茅台、五粮液、海天味业、伊利股份
+start_date = '20230101'
+end_date = '20231231'
 
-**模型选择建议**：
-- 主 Agent：使用强模型（`"default"` 或 `"reasoning"`，在主 Agent 配置中设置）
-- 子 Agent：在 `Agent` 调用中指定 `model="lite"` 以节省成本（适用于研究扫描、机械化编辑等低判断任务）
-- 子 Agent 需要复杂推理时：指定 `model="default"` 或 `model="reasoning"`
+# 2. 获取数据
+price_data = fetch_stock_data(stocks, start_date, end_date)
+
+# 3. 预处理
+returns, annual_returns, cov_matrix = preprocess_data(price_data)
+
+print("年化收益率：")
+print(annual_returns)
+print("\n年化协方差矩阵：")
+print(cov_matrix)
+
+# 4. 计算最大夏普比率组合
+max_sharpe = maximize_sharpe(annual_returns, cov_matrix, risk_free_rate=0.025)
+print(f"\n最大夏普比率组合：")
+print(f"  预期收益率：{max_sharpe['return']:.2%}")
+print(f"  风险（波动率）：{max_sharpe['risk']:.2%}")
+print(f"  夏普比率：{max_sharpe['sharpe_ratio']:.2f}")
+
+# 5. 绘制有效前沿
+plot_efficient_frontier(annual_returns, cov_matrix)
+```
+
+---
+
+## A股市场适配注意事项
+
+### 1. 数据质量
+
+- **停牌处理**：A股股票可能长期停牌，需要剔除停牌时间过长的股票
+- **涨跌停限制**：A股有±10%（ST股票±5%）的涨跌停限制，影响收益率分布
+- **复权处理**：必须使用前复权价格，否则分红除权会影响收益率计算
+
+### 2. 卖空限制
+
+- A股市场普通投资者无法做空个股，优化时应设置 `allow_short=False`
+- 可通过融券卖出，但成本高且标的有限
+
+### 3. 交易成本
+
+- 印花税：0.1%（卖出时征收）
+- 佣金：约0.025%（双向征收）
+- 在优化时应考虑换手率约束，避免过于频繁调仓
+
+### 4. 无风险利率
+
+- 推荐使用10年期国债收益率作为无风险利率
+- 当前（2026年6月）约为2.5%
+
+---
+
+## 进阶功能
+
+### 1. 加入约束条件
+
+```python
+# 示例：限制单个股票权重不超过30%
+constraints = [
+    {'type': 'eq', 'fun': lambda x: np.sum(x) - 1},
+    {'type': 'ineq', 'fun': lambda x: 0.3 - x}  # 每个权重不超过0.3
+]
+
+# 示例：限制组合换手率
+# 需要传入上一个周期的权重，计算 turnover 约束
+```
+
+### 2. 使用 Black-Litterman 模型
+
+- 结合市场均衡收益率和投资者主观观点
+- 更适合机构投资者的资产配置
+
+### 3. 风险平价（Risk Parity）策略
+
+- 不再追求最大化夏普比率，而是让每个资产对组合风险的贡献相等
+- 更适合风险分散化需求
 
 ---
 
 ## 常见问题排查
 
-### 子 Agent 返回结果质量差
+### 优化失败（constraints not satisfied）
 
-**原因**：handoff packet 不够具体，子 Agent 不知道期望的输出格式。
+**原因**：
+1. 目标收益率超出可行范围（高于最高收益股票或低于最低收益股票）
+2. 协方差矩阵奇异（股票收益率完全相关）
 
-**修复**：在 handoff packet 的「返回格式」部分给出具体模板或示例。
+**修复**：
+1. 检查 `annual_returns` 的范围，确保目标收益率在合理区间内
+2. 使用正则化协方差矩阵：`cov_matrix + np.eye(n) * 1e-6`
 
-### 子 Agent 编辑了不该碰的文件
+### 权重集中在单只股票
 
-**原因**：「范围」部分定义不清晰。
+**原因**：该股票明显优于其他股票（高收益低波动）
 
-**修复**：在 handoff packet 中明确列出「不包含」的文件/目录。
+**修复**：
+1. 加入权重上限约束（如单只股票不超过30%）
+2. 使用风险平价策略
+3. 扩大股票池，增加分散化空间
 
-### 成本没有节省
+---
 
-**原因**：子 Agent 也用了强模型，或 handoff packet 过于复杂导致子 Agent token 消耗也很大。
+## 依赖库
 
-**修复**：子 Agent 用 `model="lite"`；handoff packet 保持简洁；只委托真正可并行的工作。
+```python
+# 必需库
+import pandas as pd
+import numpy as np
+import scipy.optimize as sco
+import matplotlib.pyplot as plt
+
+# A股数据获取（二选一）
+import akshare as ak  # 免费，数据质量一般
+# 或者使用 westock-data skill（推荐，数据质量高）
+
+# 可选：风险平价、Black-Litterman 等进阶功能
+# pip install riskparityportfolio
+```
 
 ---
 
 ## 默认表述
 
-启动本 skill 时，向用户说明编排计划：
+启动本 skill 时，向用户说明分析计划：
 
-> 「我将使用主 Agent 作为指挥者和审查者，使用更便宜的子 Agent 处理
-> 高 token 消耗的研究、编码或测试工作，让昂贵的 token 花在判断、
-> 综合和最终质量上。
->
-> 计划派发 N 个子 Agent 并行处理：[列出每个子 Agent 的任务]。
-> 预计节省约 X% 的 token（仅估算，实际取决于任务可并行程度）。」
+> 「我将基于现代投资组合理论（MPT）为您优化投资组合。
+> 
+> 分析步骤：
+> 1. 获取股票池的价格数据（使用 westock-data 或 akshare）
+> 2. 计算对数收益率和协方差矩阵
+> 3. 优化投资组合（最小化风险 / 最大化夏普比率）
+> 4. 绘制有效前沿曲线
+> 
+> 需要您提供：
+> - 股票池（如：消费板块龙头）
+> - 分析时间段
+> - 是否允许做空（默认不允许）
+> - 无风险利率（默认2.5%）」

@@ -41,7 +41,8 @@
 ### 🧠 量化框架
 | Skill | 说明 | 版本 |
 |-------|------|------|
-| [efficient-frontier](./efficient-frontier/) | 将昂贵前沿模型的判断力用在刀刃上：委托子 Agent 处理高 token 消耗任务，保留主 Agent 做架构规划与最终审查 | - |
+| [frontier-model-orchestration](./frontier-model-orchestration/) | 将昂贵前沿模型（frontier model）的判断力用在刀刃上：委托子 Agent 处理高 token 消耗任务，保留主 Agent 做架构规划与最终审查 | - |
+| [efficient-frontier](./efficient-frontier/) | 基于现代投资组合理论（MPT）的有效前沿计算与投资组合优化，支持A股市场数据获取与资产配置 | - |
 | [skillevolver](./skillevolver/) | 面向在线技能学习的元技能自演化框架 | v2.0 |
 | [skill-adaptor](./skill-adaptor/) | 基于轨迹的LLM智能体自适应技能，显式故障归因 | - |
 | [factorengine](./factorengine/) | 程序级知识注入因子挖掘框架 | v2.0 |
