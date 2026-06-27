@@ -524,3 +524,129 @@ import akshare as ak  # 免费，数据质量一般
 > - 分析时间段
 > - 是否允许做空（默认不允许）
 > - 无风险利率（默认2.5%）」
+
+---
+
+## 脚本使用
+
+本 skill 提供以下可执行脚本（位于 `scripts/` 目录）：
+
+### 1. 生成示例数据
+
+```bash
+python scripts/generate_sample_data.py
+```
+
+生成模拟的 A股消费板块价格数据（用于测试）。
+
+**输出**：`data/sample_prices.csv`
+
+---
+
+### 2. 优化投资组合
+
+```bash
+# 使用示例数据
+python scripts/optimize.py --data-file data/sample_prices.csv --output result.json
+
+# 使用真实数据（需要 westock-data 或 akshare）
+python scripts/optimize.py \
+  --stocks 600519.SH 000858.SZ 603288.SH 600887.SH \
+  --start-date 2023-01-01 \
+  --end-date 2023-12-31 \
+  --risk-free-rate 0.025 \
+  --output result.json
+```
+
+**参数说明**：
+- `--stocks`：股票代码列表
+- `--start-date`：开始日期（YYYY-MM-DD）
+- `--end-date`：结束日期（YYYY-MM-DD）
+- `--risk-free-rate`：无风险利率（默认 2.5%）
+- `--allow-short`：允许做空（默认不允许）
+- `--data-file`：从 CSV 文件读取数据
+- `--output`：输出结果到 JSON 文件
+
+---
+
+### 3. 回测投资组合
+
+```bash
+python scripts/backtest.py \
+  --weights 0.25 0.25 0.25 0.25 \
+  --price-data data/sample_prices.csv \
+  --initial-capital 1000000 \
+  --plot
+```
+
+**参数说明**：
+- `--weights`：投资组合权重列表
+- `--price-data`：价格数据 CSV 文件
+- `--initial-capital`：初始资金（默认 1,000,000）
+- `--plot`：生成回测图表（需要 matplotlib）
+
+**输出**：
+- 回测指标（总收益率、年化收益率、夏普比率、最大回撤）
+- 回测图表（`backtest_result.png`，如指定 `--plot`）
+
+---
+
+### 4. 运行测试
+
+```bash
+python scripts/test_optimization.py
+```
+
+自动执行完整测试流程（生成数据 → 优化 → 验证验收标准）。
+
+**验收标准**：夏普比率 > 1
+
+---
+
+## 完整工作流示例
+
+### 场景：优化消费板块投资组合
+
+```bash
+# 步骤 1：生成示例数据
+python scripts/generate_sample_data.py
+
+# 步骤 2：优化投资组合
+python scripts/optimize.py \
+  --data-file data/sample_prices.csv \
+  --risk-free-rate 0.025 \
+  --output result.json
+
+# 步骤 3：查看优化结果
+cat result.json
+
+# 步骤 4：回测优化结果
+python scripts/backtest.py \
+  --weights $(jq -r '.weights[]' result.json) \
+  --price-data data/sample_prices.csv \
+  --plot
+
+# 步骤 5：验证验收标准
+jq '.sharpe_ratio' result.json  # 应该 > 1
+```
+
+---
+
+## 与 westock-data 集成
+
+在 WorkBuddy 中使用 `westock-data` skill 获取数据：
+
+```
+@skill:westock-data 获取股票日度价格数据
+参数：
+  - 股票代码：600519.SH 000858.SZ 603288.SH 600887.SH
+  - 开始日期：2023-01-01
+  - 结束日期：2023-12-31
+  - 字段：close（收盘价）
+  - 频率：daily
+  - 复权：前复权（qfq）
+```
+
+然后将返回的数据保存为 CSV 文件，供脚本使用。
+
+---
