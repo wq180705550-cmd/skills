@@ -51,10 +51,11 @@
 | [embodiskill](./embodiskill/) | 面向具身技能自演化的技能感知反思与进化 | v2.0 |
 
 ### 📘 量化策略
-| Skill | 说明 |
-|-------|------|
-| [multi-factor-scoring](./multi-factor-scoring/) | 多因子量化交易系统，支持因子打分、回测和模拟 |
-| [auto-research-stock-selection](./auto-research-stock-selection/) | 基于华泰证券自进化Skill框架的稳健低波价值优选策略，支持训练集/验证集/测试集样本隔离和版本化管理 |
+| Skill | 说明 | 版本 |
+|-------|------|------|
+| [stock-debate-team](./stock-debate-team/) | 股票交易辩论多空专家团，组织巴菲特/芒格/段永平/史文森四大投资大师视角进行多空辩论分析 | v1.0.0 |
+| [multi-factor-scoring](./multi-factor-scoring/) | 多因子量化交易系统，支持因子打分、回测和模拟 | - |
+| [auto-research-stock-selection](./auto-research-stock-selection/) | 基于华泰证券自进化Skill框架的稳健低波价值优选策略，支持训练集/验证集/测试集样本隔离和版本化管理 | - |
 
 ### 💡 投资思维
 | Skill | 说明 | 版本 |
@@ -168,7 +169,7 @@
 
 ## 统计
 
-- 总数：**79** 个自建 Skill
+- 总数：**80** 个自建 Skill
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等
