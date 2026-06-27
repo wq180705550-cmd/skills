@@ -41,6 +41,7 @@
 ### 🧠 量化框架
 | Skill | 说明 | 版本 |
 |-------|------|------|
+| [capm-analysis](./capm-analysis/) | CAPM（资本资产定价模型）分析与可视化，支持A股/美股/港股适配、量化框架集成、交互式Web应用 | - |
 | [frontier-model-orchestration](./frontier-model-orchestration/) | 将昂贵前沿模型（frontier model）的判断力用在刀刃上：委托子 Agent 处理高 token 消耗任务，保留主 Agent 做架构规划与最终审查 | - |
 | [efficient-frontier](./efficient-frontier/) | 基于现代投资组合理论（MPT）的有效前沿计算与投资组合优化，支持A股市场数据获取与资产配置 | - |
 | [skillevolver](./skillevolver/) | 面向在线技能学习的元技能自演化框架 | v2.0 |
@@ -72,7 +73,7 @@
 
 ## 统计
 
-- 总数：**23** 个自建 Skill
+- 总数：**24** 个自建 Skill
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等
