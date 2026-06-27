@@ -1,0 +1,29 @@
+# 因子权重配置
+# 用于多因子打分系统
+
+factor_weights:
+  momentum: 0.20      # 动量因子
+  technical: 0.15     # 技术指标因子
+  volume: 0.10        # 成交量因子
+  fundamental: 0.20   # 基本面因子
+  macro: 0.10         # 宏观经济因子
+  sector: 0.10        # 行业板块因子
+  capm_beta: 0.15     # CAPM Beta 因子（系统风险）
+
+# 市场状态检测配置
+regime_detection:
+  enable: true
+  window: 60  # 检测窗口（交易日）
+
+# 交易信号生成配置
+signal_generation:
+  buy_threshold_percentile: 80   # 买入阈值（百分位）
+  sell_threshold_percentile: 20  # 卖出阈值（百分位）
+  score_improvement_threshold: 20  # 得分改善阈值
+
+# 风险管理配置
+risk_management:
+  max_position_size: 0.10  # 单个股票最大仓位（10%）
+  max_sector_exposure: 0.30  # 单个行业最大敞口（30%）
+  stop_loss: 0.08            # 止损线（8%）
+  take_profit: 0.20          # 止盈线（20%）
