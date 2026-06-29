@@ -31,12 +31,13 @@
 | [exchange-futures-data](./exchange-futures-data/) | 中国五大期货交易所（DCE/SHFE/CZCE/CFFEX/GFEX）官方数据采集 | - |
 
 ### 🛠 工具
-| Skill | 说明 |
-|-------|------|
-| [goal](./goal/) | `/goal` 会话目标管理 |
-| [grill-me](./grill-me/) | 深度压力测试，系统性拷问计划/设计 |
-| [loop](./loop/) | `/loop` 循环执行任务，支持固定间隔、动态间隔、停滞检测、熔断机制 |
-| [schedule](./schedule/) | 定时自动化任务管理（创建/列出/删除），复刻 Claude Code `/schedule` 交互体验 |
+| Skill | 说明 | 版本 |
+|-------|------|------|
+| [goal](./goal/) | `/goal` 会话目标管理 | - |
+| [grill-me](./grill-me/) | 深度压力测试，系统性拷问计划/设计 | - |
+| [loop](./loop/) | `/loop` 循环执行任务，支持固定间隔、动态间隔、停滞检测、熔断机制 | - |
+| [schedule](./schedule/) | 定时自动化任务管理（创建/列出/删除），复刻 Claude Code `/schedule` 交互体验 | - |
+| [ai-website-cloner](./ai-website-cloner/) | AI 网站克隆器 — 五阶段流水线将任意网站逆向工程为 pixel-perfect Next.js 组件 | v1.0.0 |
 
 ### 🧠 量化框架
 | Skill | 说明 | 版本 |
@@ -170,7 +171,7 @@
 
 ## 统计
 
-- 总数：**81** 个自建 Skill
+- 总数：**82** 个自建 Skill
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等
