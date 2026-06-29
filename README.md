@@ -163,13 +163,14 @@
 | [westock-data](./westock-data/) | 金融市场结构化数据查询（A股/港股/美股/ETF/期货等） |
 
 ### ⚙️ 系统
-| Skill | 说明 |
-|-------|------|
-| [wb-hooks](./wb-hooks/) | WorkBuddy 事件驱动 Hook 系统，约定式注入实现工具调用拦截 |
+| Skill | 说明 | 版本 |
+|-------|------|------|
+| [wb-hooks](./wb-hooks/) | WorkBuddy 事件驱动 Hook 系统，约定式注入实现工具调用拦截 | - |
+| [dspark-inference](./dspark-inference/) | DSpark 分布式投机解码推理部署 — 双 DGX Spark 节点，vLLM, TP=2, FP8 KV Cache, InfiniBand/RoCE | v1.0.0 |
 
 ## 统计
 
-- 总数：**80** 个自建 Skill
+- 总数：**81** 个自建 Skill
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等
