@@ -10,6 +10,8 @@ from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
 
+from config import *
+
 
 class BacktestEngine:
     """Backtest engine for multi-factor scoring strategy"""
