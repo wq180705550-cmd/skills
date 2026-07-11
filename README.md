@@ -169,9 +169,14 @@
 | [wb-hooks](./wb-hooks/) | WorkBuddy 事件驱动 Hook 系统，约定式注入实现工具调用拦截 | - |
 | [dspark-inference](./dspark-inference/) | DSpark 分布式投机解码推理部署 — 双 DGX Spark 节点，vLLM, TP=2, FP8 KV Cache, InfiniBand/RoCE | v1.0.0 |
 
+### ✍️ 内容创作
+| Skill | 说明 | 版本 |
+|-------|------|------|
+| [xuanti-xia](./xuanti-xia/) | 选题虾 — 为「文案虾」提供选题输入：口水稿整理、主题挖掘、热点分析、选题库存储、EMOS 四维洞察推荐 | v1.0.0 |
+
 ## 统计
 
-- 总数：**82** 个自建 Skill
+- 总数：**83** 个自建 Skill
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等
