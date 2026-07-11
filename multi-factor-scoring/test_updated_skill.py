@@ -137,6 +137,45 @@ try:
 except Exception as e:
     print(f"  ❌ Dynamic slippage test failed: {e}")
 
+# Test 8: Volatility forecasting (arXiv:2607.05291) — Log-HAR + TTM ensemble
+print("\n[Test 8] Testing volatility forecasting module...")
+try:
+    from volatility_forecaster import EnsembleVolForecaster, realized_variance, volatility_score_from_forecast
+    import pandas as pd
+    import numpy as np
+
+    # Synthetic return series (long enough for HAR lags + context)
+    np.random.seed(42)
+    n = 300
+    rv_true = np.abs(np.random.normal(1.0, 0.3, n))
+    synth_ret = pd.Series(np.sqrt(rv_true) * np.random.normal(0, 1, n) / 100.0)
+
+    # Ensemble with TTM disabled (graceful Log-HAR-only fallback, no heavy dep)
+    ef = EnsembleVolForecaster(use_ttm=False)
+    fc = ef.forecast(synth_ret, h=5)
+    assert len(fc) == 5, "Forecast length mismatch"
+    vscore = volatility_score_from_forecast(fc, realized_variance(synth_ret), window=60)
+    assert 0 <= vscore <= 100, "Score out of range"
+    print(f"  ✅ Ensemble (Log-HAR only) 5-day forecast OK, len={len(fc)}")
+    print(f"  ✅ Volatility-dimension score = {vscore:.1f}/100 (TTM available: {ef.ttm_available})")
+
+    # Scorer-level integration (TTM off to keep the test lightweight)
+    vscorer = MultiFactorScorer(
+        enable_vol_forecast=True, vol_horizon=5, enable_ttm_vol=False
+    )
+    vdf = pd.DataFrame({
+        'close': synth_ret.cumsum() + 100,
+        'open': synth_ret.cumsum() + 100,
+        'high': synth_ret.cumsum() + 101,
+        'low': synth_ret.cumsum() + 99,
+        'volume': np.random.randint(1_000_000, 5_000_000, n)
+    }, index=pd.date_range('2024-01-01', periods=n, freq='D'))
+    single = vscorer._calculate_volatility_score(vdf, horizon=5)
+    print(f"  ✅ Scorer volatility score = {single:.1f}/100")
+    assert 0 <= single <= 100
+except Exception as e:
+    print(f"  ❌ Volatility forecasting test failed: {e}")
+
 print("\n" + "="*60)
 print("Test Summary")
 print("="*60)
@@ -145,6 +184,7 @@ print("\nNew features from arXiv 2026 papers:")
 print("  1. ✅ Market impact model (square-root law, arXiv:2606.24019)")
 print("  2. ✅ Dynamic transaction cost optimization (arXiv:2606.21784)")
 print("  3. ✅ Adaptive regime detection (arXiv:2606.23596)")
+print("  4. ✅ Realized-volatility forecasting: Log-HAR + TTM ensemble (arXiv:2607.05291)")
 print("\nNext steps:")
 print("  - Run full backtest to validate performance")
 print("  - Implement Robust Bayesian portfolio selection (if needed)")

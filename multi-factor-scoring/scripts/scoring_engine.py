@@ -30,10 +30,13 @@ class MultiFactorScorer:
     - Robust Bayesian portfolio selection (arXiv:2606.24212)
     - Adaptive regime detection (arXiv:2606.23596)
     - Dynamic transaction cost optimization (arXiv:2606.21784)
+    - Realized-volatility forecasting: Log-HAR + TTM equal-weight ensemble (arXiv:2607.05291)
     """
 
     def __init__(self, factor_weights=None, enable_market_impact=True, 
-                 enable_regime_detection=True, enable_robust_bayesian=False):
+                 enable_regime_detection=True, enable_robust_bayesian=False,
+                 enable_vol_forecast=None, vol_horizon=None, enable_ttm_vol=None,
+                 vol_context_length=None):
         """
         Initialize scorer with factor weights
         
@@ -42,6 +45,13 @@ class MultiFactorScorer:
             enable_market_impact: Enable market impact adjustment (arXiv:2606.24019)
             enable_regime_detection: Enable adaptive regime detection (arXiv:2606.23596)
             enable_robust_bayesian: Enable robust Bayesian portfolio selection (arXiv:2606.24212)
+            enable_vol_forecast: Enable realized-volatility forecasting factor (arXiv:2607.05291);
+                                 defaults to config.ENABLE_VOL_FORECAST
+            vol_horizon: Forecast horizon in days for the volatility dimension (1/5/22);
+                         defaults to config.VOL_HORIZON
+            enable_ttm_vol: Use Tiny Time Mixers (TTM) in the equal-weight ensemble (needs granite-tsfm);
+                            defaults to config.VOL_USE_TTM
+            vol_context_length: Context length for TTM; defaults to config.VOL_CONTEXT_LENGTH
         """
         if factor_weights is None:
             self.factor_weights = FACTOR_WEIGHTS
@@ -58,6 +68,12 @@ class MultiFactorScorer:
         self.enable_market_impact = enable_market_impact
         self.enable_regime_detection = enable_regime_detection
         self.enable_robust_bayesian = enable_robust_bayesian
+        # Volatility forecasting flags resolve from config when not explicitly passed
+        self.enable_vol_forecast = ENABLE_VOL_FORECAST if enable_vol_forecast is None else enable_vol_forecast
+        self.vol_horizon = VOL_HORIZON if vol_horizon is None else vol_horizon
+        self.enable_ttm_vol = VOL_USE_TTM if enable_ttm_vol is None else enable_ttm_vol
+        self.vol_context_length = VOL_CONTEXT_LENGTH if vol_context_length is None else vol_context_length
+        self._vol_forecaster = None  # lazy-built equal-weight ensemble
         
         # Regime detection state
         self.current_regime = 'normal'  # 'bull', 'bear', 'normal', 'crisis'
@@ -67,6 +83,7 @@ class MultiFactorScorer:
         print(f"Market impact model: {'ON' if enable_market_impact else 'OFF'}")
         print(f"Regime detection: {'ON' if enable_regime_detection else 'OFF'}")
         print(f"Robust Bayesian: {'ON' if enable_robust_bayesian else 'OFF'}")
+        print(f"Vol forecast (arXiv:2607.05291): {'ON' if enable_vol_forecast else 'OFF'}")
 
     def calculate_scores(self, data, fundamentals=None, macro_data=None, position_sizes=None):
         """
@@ -101,6 +118,11 @@ class MultiFactorScorer:
             fundamental_score = self._calculate_fundamental_score(symbol, fundamentals)
             macro_score = self._calculate_macro_score(macro_data)
             sector_score = self._calculate_sector_score(symbol, data)
+
+            # Optional volatility-dimension score (arXiv:2607.05291)
+            vol_score = None
+            if self.enable_vol_forecast:
+                vol_score = self._calculate_volatility_score(df)
             
             # Store individual scores
             scores[symbol] = {
@@ -111,6 +133,8 @@ class MultiFactorScorer:
                 'macro': macro_score,
                 'sector': sector_score
             }
+            if vol_score is not None:
+                scores[symbol]['volatility'] = vol_score
             
             # Calculate weighted composite score
             composite = (
@@ -605,6 +629,47 @@ class MultiFactorScorer:
         except Exception as e:
             print(f"Error applying regime adjustment: {e}")
             return 1.0
+
+    # ==================== Volatility Forecasting (arXiv:2607.05291) ====================
+
+    def _get_vol_forecaster(self):
+        """Lazily build the equal-weight Log-HAR + TTM ensemble forecaster."""
+        if self._vol_forecaster is None:
+            from volatility_forecaster import EnsembleVolForecaster
+            self._vol_forecaster = EnsembleVolForecaster(
+                use_ttm=self.enable_ttm_vol,
+                context_length=self.vol_context_length,
+                ttm_model="ibm/TTM"
+            )
+        return self._vol_forecaster
+
+    def _calculate_volatility_score(self, df, horizon=None):
+        """
+        Volatility-dimension score (0-100) via Log-HAR + TTM equal-weight ensemble.
+
+        Returns the percentile of the h-day-ahead forecasted realized variance within
+        the trailing 60-day distribution. Semantics match the 4-Layer L1 ATR-percentile:
+        higher future volatility => higher score (vol expansion = breakout opportunity).
+        Default horizon from vol_horizon (1 / 5 / 22 days).
+        """
+        try:
+            from volatility_forecaster import realized_variance, volatility_score_from_forecast
+            if horizon is None:
+                horizon = self.vol_horizon
+            close = df['close']
+            if len(close) < 30:
+                return 50.0
+            ret = np.log(close / close.shift(1)).dropna()
+            rv = realized_variance(ret)
+            if len(rv) < self.vol_context_length + 10:
+                return 50.0
+            forecaster = self._get_vol_forecaster()
+            fc = forecaster.forecast(rv, h=horizon)
+            score = volatility_score_from_forecast(fc, rv, window=60)
+            return round(float(score), 2)
+        except Exception as e:
+            print(f"Error in volatility forecasting: {e}")
+            return 50.0
 
 
 if __name__ == "__main__":

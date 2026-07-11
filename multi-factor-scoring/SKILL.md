@@ -1,8 +1,8 @@
 ---
 name: multi-factor-scoring
-description: "Multi-factor scoring quantitative trading system. Use this skill when the user wants to build a quantitative trading strategy based on multi-factor scoring (momentum, technical indicators, volume, fundamentals, macro, sector rotation), with support for A-shares, HK stocks, US stocks, and futures/derivatives across multiple timeframes (daily, 4H, 1H, 15M). Now includes an optional 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules. Triggers include requests for multi-factor models, scoring systems, factor-based stock selection, rotational strategies, quantitative trading framework setup, or 4-layer scoring framework."
+description: "Multi-factor scoring quantitative trading system. Use this skill when the user wants to build a quantitative trading strategy based on multi-factor scoring (momentum, technical indicators, volume, fundamentals, macro, sector rotation), with support for A-shares, HK stocks, US stocks, and futures/derivatives across multiple timeframes (daily, 4H, 1H, 15M). Now includes an optional 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, and a realized-volatility forecasting module (Log-HAR + TTM equal-weight ensemble, arXiv:2607.05291) for the volatility dimension. Triggers include requests for multi-factor models, scoring systems, factor-based stock selection, rotational strategies, quantitative trading framework setup, 4-layer scoring framework, or volatility forecasting / HAR / Log-HAR / TTM."
 agent_created: true
-version: 2.0.0
+version: 2.1.0
 language: zh
 type: strategy
 priority: high
@@ -13,7 +13,9 @@ triggers:
   - "multi-factor scoring"
   - "OI变化率/ATR/OBV/CMF"
   - "否决项/ADX/RSI极端"
-keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD]
+  - "波动率预测/HAR/Log-HAR/TTM"
+  - "realized volatility / TSFM ensemble"
+keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE]
 config:
   framework: "6-category"  # or "4-layer"
   ashare_data_source: "akshare"
@@ -517,7 +519,7 @@ The system generates the following outputs:
 
 ## 13. Latest Research Integration (2026 arXiv Papers)
 
-This skill now incorporates cutting-edge research from 10 top arXiv papers (May-June 2026). These features are enabled by default and can be toggled in `scoring_engine.py` and `simulated_broker.py`.
+This skill now incorporates cutting-edge research from 11 top arXiv papers (May–July 2026). These features are enabled by default and can be toggled in `scoring_engine.py`, `volatility_forecaster.py`, and `simulated_broker.py`.
 
 ### 13.1 Market Impact Model (arXiv:2606.24019)
 
@@ -631,6 +633,83 @@ The following papers were excluded from integration:
 - **arXiv:2606.23070, arXiv:2606.21769**: AMM dynamic fees (cryptocurrency, not stocks)
 - **arXiv:2605.23007**: MadEvolve (LLM evolution, requires >16GB RAM)
 - **arXiv:2605.05580, arXiv:2605.12532**: Multi-agent frameworks (requires >16GB RAM)
+
+---
+
+### 13.6 Realized-Volatility Forecasting: Log-HAR + TTM Equal-Weight Ensemble (arXiv:2607.05291)
+
+**Paper:** "Forecasting Realized Volatility with Time Series Foundation Models: A Comparison with Econometric Benchmarks" — Brini (2026)
+
+**Why this matters for your 5-factor WQUANT system:** In the 波动率 (volatility) dimension, the instinct is to reach for a large time-series foundation model (TSFM). This paper shows that is the wrong instinct.
+
+#### Key empirical findings (VOLARE dataset, 50 assets, 3 horizons)
+
+| Finding | Implication for WQUANT |
+|---------|------------------------|
+| 9 zero-shot TSFMs vs 8 econometric benchmarks (HAR family) — **no uniform win** for foundation models | Don't assume "bigger model = better volatility forecast" |
+| Only **Tiny Time Mixers (TTM)** — a <1M-param model — beats Log-HAR at every horizon, by a **narrow margin** | A tiny model is enough; skip the heavyweights |
+| Short-horizon gains come mostly from **better scale calibration** (Mincer-Zarnowitz), not better volatility-dynamics modelling | The "edge" is mostly debiasing the level/scale, not skill |
+| **Equal-weight TTM + Log-HAR ensemble** enters the Model Confidence Set (MCS) for **98–100%** of assets — more often than either alone | Ensemble >> single best model; no need to pick per-asset winner |
+| Architecture choice matters more than foundation-vs-econometric choice | Pick the right small model, not "a foundation model" |
+
+#### Implementation (in `scripts/volatility_forecaster.py`)
+
+Three components, composable:
+
+1. **`LogHAR`** — log-Heterogeneous Autoregressive realized-volatility forecaster (Corsi 2009, log spec).
+   - `log(RV_t) = b0 + b_d·log(RV_{t-1}) + b_w·log(mean RV_{t-1..t-5}) + b_m·log(mean RV_{t-1..t-22}) + e_t`
+   - RV computed from daily (log) returns: `RV_t ≈ ret_t²` (use intraday bars when available for the exact `Σ r²`).
+   - Multi-step `h`-day forecast by recursion. OLS via `np.linalg.lstsq`.
+
+2. **`TTMForecaster`** — IBM TinyTimeMixer, zero-shot, lightweight (<1M params).
+   - Package: `pip install granite-tsfm` (provides `tsfm_public`); model `ibm/TTM`.
+   - Zero-shot: no fine-tuning. Runs on CPU; fits the low-RAM machine.
+   - Loaded **lazily** and **only if enabled** — the skill works without it.
+
+3. **`EnsembleVolForecaster`** — the durable result:
+   - `RV_forecast_h = 0.5 · LogHAR_h + 0.5 · TTM_h`
+   - **Graceful degradation**: if TTM is unavailable (package missing / load fails), it falls back to Log-HAR only and sets `ttm_available = False`.
+   - Optional **Mincer-Zarnowitz recalibration** (`recalibrate=True`): removes level/scale bias using in-sample LogHAR errors (no lookahead into the forecast target).
+
+**Mapping to the volatility dimension (0–100 score):**
+`volatility_score_from_forecast()` returns the percentile of the h-day-ahead forecasted RV within the trailing 60-day distribution. Semantics match the 4-Layer **L1 ATR-percentile**: higher future volatility ⇒ higher score (vol expansion = breakout opportunity). This makes it a drop-in enhancement for L1's volatility read, or the standalone 波动率 factor in a 5-factor system.
+
+#### Usage
+
+```python
+from volatility_forecaster import EnsembleVolForecaster, realized_variance, volatility_score_from_forecast
+
+# From daily returns (or pass RV directly with as_rv=True)
+ef = EnsembleVolForecaster(use_ttm=True, recalibrate=False)
+forecast_rv = ef.forecast(daily_returns, h=5)          # 5-day-ahead RV
+score = volatility_score_from_forecast(forecast_rv, realized_variance(daily_returns))
+print(f"TTM used: {ef.ttm_available}, vol score: {score:.1f}")
+```
+
+**Plug into the scorer (opt-in, config-driven):**
+
+```python
+# config.py
+ENABLE_VOL_FORECAST = True    # adds a 'volatility' column to scores
+VOL_HORIZON = 5               # 1 (daily) / 5 (weekly) / 22 (monthly)
+VOL_USE_TTM = True            # needs `pip install granite-tsfm`
+VOL_CONTEXT_LENGTH = 64
+VOL_RECALIBRATE = False       # Mincer-Zarnowitz scale debiasing
+
+# scoring_engine.py
+scorer = MultiFactorScorer(enable_vol_forecast=True)   # reads config by default
+scores = scorer.calculate_scores(data)
+# scores['600519.SH']['volatility']  -> 0-100 volatility-dimension score
+```
+
+**Integration paths:**
+- **WQUANT 5-factor (趋势/成交量/市场宽度/资金流向/波动率):** use `scores[symbol]['volatility']` directly as the 波动率 dimension.
+- **4-Layer L1 萌芽:** replace/augment the ATR-percentile sub-score with this forecast-based percentile for a forward-looking volatility read (current ATR = now; this = next h days).
+
+**Caveats (from the paper):**
+- TTM is **not** best on every asset — the ensemble, not TTM alone, is the robust choice.
+- At the monthly horizon a genuine informational gain remains; at short horizons most of the gain is scale calibration.
+- Validate `TTMForecaster` output on your machine once `granite-tsfm` is installed — the `tsfm_public` pipeline column names can vary across versions (handled defensively in code).
 
 ---
 
@@ -773,12 +852,15 @@ For detailed implementation of each module, refer to the code files created in t
 6. **禁止**在回测中不体现手续费、滑点、市场冲击（尤其期货）
 7. **推荐**：首次使用 4-Layer 框架时，先在指数期货（如 IF、IC）上验证
 8. **推荐**：将 L1-L4 各层分数和否决项明细输出到 `scores_4layer.csv`，便于调试
+9. **禁止**：在波动率(波动率)维度盲目上大模型 TSFM（Moirai / TimesFM / TimeGPT 等）。arXiv:2607.05291 证明它们对 HAR 无全面碾压；应使用 Log-HAR + TTM(<1M 参数) **等权集成**，进入 Model Confidence Set 的比例（98–100%）高于任一单模型
+10. **强制**：TTM 依赖 `granite-tsfm` 包，必须懒加载且仅在 `VOL_USE_TTM=True` 时启用；包缺失或加载失败时 `EnsembleVolForecaster` 必须自动回退到 Log-HAR（设置 `ttm_available=False`），不得报错中断整个评分流程
 
 ## 版本历史
 
 | 版本 | 日期 | 变更说明 |
 |------|------|---------|
 | v2.0.0 | 2026-07-01 | SkillEvolver + Loop 演化：新增 4-Layer 评分框架（萌芽/量价/结构/确认）、否决项规则、期货/衍生品 OI 数据说明、4-Layer config 示例、S_appendix 双层结构 |
+| v2.1.0 | 2026-07-11 | SkillEvolver 演化（arXiv:2607.05291）：新增波动率预测模块 `volatility_forecaster.py`，实现 Log-HAR + TTM 等权集成（带 TTM 缺失优雅回退与 Mincer-Zarnowitz 重校准），接入 `MultiFactorScorer` 为可选 `volatility` 维度分数（config 驱动，默认关闭） |
 | v1.x | 2026-06 | 初始版本：6-Category 多因子评分框架，支持 A股/港股/美股，含 2026 arXiv 研究集成 |
 
 ---

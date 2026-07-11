@@ -73,6 +73,13 @@ MACD_PARAMS = (12, 26, 9)
 BOLLINGER_PERIOD = 20
 BOLLINGER_STD = 2
 
+# Volatility forecasting (arXiv:2607.05291) — Log-HAR + TTM equal-weight ensemble
+ENABLE_VOL_FORECAST = False          # Opt-in: adds a 'volatility' dimension score
+VOL_HORIZON = 5                      # Forecast horizon (days): 1 (daily), 5 (weekly), 22 (monthly)
+VOL_USE_TTM = True                   # Use Tiny Time Mixers in the ensemble (needs `pip install granite-tsfm`)
+VOL_CONTEXT_LENGTH = 64              # TTM context length (>=64 recommended for daily RV)
+VOL_RECALIBRATE = False              # Mincer-Zarnowitz scale recalibration (uses in-sample LogHAR errors)
+
 # Fundamental data (example values - in practice, fetch from API)
 # This is a simplified example; real implementation would fetch from financial data APIs
 FUNDAMENTAL_DATA = {
