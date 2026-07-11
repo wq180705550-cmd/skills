@@ -31,12 +31,14 @@ class MultiFactorScorer:
     - Adaptive regime detection (arXiv:2606.23596)
     - Dynamic transaction cost optimization (arXiv:2606.21784)
     - Realized-volatility forecasting: Log-HAR + TTM equal-weight ensemble (arXiv:2607.05291)
+    - Distribution-free uncertainty quantification: dependence-aware bootstrap /
+      conformal confidence intervals for signals (arXiv:2607.06690)
     """
 
     def __init__(self, factor_weights=None, enable_market_impact=True, 
                  enable_regime_detection=True, enable_robust_bayesian=False,
                  enable_vol_forecast=None, vol_horizon=None, enable_ttm_vol=None,
-                 vol_context_length=None):
+                 vol_context_length=None, enable_uncertainty=None):
         """
         Initialize scorer with factor weights
         
@@ -52,6 +54,8 @@ class MultiFactorScorer:
             enable_ttm_vol: Use Tiny Time Mixers (TTM) in the equal-weight ensemble (needs granite-tsfm);
                             defaults to config.VOL_USE_TTM
             vol_context_length: Context length for TTM; defaults to config.VOL_CONTEXT_LENGTH
+            enable_uncertainty: Enable distribution-free uncertainty quantification of the
+                                return signal (arXiv:2607.06690); defaults to config.ENABLE_UNCERTAINTY
         """
         if factor_weights is None:
             self.factor_weights = FACTOR_WEIGHTS
@@ -74,6 +78,8 @@ class MultiFactorScorer:
         self.enable_ttm_vol = VOL_USE_TTM if enable_ttm_vol is None else enable_ttm_vol
         self.vol_context_length = VOL_CONTEXT_LENGTH if vol_context_length is None else vol_context_length
         self._vol_forecaster = None  # lazy-built equal-weight ensemble
+        # Uncertainty quantification flag resolves from config when not explicitly passed
+        self.enable_uncertainty = ENABLE_UNCERTAINTY if enable_uncertainty is None else enable_uncertainty
         
         # Regime detection state
         self.current_regime = 'normal'  # 'bull', 'bear', 'normal', 'crisis'
@@ -83,7 +89,8 @@ class MultiFactorScorer:
         print(f"Market impact model: {'ON' if enable_market_impact else 'OFF'}")
         print(f"Regime detection: {'ON' if enable_regime_detection else 'OFF'}")
         print(f"Robust Bayesian: {'ON' if enable_robust_bayesian else 'OFF'}")
-        print(f"Vol forecast (arXiv:2607.05291): {'ON' if enable_vol_forecast else 'OFF'}")
+        print(f"Vol forecast (arXiv:2607.05291): {'ON' if self.enable_vol_forecast else 'OFF'}")
+        print(f"Uncertainty quantification (arXiv:2607.06690): {'ON' if self.enable_uncertainty else 'OFF'}")
 
     def calculate_scores(self, data, fundamentals=None, macro_data=None, position_sizes=None):
         """
@@ -161,6 +168,12 @@ class MultiFactorScorer:
                 scores[symbol]['regime_adjustment'] = regime_adjustment
             
             scores[symbol]['composite'] = round(composite, 2)
+
+            # Optional distribution-free uncertainty quantification (arXiv:2607.06690)
+            if self.enable_uncertainty:
+                uq = self._quantify_signal_uncertainty(df)
+                if uq is not None:
+                    scores[symbol].update(uq)
         
         # Convert to DataFrame
         scores_df = pd.DataFrame.from_dict(scores, orient='index')
@@ -670,6 +683,46 @@ class MultiFactorScorer:
         except Exception as e:
             print(f"Error in volatility forecasting: {e}")
             return 50.0
+
+    def _quantify_signal_uncertainty(self, df, lookback=120):
+        """
+        Distribution-free uncertainty quantification of the return signal (arXiv:2607.06690).
+
+        Builds a dependence-aware (moving-block) bootstrap CI on the mean daily
+        return, then maps it to:
+          - confidence:       position-sizing multiplier in [UQ_CONF_FLOOR, 1]
+          - ci_low / ci_high: (1 - UQ_ALPHA) CI bounds on mean return
+          - edge_significant: True if the CI excludes zero (a real edge, not noise)
+          - risk_scale:       size multiplier after the risk gate (0 if vetoed)
+
+        Uses tsbootstrap MovingBlock if installed, else a pure-numpy fallback.
+        Returns a dict of columns to merge into the symbol's scores, or None on error.
+        """
+        try:
+            from uncertainty_quantification import quantify_signal
+            close = df['close']
+            ret = close.pct_change().dropna().tail(lookback)
+            if len(ret) < 30:
+                return None
+            bundle = quantify_signal(
+                ret.values,
+                alpha=UQ_ALPHA,
+                direction="long",
+                n_bootstraps=UQ_N_BOOTSTRAPS,
+                random_state=UQ_RANDOM_STATE,
+                require_significant=UQ_REQUIRE_SIGNIFICANT,
+            )
+            ci, gate = bundle['ci'], bundle['risk_gate']
+            return {
+                'confidence': round(bundle['confidence'], 3),
+                'ci_low': round(ci['lower'], 6),
+                'ci_high': round(ci['upper'], 6),
+                'edge_significant': bool(gate['significant']),
+                'risk_scale': round(gate['scale'], 3),
+            }
+        except Exception as e:
+            print(f"Error in uncertainty quantification: {e}")
+            return None
 
 
 if __name__ == "__main__":

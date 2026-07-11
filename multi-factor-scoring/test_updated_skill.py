@@ -176,6 +176,55 @@ try:
 except Exception as e:
     print(f"  ❌ Volatility forecasting test failed: {e}")
 
+# Test 9: Distribution-free uncertainty quantification (arXiv:2607.06690)
+print("\n[Test 9] Testing uncertainty quantification module...")
+try:
+    from uncertainty_quantification import (
+        signal_confidence_interval, position_confidence, risk_gate,
+        conformal_halfwidth, quantify_signal, auto_block_length,
+    )
+    import pandas as pd
+    import numpy as np
+
+    # Serially-dependent AR(1) return series (IID bootstrap would undercover here)
+    rng = np.random.default_rng(0)
+    n, phi = 250, 0.6
+    xs = np.zeros(n)
+    for t in range(1, n):
+        xs[t] = phi * xs[t - 1] + rng.standard_normal()
+    daily_ret = 0.0004 + 0.01 * xs
+
+    bl = auto_block_length(daily_ret)
+    assert bl >= 1
+    ci = signal_confidence_interval(daily_ret, alpha=0.10, n_bootstraps=200)
+    assert ci['lower'] <= ci['point'] <= ci['upper'], "CI must bracket the point estimate"
+    print(f"  ✅ 90% CI on mean return: [{ci['lower']:.5f}, {ci['upper']:.5f}] (backend: {ci['backend']}, block={bl})")
+
+    conf = position_confidence(ci['rel_width'])
+    assert 0.30 <= conf <= 1.0, "Confidence must be in [floor, 1]"
+    gate = risk_gate(ci, direction="long", require_significant=True)
+    print(f"  ✅ Position confidence = {conf:.3f}; risk gate: {gate['reason']} (scale={gate['scale']:.2f})")
+
+    hw = conformal_halfwidth(0.01 * rng.standard_normal(200), alpha=0.10)
+    assert hw >= 0
+    print(f"  ✅ Conformal 90% half-width = {hw:.5f}")
+
+    # Scorer-level integration (use raw arrays to avoid index-alignment NaNs)
+    uqscorer = MultiFactorScorer(enable_uncertainty=True)
+    price = np.cumprod(1 + daily_ret) * 100
+    udf = pd.DataFrame({
+        'close': price,
+        'open': price,
+        'high': price * 1.01,
+        'low': price * 0.99,
+        'volume': rng.integers(1_000_000, 5_000_000, n),
+    }, index=pd.date_range('2024-01-01', periods=n, freq='D'))
+    uq = uqscorer._quantify_signal_uncertainty(udf)
+    assert uq is not None and 'confidence' in uq and 'edge_significant' in uq
+    print(f"  ✅ Scorer UQ: confidence={uq['confidence']}, edge_significant={uq['edge_significant']}, risk_scale={uq['risk_scale']}")
+except Exception as e:
+    print(f"  ❌ Uncertainty quantification test failed: {e}")
+
 print("\n" + "="*60)
 print("Test Summary")
 print("="*60)
@@ -185,6 +234,7 @@ print("  1. ✅ Market impact model (square-root law, arXiv:2606.24019)")
 print("  2. ✅ Dynamic transaction cost optimization (arXiv:2606.21784)")
 print("  3. ✅ Adaptive regime detection (arXiv:2606.23596)")
 print("  4. ✅ Realized-volatility forecasting: Log-HAR + TTM ensemble (arXiv:2607.05291)")
+print("  5. ✅ Distribution-free uncertainty quantification (arXiv:2607.06690)")
 print("\nNext steps:")
 print("  - Run full backtest to validate performance")
 print("  - Implement Robust Bayesian portfolio selection (if needed)")

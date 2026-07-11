@@ -1,8 +1,8 @@
 ---
 name: multi-factor-scoring
-description: "Multi-factor scoring quantitative trading system. Use this skill when the user wants to build a quantitative trading strategy based on multi-factor scoring (momentum, technical indicators, volume, fundamentals, macro, sector rotation), with support for A-shares, HK stocks, US stocks, and futures/derivatives across multiple timeframes (daily, 4H, 1H, 15M). Now includes an optional 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, and a realized-volatility forecasting module (Log-HAR + TTM equal-weight ensemble, arXiv:2607.05291) for the volatility dimension. Triggers include requests for multi-factor models, scoring systems, factor-based stock selection, rotational strategies, quantitative trading framework setup, 4-layer scoring framework, or volatility forecasting / HAR / Log-HAR / TTM."
+description: "Multi-factor scoring quantitative trading system. Use this skill when the user wants to build a quantitative trading strategy based on multi-factor scoring (momentum, technical indicators, volume, fundamentals, macro, sector rotation), with support for A-shares, HK stocks, US stocks, and futures/derivatives across multiple timeframes (daily, 4H, 1H, 15M). Now includes an optional 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM equal-weight ensemble, arXiv:2607.05291) for the volatility dimension, and a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal confidence intervals, arXiv:2607.06690) that attaches calibrated confidence intervals to signals for position-confidence sizing and risk-control thresholds. Triggers include requests for multi-factor models, scoring systems, factor-based stock selection, rotational strategies, quantitative trading framework setup, 4-layer scoring framework, volatility forecasting / HAR / Log-HAR / TTM, or uncertainty quantification / conformal prediction / bootstrap confidence intervals / position confidence / risk thresholds."
 agent_created: true
-version: 2.1.0
+version: 2.2.0
 language: zh
 type: strategy
 priority: high
@@ -15,7 +15,10 @@ triggers:
   - "否决项/ADX/RSI极端"
   - "波动率预测/HAR/Log-HAR/TTM"
   - "realized volatility / TSFM ensemble"
-keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE]
+  - "不确定性量化/置信区间/共形预测"
+  - "仓位置信度/风控阀值/自助法"
+  - "uncertainty quantification / conformal prediction / bootstrap CI"
+keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI]
 config:
   framework: "6-category"  # or "4-layer"
   ashare_data_source: "akshare"
@@ -519,7 +522,7 @@ The system generates the following outputs:
 
 ## 13. Latest Research Integration (2026 arXiv Papers)
 
-This skill now incorporates cutting-edge research from 11 top arXiv papers (May–July 2026). These features are enabled by default and can be toggled in `scoring_engine.py`, `volatility_forecaster.py`, and `simulated_broker.py`.
+This skill now incorporates cutting-edge research from 12 top arXiv papers (May–July 2026). These features are enabled by default and can be toggled in `scoring_engine.py`, `volatility_forecaster.py`, `uncertainty_quantification.py`, and `simulated_broker.py`.
 
 ### 13.1 Market Impact Model (arXiv:2606.24019)
 
@@ -713,6 +716,78 @@ scores = scorer.calculate_scores(data)
 
 ---
 
+### 13.7 Distribution-Free Uncertainty Quantification: Bootstrap + Conformal CIs for Signals (arXiv:2607.06690)
+
+**Paper:** "tsbootstrap: Distribution-Free Uncertainty Quantification and Conformal Prediction for Time Series" — Gilda (2026)
+
+**Why this matters for your signals:** A point forecast (factor return, forecasted volatility, composite score) tells you *where*, never *how sure*. Sizing positions off a point estimate that sits inside the noise band is the classic risk trap. This module attaches a **calibrated confidence interval** to each signal, then turns interval width into a **position-confidence multiplier** and a **risk gate**.
+
+#### Key empirical findings
+
+| Finding | Implication for WQUANT |
+|---------|------------------------|
+| The **IID bootstrap undercovers sharply** under serial dependence | Never quantify a serially-dependent signal (returns, RV) with an IID bootstrap — intervals will be too tight and you'll over-size |
+| **Dependence-aware** resampling (block / sieve) restores coverage near nominal; sieve nearest under short-memory linear dependence | Default to a **moving-block** bootstrap for financial signals |
+| **Conformal calibration** gives a finite-sample coverage guarantee; adaptive variants (**EnbPI / ACI / NexCP / AgACI**) hold coverage on drifting streams | Use conformal for forecast prediction intervals; adaptive variants when the stream drifts |
+| One typed API combines a dependence-aware resampling engine with an adaptive conformal layer | Single mental model: pick a *method spec*, get calibrated intervals |
+
+#### Implementation (in `scripts/uncertainty_quantification.py`)
+
+Distribution-free, with the same graceful-fallback pattern as the volatility module:
+
+1. **`moving_block_bootstrap` / `auto_block_length`** — dependence-aware resampler. Block length picked from the first insignificant ACF lag (2/√n band) with an n^(1/3) floor — the block must span the memory of the series to restore coverage.
+2. **`bootstrap_ci`** — distribution-free CI for *any* statistic (default: mean). **PRIMARY path** uses `tsbootstrap` `MovingBlock(block_length="auto")` (Politis–White) if installed; **FALLBACK** is the pure-numpy moving-block resampler. The statistic + percentile interval are always computed here, so results are correct regardless of backend.
+3. **`conformal_halfwidth`** — split-conformal half-width `Q_{⌈(n+1)(1-α)⌉/n}(|residuals|)`; ≥ (1−α) marginal coverage under exchangeability, degrades gracefully on dependent streams (use block/adaptive conformal via `tsbootstrap.uq` for strict coverage).
+4. **`position_confidence`** — maps relative CI width to a sizing multiplier: `clip( 1/(1 + k·rel_width), floor, 1 )`. Narrow CI ⇒ near 1 (full size); wide CI ⇒ near `floor` (shrink).
+5. **`risk_gate`** — significance / risk-threshold decision on an expected-return CI. If the CI straddles zero the edge is indistinguishable from noise → veto (or scale down).
+6. **`quantify_signal`** — one-call bundle: CI + confidence + risk gate.
+
+**Install for the primary (dependence-aware) path:** `pip install tsbootstrap` (MIT, v0.6.1). Without it the module runs on numpy alone (`backend="numpy-fallback"`).
+
+#### Usage
+
+```python
+from uncertainty_quantification import quantify_signal, signal_confidence_interval, position_confidence
+
+# CI on the mean of a signal (factor returns, forecasted RV, ...)
+ci = signal_confidence_interval(daily_returns, alpha=0.10)   # 90% CI, moving-block
+# {'point':..., 'lower':..., 'upper':..., 'rel_width':..., 'backend':...}
+
+conf = position_confidence(ci['rel_width'])                  # -> [0.30, 1.0] sizing multiplier
+
+bundle = quantify_signal(daily_returns, alpha=0.10, direction="long", require_significant=True)
+# bundle['confidence'], bundle['risk_gate']['significant'/'veto'/'scale']
+```
+
+**Plug into the scorer (opt-in, config-driven):**
+
+```python
+# config.py
+ENABLE_UNCERTAINTY = True     # adds confidence/ci_low/ci_high/edge_significant/risk_scale columns
+UQ_ALPHA = 0.10               # (1 - alpha) = 90% intervals
+UQ_N_BOOTSTRAPS = 500
+UQ_CONF_FLOOR = 0.30
+UQ_REQUIRE_SIGNIFICANT = False  # True -> veto (scale->0) when the return CI straddles zero
+
+# scoring_engine.py
+scorer = MultiFactorScorer(enable_uncertainty=True)   # reads config by default
+scores = scorer.calculate_scores(data)
+# scores['600519.SH']['confidence']       -> position-sizing multiplier [0.30, 1]
+# scores['600519.SH']['edge_significant'] -> True if CI on mean return excludes 0
+```
+
+**Integration paths:**
+- **Position sizing:** multiply your target weight by `confidence` (or `risk_scale`). Precise signals get full size; noisy signals get shrunk — a distribution-free alternative to ad-hoc conviction weighting.
+- **Risk-control threshold:** gate entries on `edge_significant` (CI excludes zero). Combine with the 4-Layer veto rules as an extra "signal is real, not noise" filter.
+- **Volatility dimension:** wrap the Log-HAR + TTM forecast (§13.6) with `conformal_halfwidth` on its in-sample residuals to publish a *prediction interval* on next-h-day RV, not just a point.
+
+**Caveats (from the paper):**
+- The **IID bootstrap is the wrong default** for dependent signals — always use the moving-block (or sieve) path. The module defaults to moving-block for this reason.
+- Split conformal assumes exchangeability; on strongly drifting streams prefer adaptive conformal (EnbPI/ACI/NexCP/AgACI) via `tsbootstrap.uq`.
+- Wider `n_bootstraps` = smoother intervals but slower; 500 is a good balance for per-symbol scoring.
+
+---
+
 ## Usage Examples
 
 **Example 1: Build a multi-factor scoring system for A-shares**
@@ -854,6 +929,9 @@ For detailed implementation of each module, refer to the code files created in t
 8. **推荐**：将 L1-L4 各层分数和否决项明细输出到 `scores_4layer.csv`，便于调试
 9. **禁止**：在波动率(波动率)维度盲目上大模型 TSFM（Moirai / TimesFM / TimeGPT 等）。arXiv:2607.05291 证明它们对 HAR 无全面碾压；应使用 Log-HAR + TTM(<1M 参数) **等权集成**，进入 Model Confidence Set 的比例（98–100%）高于任一单模型
 10. **强制**：TTM 依赖 `granite-tsfm` 包，必须懒加载且仅在 `VOL_USE_TTM=True` 时启用；包缺失或加载失败时 `EnsembleVolForecaster` 必须自动回退到 Log-HAR（设置 `ttm_available=False`），不得报错中断整个评分流程
+11. **禁止**：对存在序列相关的信号（收益率/波动率等）用 **IID 自助法**做不确定性量化。arXiv:2607.06690 证明 IID 自助法在依赖数据下会**严重低覆盖**（区间过窄→过度加仓）；必须使用**依赖感知**的移动块（或 sieve）自助法，`uncertainty_quantification.py` 已默认移动块
+12. **强制**：`uncertainty_quantification.py` 主路径依赖 `tsbootstrap` 包，必须优雅回退——包缺失时自动切换纯 numpy 移动块实现（`backend="numpy-fallback"`），不得中断评分
+13. **推荐**：将 `confidence`/`risk_scale` 作为仓位乘子（精确信号满仓、噪声信号缩仓）；用 `edge_significant`（CI 排除零）作为"信号非噪声"的风控闸门，与 4-Layer 否决项叠加使用
 
 ## 版本历史
 
@@ -861,6 +939,7 @@ For detailed implementation of each module, refer to the code files created in t
 |------|------|---------|
 | v2.0.0 | 2026-07-01 | SkillEvolver + Loop 演化：新增 4-Layer 评分框架（萌芽/量价/结构/确认）、否决项规则、期货/衍生品 OI 数据说明、4-Layer config 示例、S_appendix 双层结构 |
 | v2.1.0 | 2026-07-11 | SkillEvolver 演化（arXiv:2607.05291）：新增波动率预测模块 `volatility_forecaster.py`，实现 Log-HAR + TTM 等权集成（带 TTM 缺失优雅回退与 Mincer-Zarnowitz 重校准），接入 `MultiFactorScorer` 为可选 `volatility` 维度分数（config 驱动，默认关闭） |
+| v2.2.0 | 2026-07-11 | SkillEvolver 演化（arXiv:2607.06690）：新增无分布不确定性量化模块 `uncertainty_quantification.py`，实现依赖感知移动块自助法 CI（tsbootstrap 主路径 + 纯numpy回退）、split-conformal 预测半宽、仓位置信度映射与风控闸门（CI跨零则否决），接入 `MultiFactorScorer` 为可选 `confidence`/`ci_low`/`ci_high`/`edge_significant`/`risk_scale` 字段（config 驱动，默认关闭） |
 | v1.x | 2026-06 | 初始版本：6-Category 多因子评分框架，支持 A股/港股/美股，含 2026 arXiv 研究集成 |
 
 ---

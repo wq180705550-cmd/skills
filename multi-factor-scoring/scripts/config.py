@@ -80,6 +80,18 @@ VOL_USE_TTM = True                   # Use Tiny Time Mixers in the ensemble (nee
 VOL_CONTEXT_LENGTH = 64              # TTM context length (>=64 recommended for daily RV)
 VOL_RECALIBRATE = False              # Mincer-Zarnowitz scale recalibration (uses in-sample LogHAR errors)
 
+# Uncertainty quantification (arXiv:2607.06690) — distribution-free CIs for signals
+# Attaches a confidence interval to each symbol's return signal so you can size
+# positions by confidence and set risk-control thresholds. IID bootstrap
+# undercovers under dependence -> we default to a dependence-aware MOVING BLOCK
+# bootstrap (tsbootstrap if installed, else a pure-numpy fallback).
+ENABLE_UNCERTAINTY = False           # Opt-in: adds 'confidence' / 'ci_low' / 'ci_high' / 'edge_significant'
+UQ_ALPHA = 0.10                      # Miscoverage level -> (1 - alpha) = 90% intervals
+UQ_N_BOOTSTRAPS = 500                # Bootstrap replicates (500 is a good speed/accuracy balance)
+UQ_CONF_FLOOR = 0.30                 # Minimum position-confidence multiplier (never size to 0 on width alone)
+UQ_REQUIRE_SIGNIFICANT = False       # If True, veto (scale->0) when the return CI straddles zero
+UQ_RANDOM_STATE = 0                  # Seed for reproducible intervals
+
 # Fundamental data (example values - in practice, fetch from API)
 # This is a simplified example; real implementation would fetch from financial data APIs
 FUNDAMENTAL_DATA = {
