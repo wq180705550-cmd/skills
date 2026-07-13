@@ -7,11 +7,13 @@
   1. 主标题吸引力 (硬)
   2. 小标题简洁性 (硬) — 必须用 ## 标记
   3. 数据准确性   (硬)
-  4. 事实一致性   (软, 推导) — 可选选题卡对齐
-  5. AI味检测     (软, 推导) — 衔接文案虾 humanize-guide
-  6. 平台适配性   (软, 推导)
+  4. 事实一致性   (软) — 可选选题卡对齐
+  5. AI味检测     (软) — 衔接文案虾 humanize-guide
+  6. 平台适配性   (软)
 
-仅依赖标准库。输出每维度评分 + 发布闸门结论，并写 <原名>.audit.md 报告。
+仅依赖标准库。本脚本是「LLM 语义复核」的**兜底基线**：对 3 个语义维
+（事实一致性/AI味检测/平台适配性）输出确定性启发式分；当 LLM 不可用/
+报错时作为 fallback，不中断审核。输出每维度评分 + 发布闸门结论，并写报告。
 
 用法:
   python audit_article.py <文章.md | 目录>
@@ -288,6 +290,8 @@ def audit_file(path: Path, platform=None, topic_card=None, threshold=70):
         "soft_pass": soft_pass,
         "publish": hard_pass and soft_pass,
         "verdict": verdict,
+        "review_mode": "script_fallback_baseline",
+        "semantic_dims_llm_primary": ["事实一致性", "AI味检测", "平台适配性"],
     }
 
 
@@ -297,6 +301,7 @@ def render_report(rep: dict) -> str:
         "",
         f"- 平台: {rep['platform'] or '未指定'}  | 阈值: 硬 {rep['threshold']} / 软 {rep['soft_threshold']}",
         f"- 结论: **{rep['verdict']}**",
+        f"- 复核模式: 结构维=脚本确定性；语义维(事实一致性/AI味检测/平台适配性)=LLM语义复核为主，本脚本为兜底基线",
         "",
         "| 维度 | 类型 | 评分 | 结论 |",
         "|------|------|------|------|",
