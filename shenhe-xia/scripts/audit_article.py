@@ -34,12 +34,16 @@ from pathlib import Path
 
 CURRENT_YEAR = 2026
 
+# 平台字数区间 — 与「文案虾」style-guide.md「多平台改写差异」对齐；
+# style-guide 为上游源，本区间随其演进联动校验（避免闭环断裂：
+# 文案按 spec 写、审核反扣分）。此前 小红书(800-1500 vs 300-800)、
+# 知乎(2000- vs 3000+)、头条(600- vs 500-) 三处下限冲突已修正。
 PLATFORM_BANDS = {
-    "小红书": (800, 1500),
+    "小红书": (300, 800),
     "公众号": (1500, 3000),
-    "知乎": (2000, 5000),
-    "今日头条": (600, 1200),
-    "头条": (600, 1200),
+    "知乎": (3000, 5000),
+    "今日头条": (500, 1200),
+    "头条": (500, 1200),
 }
 
 # 审核虾 AI 味兜底清单 — 与「文案虾」humanize-guide.md 词汇层(Layer-1)对齐；
@@ -183,6 +187,30 @@ def audit_data(text):
     return score, findings
 
 
+def _extract_core_points(tc_text: str) -> list[str]:
+    """从选题卡(选题虾渲染格式)抽取 core_points。
+
+    上游渲染格式(store_topic.py _to_markdown): '## 核心观点' 标题下跟
+    '- 观点' 列表，直到下一个 '##' 标题或 EOF。本解析规则随选题卡
+    schema 格式联动校验（曾因期望 '- **核心观点**:' 格式而实际为
+    '## 核心观点' + 列表，导致脚本抽不到任何观点）。
+    """
+    points = []
+    in_section = False
+    for line in tc_text.splitlines():
+        s = line.strip()
+        if re.match(r"^##\s+核心观点\s*$", s):
+            in_section = True
+            continue
+        if in_section:
+            if re.match(r"^##\s+", s):  # 遇到下一个二级标题即退出本段
+                break
+            m = re.match(r"^[-*]\s+(.+)$", s)
+            if m:
+                points.append(m.group(1).strip())
+    return points
+
+
 def audit_consistency(text, topic_card_path=None):
     findings = []
     score = 85
@@ -190,13 +218,12 @@ def audit_consistency(text, topic_card_path=None):
         p = Path(topic_card_path)
         if p.exists():
             tc = p.read_text(encoding="utf-8")
-            points = re.findall(r"-\s*\*(?:核心观点|core_points|要点)\*?\s*[:：]?\s*(.+)", tc)
-            if not points:
-                points = re.findall(r"核心观点[：:]\s*(.+)", tc)
+            points = _extract_core_points(tc)
             if points:
                 missing = []
                 for pt in points[:8]:
-                    kw = re.findall(r"[\u4e00-\u9fff]{2,}", pt)[:3]
+                    # 用向前查找提取 2 字滑动窗口片段(非整串)，逐片匹配正文
+                    kw = re.findall(r"(?=([\u4e00-\u9fff]{2}))", pt)[:3]
                     if kw and not any(k in text for k in kw):
                         missing.append(pt[:20])
                 if missing:
@@ -204,6 +231,8 @@ def audit_consistency(text, topic_card_path=None):
                     findings.append(f"与选题卡对齐缺失 {len(missing)} 条核心观点")
                 else:
                     findings.append("核心观点均已体现在正文中")
+            else:
+                findings.append("选题卡未解析到核心观点(格式不符)，跳过对齐")
     clean = _strip_code(text)
     pairs = re.findall(r"([\u4e00-\u9fff]{2,4})[^\n]{0,30}?(\d[\d,\.]*%?)", clean)
     seen = {}
