@@ -63,6 +63,11 @@
 |-------|------|------|
 | [warren-buffett](./warren-buffett/) | 巴菲特投资决策框架与商业分析思维，5大心智模型+8个决策启发式+A股适配 | v2.0 |
 
+### 🎓 金融考证
+| Skill | 说明 | 版本 |
+|-------|------|------|
+| [cfa-l3-mastery](./cfa-l3-mastery/) | CFA Level 3 深度学习与备考助手：组合管理/资产配置/IPS/行为金融/衍生品·权益·固收·另类 PM/GIPS道德 全模块知识库 + 网盘资料映射（最近年份优先去重叠） | v1.0.0 |
+
 ### 🏦 金融服务（Anthropic 官方技能包）
 
 > 来源：[anthropics/financial-services](https://github.com/anthropics/financial-services)
@@ -178,7 +183,7 @@
 
 ## 统计
 
-- 总数：**85** 个自建 Skill
+- 总数：**86** 个自建 Skill
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等
