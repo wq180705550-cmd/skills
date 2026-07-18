@@ -1,8 +1,8 @@
 ---
 name: multi-factor-scoring
-description: "Multi-factor scoring quantitative trading system. Use this skill when the user wants to build a quantitative trading strategy based on multi-factor scoring (momentum, technical indicators, volume, fundamentals, macro, sector rotation), with support for A-shares, HK stocks, US stocks, and futures/derivatives across multiple timeframes (daily, 4H, 1H, 15M). Now includes an optional 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM equal-weight ensemble, arXiv:2607.05291) for the volatility dimension, and a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal confidence intervals, arXiv:2607.06690) that attaches calibrated confidence intervals to signals for position-confidence sizing and risk-control thresholds. Triggers include requests for multi-factor models, scoring systems, factor-based stock selection, rotational strategies, quantitative trading framework setup, 4-layer scoring framework, volatility forecasting / HAR / Log-HAR / TTM, or uncertainty quantification / conformal prediction / bootstrap confidence intervals / position confidence / risk thresholds."
+description: "Multi-factor scoring quantitative trading system. Use this skill when the user wants to build a quantitative trading strategy based on multi-factor scoring (momentum, technical indicators, volume, fundamentals, macro, sector rotation), with support for A-shares, HK stocks, US stocks, and futures/derivatives across multiple timeframes (daily, 4H, 1H, 15M). Now includes an optional 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM equal-weight ensemble, arXiv:2607.05291) for the volatility dimension, and a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal confidence intervals, arXiv:2607.06690) that attaches calibrated confidence intervals to signals for position-confidence sizing and risk-control thresholds. Triggers include requests for multi-factor models, scoring systems, factor-based stock selection, rotational strategies, quantitative trading framework setup, 4-layer scoring framework, volatility forecasting / HAR / Log-HAR / TTM, or uncertainty quantification / conformal prediction / bootstrap confidence intervals / position confidence / risk thresholds. Weekly arXiv auto-evolution (2026-07-14~18) adds cost-aware RL allocation (arXiv:2607.15195), base-rate-honest directional-significance testing (arXiv:2607.12248), denoised correlation-breadth factor (arXiv:2607.10297), eigenvector-rotation crisis early-warning (arXiv:2607.11935), fat-tail-aware risk gating (arXiv:2607.10810), and a news-sentiment alternative factor (arXiv:2607.13968)."
 agent_created: true
-version: 2.2.0
+version: 2.3.0
 language: zh
 type: strategy
 priority: high
@@ -18,7 +18,13 @@ triggers:
   - "不确定性量化/置信区间/共形预测"
   - "仓位置信度/风控阀值/自助法"
   - "uncertainty quantification / conformal prediction / bootstrap CI"
-keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI]
+  - "成本感知配置/RL组合优化/SciPhyRL/多期配置"
+  - "基率诚实/方向准确率/TimesFM显著性/方向性信号"
+  - "去噪相关/市场广度/板块协同/相关性网络"
+  - "特征向量旋转/危机领先指标/TVP-Kalman/临界转变"
+  - "厚尾风险/CVaR/尾部风险闸门/时变采样"
+  - "新闻情绪/另类数据因子/transformer情绪"
+keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI, cost-aware-allocation, SciPhyRL, base-rate, directional-significance, correlation-denoising, market-breadth, eigenvector-rotation, early-warning, tail-risk, CVaR, news-sentiment, alternative-data]
 config:
   framework: "6-category"  # or "4-layer"
   ashare_data_source: "akshare"
@@ -788,6 +794,114 @@ scores = scorer.calculate_scores(data)
 
 ---
 
+### 13.8 This-Week arXiv Integration (2026-07-14 ~ 2026-07-18)
+
+Crawled the arXiv **q-fin** recent listing (announcements 2026-07-14 → 2026-07-17) plus cross-listings; scanned 50+ titles and selected 6 with a direct, non-speculative mapping to this skill's modules. Each adds a concrete signal/factor or strengthens an existing module. Follows the opt-in, config-driven, graceful-fallback pattern of §13.6/§13.7.
+
+#### 13.8.1 Signal→Cost-Aware Multi-Period Allocation (arXiv:2607.15195)
+
+**Paper:** "SciPhy Reinforcement Learning for Portfolio Optimization" — Halperin & Itkin (2026-07-16)
+
+**Key findings:** Formulates portfolio optimization as continuous-time Scientific Physics-Informed RL (SciPhy-RL). A pathwise HJB is solved via PINN in a *single offline sweep* (no value/policy iteration). The control is recast from a continuous trading rate to a **discrete target holding**, so signal-implied positions are reached immediately, while execution cost is priced with a microstructure-grounded quadratic price-impact model. On a 14-asset ETF universe with an engineered oracle signal, the learned Gibbs policy yields substantial **out-of-sample Sharpe improvement** over static/myopic baselines, with strictly controlled volatility and turnover.
+
+**Framework mapping:** Strengthens the **Position Sizing** block (§5) and the dynamic-cost module (§13.2). Current sizing is a single-period linear rule `size = (score-50)/50*max`; this paper turns a *given signal* into an optimal **cost-aware, multi-period holding path**.
+
+**Signal design:** Add `cost_aware_allocate(scores, cost_model)` to `simulated_broker.py`:
+- Input: composite scores (signal quality) + quadratic price-impact cost estimate (from §13.2).
+- Output: discrete target weights per asset, solved offline (PINN/HJB) once per rebalance, then applied as target holdings.
+- Feed the current linear sizing in as the *signal* to this allocator, not as the final weight.
+- Risk control: cap turnover (paper shows controlled turnover) and bound volatility using the §13.6 forecast as the vol constraint.
+
+**Caveat:** PINN/HJB solve is offline + compute-heavy; default **OFF** (same guidance as §13.4). The portable takeaway is the **discrete-target-holding recast** — prefer it over continuous trading-rate control in backtests to avoid execution look-ahead.
+
+---
+
+#### 13.8.2 Base-Rate-Honest Significance Test for ML Forecast Signals (arXiv:2607.12248)
+
+**Paper:** "When Directional Accuracy Lies: A Base-Rate-Honest Benchmark for LoRA-Adapted TimesFM on Equity Forecasting" — Cheung (2026-07-15)
+
+**Key findings:** Directional-accuracy metrics for time-series foundation models (TimesFM, LoRA-adapted) on equity forecasting are misleading when the market's up/down **base rate** is ignored. A model can post high "directional accuracy" yet add no value vs a naive base-rate classifier. Directly reinforces the §13.6 warning that TSFMs are not automatically superior.
+
+**Framework mapping:** Strengthens the **Uncertainty Quantification** module (§13.7), specifically `edge_significant` and `risk_gate`. Adds a base-rate-honest layer on top of the moving-block CI.
+
+**Signal design:** Extend `uncertainty_quantification.py` with `base_rate_honest_significance()`:
+- Compute the market's empirical up/down base rate `p0` over the trailing window.
+- For a directional ML signal, test whether its hit rate `p̂` exceeds `p0` by more than the CI half-width allows: significant only if `p̂_lower > p0`.
+- Feed into `risk_gate`: if the directional signal is **not** base-rate-honest-significant, push `risk_scale` toward floor (don't size on a signal that beats chance only by noise).
+- Guards the volatility forecast (§13.6) and any TSFM-based factor from being over-trusted on directional calls.
+
+**Caveat:** Base rate must use the **same labeling horizon** as the signal (next-day vs next-5d up differ). Mismatch → false significance.
+
+---
+
+#### 13.8.3 Denoised Correlation-Breadth Factor (arXiv:2607.10297)
+
+**Paper:** "Recovering Structural Organization in Noisy Correlation Networks Using Financial Systems as a Testbed" — Ansari, Jain & Iyer (2026-07-14)
+
+**Key findings:** Financial correlation matrices are noisy; structural organization (blocks/clusters) can be recovered from noisy correlation networks via a denoising method. The recovered structure is a more stable basis for breadth/sector-comovement than raw correlations.
+
+**Framework mapping:** Strengthens the **Sector/Industry** factor (§2) and the **regime-detection** input (§13.3). Supplies a denoised correlation matrix for breadth and sector-rotation reads.
+
+**Signal design:** Add `denoised_correlation_breadth(prices)` to `scoring_engine.py`:
+- Build the trailing correlation matrix from returns, denoise (recover block structure), then compute **market breadth** = fraction of assets with positive denoised comovement to the market eigenvector, and **sector coherence** = intra-cluster correlation strength.
+- Use breadth as a regime input (`crisis` when breadth collapses) and as a sector-factor sub-score.
+- Replaces naive equal-weight breadth with a structure-aware read → less whipsaw in regime calls.
+
+**Caveat:** Denoising window must be long enough to estimate the correlation block structure; short windows → unstable clusters. Use **≥ 60 observations**.
+
+---
+
+#### 13.8.4 Leading Indicator for Crisis Regime: Eigenvector-Rotation Early-Warning (arXiv:2607.11935)
+
+**Paper:** "Eigenvector rotation precedes eigenvalue-based early-warning signals: a TVP-Kalman approach to detecting critical transitions" — Ngueuleweu (2026-07-15)
+
+**Key findings:** In systems approaching a critical transition, the **rotation of eigenvectors** (loadings) *leads* the eigenvalue-based early-warning signals. A time-varying-parameter Kalman filter detects this rotation earlier than traditional variance/eigenvalue metrics.
+
+**Framework mapping:** Strengthens **Adaptive Regime Detection** (§13.3), adding an *early-warning* layer that flips `crisis` detection from reactive (volatility spike) to **leading** (eigenvector rotation in the return covariance).
+
+**Signal design:** Add `covariance_early_warning(returns)` to `scoring_engine.py` (feeds `_detect_regime()`):
+- Track the *rate of eigenvector rotation* of the rolling covariance via TVP-Kalman (or a cheap proxy: week-over-week change in top-PC loadings).
+- When rotation accelerates beyond a trailing threshold while eigenvalues are still calm → raise `crisis_warning=True` (leading indicator), tightening the 4-Layer veto / shrinking `risk_scale` **before** vol explodes.
+- Combine with §13.3: rotation-warning promotes a defensive weight tilt (volume + sector) earlier.
+
+**Caveat:** TVP-Kalman is the heavy part; default to the **proxy** (top-PC loading change), full Kalman opt-in.
+
+---
+
+#### 13.8.5 Fat-Tail-Aware Risk Gate (arXiv:2607.10810)
+
+**Paper:** "Diachronic Sample Integration: Robust Tail-Risk Estimation with Generative Models" — Zhao et al. (2026-07-14)
+
+**Key findings:** Standard tail-risk estimates understate risk when the sample is non-stationary; a *diachronic* (time-aware) sample-integration with generative models gives more robust tail-risk (VaR/CVaR) estimates than i.i.d. historical sampling.
+
+**Framework mapping:** Strengthens the **Uncertainty Quantification** risk gate (§13.7) and drawdown control. Augments `risk_gate` with a fat-tail-aware CVaR check that respects time structure — pairs naturally with the moving-block bootstrap in §13.7 (which already forbids IID resampling).
+
+**Signal design:** Extend `uncertainty_quantification.py` with `tail_risk_gate(returns, alpha)`:
+- Estimate CVaR using **time-aware (block/diachronic)** sampling, not i.i.d. historical.
+- If CVaR (scaled to position) breaches the user's loss budget → veto/scale-down the position even when the point signal is positive.
+- Reuses the moving-block backend from §13.7 (no IID), consistent with the no-IID rule (constraint #11).
+
+**Caveat:** Generative tail-model is opt-in (compute); the time-aware block-CVaR is the default and needs no ML.
+
+---
+
+#### 13.8.6 News-Sentiment Alternative Factor (arXiv:2607.13968)
+
+**Paper:** "Measuring Sentiment News with Transformer-Based Language Models" — Mavillonio et al. (2026-07-16)
+
+**Key findings:** Transformer-based LMs measure news sentiment reliably; a news-sentiment score is a tradable alternative-data signal that leads price action when integrated as a factor.
+
+**Framework mapping:** Adds an **alternative-data** input to the **Fundamentals** factor (§2) / composite score — a news-sentiment sub-score, distinct from the price/volume technical factors.
+
+**Signal design:** Add `news_sentiment_score(news_texts)` (pluggable; default = transformer sentiment score, cached daily):
+- Map sentiment ∈ [-1, 1] to a 0–100 sub-score; blend into the composite with a small weight (e.g., 5% of the fundamentals bucket, or a standalone alt-data column).
+- Use as a *confirmation* overlay: strongly negative news-sentiment can apply a soft veto on buy signals (narrative risk), without replacing the price-based 4-Layer score.
+- For crypto/derivatives, pair with on-chain sentiment (arXiv:2607.15258 "Decoding Market Emotion from Blockchain Activity") as a crypto-specific sentiment factor.
+
+**Caveat:** News sentiment is slow vs price; treat as a **low-frequency overlay**, not an intraday signal. Avoid double-counting with momentum.
+
+---
+
 ## Usage Examples
 
 **Example 1: Build a multi-factor scoring system for A-shares**
@@ -932,6 +1046,11 @@ For detailed implementation of each module, refer to the code files created in t
 11. **禁止**：对存在序列相关的信号（收益率/波动率等）用 **IID 自助法**做不确定性量化。arXiv:2607.06690 证明 IID 自助法在依赖数据下会**严重低覆盖**（区间过窄→过度加仓）；必须使用**依赖感知**的移动块（或 sieve）自助法，`uncertainty_quantification.py` 已默认移动块
 12. **强制**：`uncertainty_quantification.py` 主路径依赖 `tsbootstrap` 包，必须优雅回退——包缺失时自动切换纯 numpy 移动块实现（`backend="numpy-fallback"`），不得中断评分
 13. **推荐**：将 `confidence`/`risk_scale` 作为仓位乘子（精确信号满仓、噪声信号缩仓）；用 `edge_significant`（CI 排除零）作为"信号非噪声"的风控闸门，与 4-Layer 否决项叠加使用
+14. **强制**：任何"方向性准确率/涨跌预测"类 ML 信号（含 TSFM、TimesFM、LoRA 适配模型）必须通过**基率诚实显著性检验**（arXiv:2607.12248）：其命中率 CI 下界须高于市场上涨基率，否则 `risk_scale` 降至 floor；不得将"高方向准确率"直接当作可加仓信号
+15. **强制**：相关性/广度类因子（市场广度、板块协同）必须使用**去噪相关矩阵**（arXiv:2607.10297）；禁止在短窗口原始相关矩阵上做板块聚类/危机判定（窗口 < 60 观察值会导致聚类不稳定）
+16. **推荐**：危机/regime 判定应加入**领先指标**——协方差矩阵特征向量旋转率（arXiv:2607.11935），在波动率爆发前提前收紧否决项与 `risk_scale`；默认用"顶层主成分载荷周度变化"代理，TVP-Kalman 为可选
+17. **强制**：尾部风险/CVaR 估计必须采用**时间感知（block/diachronic）采样**（arXiv:2607.10810），与 §13.7 的"禁止 IID 自助法"规则一致；禁止用 i.i.d. 历史样本直接估计 VaR/CVaR
+18. **推荐**：新闻情绪作为**低频另类数据叠加**，权重宜小（如 fundamental 桶 5%），仅作确认层/软否决，不与动量因子重复计数；加密标的可叠加 on-chain 情绪（arXiv:2607.15258）
 
 ## 版本历史
 
@@ -940,6 +1059,7 @@ For detailed implementation of each module, refer to the code files created in t
 | v2.0.0 | 2026-07-01 | SkillEvolver + Loop 演化：新增 4-Layer 评分框架（萌芽/量价/结构/确认）、否决项规则、期货/衍生品 OI 数据说明、4-Layer config 示例、S_appendix 双层结构 |
 | v2.1.0 | 2026-07-11 | SkillEvolver 演化（arXiv:2607.05291）：新增波动率预测模块 `volatility_forecaster.py`，实现 Log-HAR + TTM 等权集成（带 TTM 缺失优雅回退与 Mincer-Zarnowitz 重校准），接入 `MultiFactorScorer` 为可选 `volatility` 维度分数（config 驱动，默认关闭） |
 | v2.2.0 | 2026-07-11 | SkillEvolver 演化（arXiv:2607.06690）：新增无分布不确定性量化模块 `uncertainty_quantification.py`，实现依赖感知移动块自助法 CI（tsbootstrap 主路径 + 纯numpy回退）、split-conformal 预测半宽、仓位置信度映射与风控闸门（CI跨零则否决），接入 `MultiFactorScorer` 为可选 `confidence`/`ci_low`/`ci_high`/`edge_significant`/`risk_scale` 字段（config 驱动，默认关闭） |
+| v2.3.0 | 2026-07-18 | SkillEvolver 周度自进化（arXiv 2026-07-14~18）：新增 6 篇本周论文集成 — §13.8.1 成本感知多期配置(arXiv:2607.15195)、§13.8.2 基率诚实方向显著性(arXiv:2607.12248)、§13.8.3 去噪相关广度因子(arXiv:2607.10297)、§13.8.4 特征向量旋转危机领先指标(arXiv:2607.11935)、§13.8.5 厚尾风险闸门(arXiv:2607.10810)、§13.8.6 新闻情绪另类因子(arXiv:2607.13968)；新增约束 #14–#18 |
 | v1.x | 2026-06 | 初始版本：6-Category 多因子评分框架，支持 A股/港股/美股，含 2026 arXiv 研究集成 |
 
 ---
