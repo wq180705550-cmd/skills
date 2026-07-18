@@ -1,6 +1,6 @@
 # CFA Level 3 深度学习知识库（Curriculum Knowledge Base）
 
-> 本文件是 `cfa-l3-mastery` 技能的核心知识库，编码 CFA Level 3 课程体系的学科知识与应试要点。
+> 本文件是 `cfa-mastery` 技能的核心知识库，编码 CFA Level 3 课程体系的学科知识与应试要点。
 > 配套文件：`l3_materials.md`（网盘资料按主题+最近年份映射）、`assets/cfa_l3_inventory.csv`（完整 L3 清单）。
 > 知识以 **2024 L3 课程（V1–V5）** 为最新完整基准；道德部分以 **2025/2026 考纲** 为最新。
 

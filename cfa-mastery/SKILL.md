@@ -1,5 +1,5 @@
 ---
-name: cfa-l3-mastery
+name: cfa-mastery
 description: Unified CFA study & research assistant covering Level 1, Level 2, and Level 3. Combines (1) authoritative curriculum key-points for all 10 L1 subjects, 10 L2 subjects, and 14 L3 modules, and (2) a mapped inventory of the user's Baidu Netdisk CFA materials with a "most-recent-year-wins" rule for overlapping content. Use it when the user asks any CFA question (concept, formula, valuation, IPS/essay drafting) or wants to locate/study their netdisk CFA materials at any level. Trigger keywords: CFA、CFA一级、CFA二级、CFA三级、L1、L2、L3、CFA Level、资产配置、IPS、组合管理、道德GIPS、权益估值、固定收益、财报、CFA备考.
 agent_created: true
 ---
@@ -11,8 +11,8 @@ A specialized study and research assistant for the entire CFA program. It combin
 (2) a mapped inventory of the user's actual Baidu Netdisk CFA materials, so answers
 are both conceptually correct and tied to the exact resources the user already owns.
 
-> Scope note: the skill directory is named `cfa-l3-mastery` for historical reasons;
-> since this iteration it covers **L1 + L2 + L3** in full.
+> Scope note: renamed from `cfa-l3-mastery` to `cfa-mastery` (the latter is now the canonical
+> directory name). It covers **L1 + L2 + L3** in full.
 
 ## When to use
 
