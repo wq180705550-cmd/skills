@@ -124,3 +124,35 @@ SECTOR_MAP = {
     'AMZN': 'consumer_discretionary',
     'NVDA': 'technology',
 }
+
+# =====================================================================
+# 因子治理模块 (factor_governance.py) — FTS 派生的 6 项工程化能力
+# 默认全部关闭，与现有 arXiv 模块一致（config 驱动，不改动既有行为）
+# =====================================================================
+ENABLE_GOVERNANCE = False        # 总开关：在 scoring_engine 中启用正交化去冗余
+GOV_CORR_THRESHOLD = 0.7         # 正交化相关性阈值：>0.7 剔除冗余因子
+GOV_EVAL_CHAIN = False           # 三级评估链（L1回测/L2经济逻辑/L3多重检验）
+GOV_WALK_FORWARD = False         # 走航验证（替代单次 train/test）
+GOV_DECAY_TEST = False           # 因子衰减检验
+GOV_DECAY_WINDOW = 126           # 衰减窗口（≈6 个月交易日）
+GOV_DECAY_THRESHOLD = 0.30       # 衰减率阈值：>30% 剔除
+GOV_ATOMIC_WRITE = True          # 评估/治理结果原子持久化（temp + os.replace）
+
+# 熔断机制（自动化跑批安全网）默认值
+GOV_CB_TOKEN_BUDGET = 2_000_000  # 单日 token 预算
+GOV_CB_MAX_TOKEN_MULT = 2.0      # 超预算 2x 熔断
+GOV_CB_MIN_IC = 0.01             # 连续低 IC 阈值
+GOV_CB_MAX_CONSEC_LOW_IC = 3     # 连续 3 代 IC<0.01 熔断
+GOV_CB_MAX_FAILURE_RATE = 0.90   # 失败率 >90% 熔断
+
+# 三级评估链：L2 经济逻辑四维默认 rubric（theory/behavior/microstructure/institution, 0/1）
+# 各因子可按需覆盖；此处为 6 大类的默认合理假设
+GOV_ECONOMIC_RUBRIC = {
+    'momentum':      {'theory': 1, 'behavior': 1, 'microstructure': 1, 'institution': 1},
+    'technical':     {'theory': 1, 'behavior': 1, 'microstructure': 1, 'institution': 0},
+    'volume':        {'theory': 1, 'behavior': 1, 'microstructure': 1, 'institution': 0},
+    'fundamental':   {'theory': 1, 'behavior': 0, 'microstructure': 1, 'institution': 1},
+    'macro':         {'theory': 1, 'behavior': 0, 'microstructure': 0, 'institution': 1},
+    'sector':        {'theory': 1, 'behavior': 1, 'microstructure': 1, 'institution': 1},
+}
+

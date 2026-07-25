@@ -12,6 +12,12 @@ warnings.filterwarnings('ignore')
 
 from config import *
 
+try:
+    from factor_governance import walk_forward_validate, factor_decay_test, atomic_write
+    GOVERNANCE_AVAILABLE = True
+except ImportError:
+    GOVERNANCE_AVAILABLE = False
+
 
 class BacktestEngine:
     """Backtest engine for multi-factor scoring strategy"""
@@ -96,6 +102,68 @@ class BacktestEngine:
         # Calculate final results
         results = self._calculate_results()
         return results
+
+    def run_walk_forward_validation(self, factor_series, forward_returns, n_splits=4, min_train=60):
+        """
+        FTS 走航验证 (Walk-forward) — replaces a single in/out split with rolling
+        train/validate windows to estimate out-of-sample IC stability.
+
+        Opt-in: only runs when GOV_WALK_FORWARD is True and the governance module
+        is importable. Otherwise returns None (no-op, contract-preserving).
+
+        Args:
+            factor_series: pd.Series — factor/composite scores indexed by date.
+            forward_returns: pd.Series — forward period returns aligned to factor_series.
+            n_splits: number of rolling windows.
+            min_train: minimum training observations per window.
+
+        Returns:
+            dict | None — walk-forward report with mean_ic / consistency / per-split detail.
+        """
+        if not GOVERNANCE_AVAILABLE:
+            print("[WalkForward] governance module unavailable — skip.")
+            return None
+        if not GOV_WALK_FORWARD:
+            print("[WalkForward] GOV_WALK_FORWARD disabled — skip (set True to enable).")
+            return None
+
+        report = walk_forward_validate(
+            factor_series, forward_returns, n_splits=n_splits, min_train=min_train
+        )
+        print(f"\n=== Walk-Forward Validation ===")
+        print(f"  Mean OOS IC: {report['mean_ic']:.4f}")
+        print(f"  Consistency (splits IC>0): {report['consistency']:.2f}")
+        print(f"  Splits: {report['n_splits']}")
+        for s in report['splits']:
+            print(f"    split {s['split']}: ic={s['ic']:.4f} n={s['n']}")
+        return report
+
+    def run_decay_test(self, ic_history, window=GOV_DECAY_WINDOW, threshold=GOV_DECAY_THRESHOLD):
+        """
+        FTS 因子衰减检验 (Decay Test) — flags factors whose recent IC decayed
+        beyond GOV_DECAY_THRESHOLD vs the prior window.
+
+        Args:
+            ic_history: list/array of IC values ordered by time.
+            window: trailing window length for comparison.
+            threshold: max allowed decay fraction.
+
+        Returns:
+            dict | None — decay report with 'decay', 'remove', 'recent_ic', 'prior_ic'.
+        """
+        if not GOVERNANCE_AVAILABLE:
+            print("[DecayTest] governance module unavailable — skip.")
+            return None
+        if not GOV_DECAY_TEST:
+            print("[DecayTest] GOV_DECAY_TEST disabled — skip (set True to enable).")
+            return None
+
+        report = factor_decay_test(ic_history, window=window, threshold=threshold)
+        verb = "REMOVE" if report['remove'] else "KEEP"
+        print(f"\n=== Factor Decay Test ===")
+        print(f"  Recent IC: {report['recent_ic']:.4f} | Prior IC: {report['prior_ic']:.4f}")
+        print(f"  Decay: {report['decay']:.4f} (threshold {threshold:.2f}) -> {verb}")
+        return report
 
     def _process_date(self, data, signals_df, date):
         """Process a single trading date"""

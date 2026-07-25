@@ -14,6 +14,12 @@ try:
 except ImportError:
     print("Warning: config.py not found. Using default values.")
 
+try:
+    from factor_governance import CircuitBreaker
+    GOVERNANCE_AVAILABLE = True
+except ImportError:
+    GOVERNANCE_AVAILABLE = False
+
 
 class SignalGenerator:
     """Generate trading signals based on multi-factor scores"""
@@ -24,7 +30,8 @@ class SignalGenerator:
                  score_improvement_threshold=SCORE_IMPROVEMENT_THRESHOLD,
                  score_decline_threshold=SCORE_DECLINE_THRESHOLD,
                  min_score_for_buy=MIN_SCORE_FOR_BUY,
-                 max_score_for_sell=MAX_SCORE_FOR_SELL):
+                 max_score_for_sell=MAX_SCORE_FOR_SELL,
+                 circuit_breaker=None):
         """
         Initialize signal generator
 
@@ -35,6 +42,8 @@ class SignalGenerator:
             score_decline_threshold: Sell if score declines by this many points (default 20)
             min_score_for_buy: Minimum composite score to hold a position (default 70)
             max_score_for_sell: Maximum composite score to sell (default 30)
+            circuit_breaker: Optional CircuitBreaker instance (FTS 熔断机制).
+                              If tripped, generate_signals returns empty signals.
         """
         self.buy_pct = buy_threshold_percentile
         self.sell_pct = sell_threshold_percentile
@@ -42,14 +51,18 @@ class SignalGenerator:
         self.decline_thresh = score_decline_threshold
         self.min_score_buy = min_score_for_buy
         self.max_score_sell = max_score_for_sell
+        self.circuit_breaker = circuit_breaker
 
         print(f"Signal Generator initialized:")
         print(f"  Buy threshold: {self.buy_pct}th percentile")
         print(f"  Sell threshold: {self.sell_pct}th percentile")
         print(f"  Score improvement threshold: +{self.improvement_thresh} points")
         print(f"  Score decline threshold: -{self.decline_thresh} points")
+        if circuit_breaker is not None:
+            print(f"  Circuit breaker: ACTIVE (token_budget={circuit_breaker.token_budget})")
 
-    def generate_signals(self, current_scores, historical_scores=None, positions=None):
+    def generate_signals(self, current_scores, historical_scores=None, positions=None,
+                         realized_ic=None, passed=True):
         """
         Generate trading signals based on current and historical scores
 
@@ -57,6 +70,11 @@ class SignalGenerator:
             current_scores: DataFrame with current scores (from MultiFactorScorer)
             historical_scores: DataFrame with previous period scores (optional)
             positions: Dict of current positions {symbol: quantity}
+            realized_ic: Optional realized Information Coefficient for this run.
+                         If a circuit_breaker is set, this is fed to breaker.record_generation
+                         for consecutive-low-IC trip logic.
+            passed: Whether this factor run passed governance (default True).
+                    Fed to breaker.record_generation when realized_ic is provided.
 
         Returns:
             DataFrame: Trading signals with columns ['symbol', 'current_score', 'signal', 'reason']
@@ -65,6 +83,17 @@ class SignalGenerator:
         if current_scores is None or current_scores.empty:
             print("No scores provided!")
             return pd.DataFrame()
+
+        # FTS 熔断机制 (Circuit Breaker): if tripped, emit NO signals.
+        # This is a hard gate — bypassing it silently is forbidden by contract.
+        if self.circuit_breaker is not None and self.circuit_breaker.tripped():
+            reason = self.circuit_breaker.trip_reason() or "circuit breaker tripped"
+            print(f"[CIRCUIT BREAKER] {reason} — generate_signals returning EMPTY.")
+            return pd.DataFrame()
+
+        # Feed run outcome into breaker for consecutive-low-IC / failure-rate trip logic.
+        if self.circuit_breaker is not None and realized_ic is not None:
+            self.circuit_breaker.record_generation(ic=realized_ic, passed=passed)
 
         # Calculate dynamic thresholds based on score distribution
         composite_scores = current_scores['composite']
@@ -167,7 +196,8 @@ class SignalGenerator:
 
         return round(position_fraction, 4)
 
-    def generate_signals_with_position_sizing(self, current_scores, historical_scores=None, portfolio_value=100000):
+    def generate_signals_with_position_sizing(self, current_scores, historical_scores=None, portfolio_value=100000,
+                                              realized_ic=None, passed=True):
         """
         Generate signals with recommended position sizes
 
@@ -175,11 +205,14 @@ class SignalGenerator:
             current_scores: DataFrame with current scores
             historical_scores: DataFrame with previous period scores
             portfolio_value: Total portfolio value for position sizing
+            realized_ic: Optional realized IC, forwarded to the circuit breaker.
+            passed: Whether this run passed governance, forwarded to the circuit breaker.
 
         Returns:
             DataFrame: Signals with position size recommendations
         """
-        signals = self.generate_signals(current_scores, historical_scores)
+        signals = self.generate_signals(current_scores, historical_scores,
+                                         realized_ic=realized_ic, passed=passed)
 
         # Add position size recommendations
         signals['recommended_position_pct'] = signals['current_score'].apply(

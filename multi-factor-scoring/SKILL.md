@@ -1,8 +1,8 @@
 ---
 name: multi-factor-scoring
-description: "Multi-factor scoring quantitative trading system. Use this skill when the user wants to build a quantitative trading strategy based on multi-factor scoring (momentum, technical indicators, volume, fundamentals, macro, sector rotation), with support for A-shares, HK stocks, US stocks, and futures/derivatives across multiple timeframes (daily, 4H, 1H, 15M). Now includes an optional 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM equal-weight ensemble, arXiv:2607.05291) for the volatility dimension, and a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal confidence intervals, arXiv:2607.06690) that attaches calibrated confidence intervals to signals for position-confidence sizing and risk-control thresholds. Triggers include requests for multi-factor models, scoring systems, factor-based stock selection, rotational strategies, quantitative trading framework setup, 4-layer scoring framework, volatility forecasting / HAR / Log-HAR / TTM, or uncertainty quantification / conformal prediction / bootstrap confidence intervals / position confidence / risk thresholds. Weekly arXiv auto-evolution (2026-07-14~18) adds cost-aware RL allocation (arXiv:2607.15195), base-rate-honest directional-significance testing (arXiv:2607.12248), denoised correlation-breadth factor (arXiv:2607.10297), eigenvector-rotation crisis early-warning (arXiv:2607.11935), fat-tail-aware risk gating (arXiv:2607.10810), and a news-sentiment alternative factor (arXiv:2607.13968)."
+description: "Multi-factor scoring quantitative trading system. Use this skill when the user wants to build a quantitative trading strategy based on multi-factor scoring (momentum, technical indicators, volume, fundamentals, macro, sector rotation), with support for A-shares, HK stocks, US stocks, and futures/derivatives across multiple timeframes (daily, 4H, 1H, 15M). Now includes an optional 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM equal-weight ensemble, arXiv:2607.05291) for the volatility dimension, and a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal confidence intervals, arXiv:2607.06690) that attaches calibrated confidence intervals to signals for position-confidence sizing and risk-control thresholds. Triggers include requests for multi-factor models, scoring systems, factor-based stock selection, rotational strategies, quantitative trading framework setup, 4-layer scoring framework, volatility forecasting / HAR / Log-HAR / TTM, or uncertainty quantification / conformal prediction / bootstrap confidence intervals / position confidence / risk thresholds. Weekly arXiv auto-evolution (2026-07-14~18) adds cost-aware RL allocation (arXiv:2607.15195), base-rate-honest directional-significance testing (arXiv:2607.12248), denoised correlation-breadth factor (arXiv:2607.10297), eigenvector-rotation crisis early-warning (arXiv:2607.11935), fat-tail-aware risk gating (arXiv:2607.10810), and a news-sentiment alternative factor (arXiv:2607.13968). Weekly arXiv auto-evolution (2026-07-20~24) adds trend-following spectral-mass diagnostics with cost-optimal lookback span (arXiv:2607.19497), triple-gate factor admission (statistical x economic x survival, arXiv:2607.20093), Brier+Winkler calibration-based sizing multiplier (arXiv:2607.16229), asymmetric-volatility CVaR allocation with measure-disagreement flagging (arXiv:2607.16450), TDA topological diversification with retention-based turnover control (arXiv:2607.21170), and a backtest forensic audit checklist (purged splits, next-bar entry, AUC-vs-precision guard, point-in-time universe; arXiv:2607.19453 + 2607.20168)."
 agent_created: true
-version: 2.3.0
+version: 2.5.0
 language: zh
 type: strategy
 priority: high
@@ -24,7 +24,12 @@ triggers:
   - "特征向量旋转/危机领先指标/TVP-Kalman/临界转变"
   - "厚尾风险/CVaR/尾部风险闸门/时变采样"
   - "新闻情绪/另类数据因子/transformer情绪"
-keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI, cost-aware-allocation, SciPhyRL, base-rate, directional-significance, correlation-denoising, market-breadth, eigenvector-rotation, early-warning, tail-risk, CVaR, news-sentiment, alternative-data]
+  - "趋势跟随理论/谱质量/成本最优回看窗口"
+  - "三闸门准入/信号审计/回测取证/purged split"
+  - "校准评分/Brier/Winkler/过度自信缩仓"
+  - "TDA拓扑聚类/保留机制/换手控制"
+  - "非对称波动/GJR/CVaR配置/Rachev"
+keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI, cost-aware-allocation, SciPhyRL, base-rate, directional-significance, correlation-denoising, market-breadth, eigenvector-rotation, early-warning, tail-risk, CVaR, news-sentiment, alternative-data, trend-following, spectral-mass, cost-optimal-span, triple-gate-admission, backtest-audit, purged-split, calibration, Brier-score, Winkler-score, TDA, topological-clustering, retention-mechanism, GJR-GARCH, asymmetric-volatility, Rachev-ratio]
 config:
   framework: "6-category"  # or "4-layer"
   ashare_data_source: "akshare"
@@ -902,6 +907,117 @@ Crawled the arXiv **q-fin** recent listing (announcements 2026-07-14 → 2026-07
 
 ---
 
+### 13.9 This-Week arXiv Integration (2026-07-20 ~ 2026-07-24)
+
+Crawled the arXiv **q-fin** recent listing (announcements 2026-07-20 → 2026-07-24, 64 papers) plus cross-listings; scanned all titles and selected 6 with a direct, non-speculative mapping to this skill's modules. Follows the opt-in, config-driven, graceful-fallback pattern of §13.6–§13.8. This week's theme is **evaluation honesty + trend theory**: three papers are rigorous *audits* of popular signals, two upgrade risk/diversification machinery, one gives closed-form trend-following theory.
+
+#### 13.9.1 Analytical Trend-Following Design: Spectral-Mass Alpha & Cost-Optimal Span (arXiv:2607.19497)
+
+**Paper:** "The Science and Practice of Trend-Following Systems" — Sepp & Lucic (2026-07-23)
+
+**Key findings:** Unified theory of TF systems (European / American / TSMOM). Exact P&L ↔ autocorrelation ↔ drift relation in vol-normalized returns; TF is profitable when long-term autocorrelation is positive **even under short-term mean reversion**. In the frequency domain, TF alpha = **excess spectral mass at low frequencies** (Poisson-kernel reading of the spectrum). Closed-form Sharpe (excess kurtosis enters via a single loading), closed-form **cost-optimal lookback span** under trading costs, and structurally **positive skewness** of TF returns peaking near half the filter span. All TF variants are strongly correlated empirically.
+
+**Framework mapping:** Strengthens the **Momentum** factor (§2) and the 4-Layer **L2 量价** trend reads (Supertrend/HMA). Replaces ad-hoc lookback choice with a principled one.
+
+**Signal design:** Add `trend_quality_diagnostic(returns)` to `scoring_engine.py`:
+- Estimate the low-frequency spectral mass of vol-normalized returns (Welch periodogram, kernel-weighted); sub-score = percentile of excess low-freq mass vs universe. High mass ⇒ trend-followable asset ⇒ boost momentum weight for that symbol.
+- Select the momentum lookback as the **cost-optimal span** given the asset's estimated cost (reuse §13.2 dynamic costs) instead of fixed 20/60/120.
+- Position management: TF positive skew is structural — avoid tight stop-losses that truncate the right tail (document in risk config).
+
+**Caveat:** Spectral estimates need ≥ 250 obs to be stable; below that fall back to fixed spans.
+
+---
+
+#### 13.9.2 Triple-Gate Factor Admission: Statistical × Economic × Survival (arXiv:2607.20093)
+
+**Paper:** "Retail Trader's Ruin: An Anatomy of Popular Signal Failure" — Darmanin (2026-07-23)
+
+**Key findings:** Tests 5 popular retail signal families with **three predeclared gates**: (1) statistical edge after multiplicity correction (hierarchical Benjamini-Yekutieli), (2) economic viability after costs, (3) finite-bankroll survival under leverage. Result: oscillator / volume / calendar / candlestick families **REFUTED**; trend & momentum **INCONCLUSIVE** (not refuted); none SUPPORTED. Key methodology: distinguish "statistically refuted" from "unresolved" — non-significance ≠ proof of absence.
+
+**Framework mapping:** Strengthens **§14 factor governance** (admission chain) and the S_appendix veto philosophy. The three-gate conjunction is a direct upgrade to `evaluate_factor_3level` L3.
+
+**Signal design:** Extend `factor_governance.py` with `triple_gate_admission(factor_returns, cost_model, bankroll)`:
+- Gate 1: stationary-bootstrap CI + BY-corrected p-value on the factor's exposure-matched excess return (reuses §13.7 moving-block backend).
+- Gate 2: net-of-cost edge > 0 using §13.2 dynamic costs.
+- Gate 3: ruin probability under the intended leverage < threshold (Kelly-fraction check).
+- A factor enters the composite only if **all three gates pass**; INCONCLUSIVE factors may stay at reduced weight but must be flagged, never treated as validated.
+- Down-weight prior: oscillator/candlestick/calendar-type sub-factors carry refuted-in-literature priors — require stronger evidence to admit.
+
+**Caveat:** Gates need enough sample; small-N factors default to INCONCLUSIVE (reduced weight), not auto-admission.
+
+---
+
+#### 13.9.3 Calibration Benchmarking for Probabilistic Signals: Brier + Winkler (arXiv:2607.16229)
+
+**Paper:** "FinBench: Time-Gated Calibration and Uncertainty Benchmarking for Agentic Financial Forecasting" — Ghosh & Devarakonda (2026-07-21)
+
+**Key findings:** The critical failure mode of LLM/ML forecasters used for sizing is the **confidence–competence gap** — slightly-better-than-chance but consistently overconfident models produce negative long-run growth under bet-sizing rules. Fix: strictly **time-gated** evaluation (no look-ahead) + **strictly proper scoring rules** — Brier score for P(up), Winkler interval score for the 80% prediction interval — with skill scores vs hard baselines.
+
+**Framework mapping:** Strengthens **§13.7 UQ** and complements the base-rate-honest test (constraint #14). Where #14 tests *direction* honesty, this tests *probability/interval* honesty.
+
+**Signal design:** Extend `uncertainty_quantification.py` with `calibration_report(probs, intervals, outcomes)`:
+- Rolling Brier + Winkler scores per signal source; skill score vs base-rate classifier and vs the §13.6 vol-forecast interval.
+- Map calibration quality to the sizing multiplier: `risk_scale *= clip(brier_skill, floor, 1)` — an overconfident source gets structurally shrunk even when its point signal is strong.
+- All evaluation windows strictly time-gated (train < gate < test), consistent with walk-forward (§14.2).
+
+**Caveat:** Proper-score estimates are noisy on short windows; require ≥ 60 scored forecasts before letting calibration modify sizing.
+
+---
+
+#### 13.9.4 Asymmetric-Volatility CVaR Allocation & Measure Disagreement (arXiv:2607.16450)
+
+**Paper:** "Portfolio Optimization under Heavy Tails and Asymmetric Volatility: Evidence from Taiwan-Exposed ETFs" — Lee, Shirvani, Afroz (2026-07-21)
+
+**Key findings:** On 30 tech-concentrated ETFs (2015–2025): heavy tails everywhere, but cross-sectional differences in extreme downside risk are driven by **return scale, not tail index**; GJR-GARCH shows persistent **asymmetric** volatility, and apparent long memory in squared returns is mostly conditional heteroskedasticity. **CVaR optimization concentrates allocations** far more than mean-variance; Sharpe/STARR favor equal-weight while Rachev favors CVaR portfolios — **the measure choice changes the ranking**.
+
+**Framework mapping:** Strengthens the **fat-tail risk gate** (§13.8.5) and the volatility dimension (§13.6). Adds sector-concentration awareness to position sizing.
+
+**Signal design:** Extend `tail_risk_gate` in `uncertainty_quantification.py`:
+- Scale CVaR by an **asymmetric-vol multiplier**: when GJR-style leverage effect is detected (down-move vol > up-move vol), inflate the loss-budget check for concentrated/tech-heavy symbols.
+- For tail comparisons across symbols use **scale (VaR/CVaR level)**, not tail-index estimates — matching the paper's finding.
+- Report **both** Sharpe-type and Rachev-type metrics in backtest output (§12); flag when they disagree on portfolio ranking instead of silently trusting one.
+
+**Caveat:** CVaR-optimal weights are concentrated — always cap per-symbol/per-sector exposure (`MAX_POSITION_SIZE` / `MAX_SECTOR_EXPOSURE`) on top of CVaR optimization.
+
+---
+
+#### 13.9.5 Topological Diversification Distance + Retention-Based Turnover Control (arXiv:2607.21170)
+
+**Paper:** "Portfolio Optimization under Dynamic Rebalancing via Topological Data Analysis and News Sentiments" — Garg (2026-07-24)
+
+**Key findings:** TDA-based distance inside agglomerative clustering identifies **topologically dissimilar** assets better than correlation/Euclidean distances (captures nonlinear relations); FinBERT news sentiment adjusts for perception shifts technicals miss; a **retention mechanism** keeps high-quality assets across consecutive rebalancing windows, cutting turnover and costs. Outperforms correlation-distance and benchmark portfolios on S&P 500, robust in stress periods.
+
+**Framework mapping:** Alternative/upgrade to the **denoised-correlation breadth factor** (§13.8.3) for the diversification step, and adds a turnover-control primitive to §13.8.1 / §5 position sizing. News-sentiment part reuses §13.8.6 (no duplication).
+
+**Signal design:** Add `tda_diversification_clusters(prices)` to `scoring_engine.py`:
+- Compute pairwise TDA distance (persistence-diagram distance on sliding-window point clouds) → agglomerative clusters → pick top-scored symbol per cluster (composite score as ranker).
+- **Retention rule** in `signal_generator.py`: a held symbol is replaced only if its score falls below the challenger by a margin (e.g. > 10 pts) — hysteresis that cuts churn.
+- Choice rule vs §13.8.3: denoised correlation for **regime/breadth** reads; TDA distance for **portfolio construction** diversification. Don't run both for the same purpose.
+
+**Caveat:** TDA is compute-heavy; default to weekly cluster refresh, and fall back to denoised-correlation clustering when `giotto-tda`/`ripser` is unavailable (graceful degradation).
+
+---
+
+#### 13.9.6 Backtest Forensics: AUC ≠ Profit, Purged Splits, Protocol Standards (arXiv:2607.19453 + arXiv:2607.20168)
+
+**Papers:** "Predictive Extrema, Unprofitable Policies: An AI-Assisted Audit of Candle-Based Binance Spot Timing Models" — Jadouli (2026-07-23); "Quantum Kernels and the Cross-Section of Stock Returns: Anatomy of a Vanishing Advantage" — Shen (2026-07-23)
+
+**Key findings:** (a) Extrema classifiers hit ROC-AUC 0.87–0.90 yet **average precision only ~0.12–0.13** and lose 44% net — high AUC on imbalanced extrema labels is *not* a tradable edge; every audited policy ends NO_TRADE. Forensic failures: outcome horizon **not purged at split boundaries**, **same-close entry** (look-ahead), missing raw result directories. (b) Quantum-kernel "advantage" on A-share cross-section **vanishes** under a controlled protocol: point-in-time universe, kernel-swap controls, budget-equalized comparisons, family-wise correction — a full-sample-screened universe manufactures the opposite conclusion.
+
+**Framework mapping:** Hardens **backtest hygiene** (§8 Step 4, §14 governance) and the ML-signal admission rules (#14, #25, #26). These are *negative results* — their value is as guard-rails, not new factors.
+
+**Signal design:** Codify in `backtest.py` as `audit_checklist()` (run before accepting any backtest):
+- [ ] Splits **purged** by at least the label horizon (+ embargo) at every boundary.
+- [ ] Entry uses **next-bar open** (or later), never same-close as the signal bar.
+- [ ] Imbalanced-label classifiers report **average precision + net-of-cost P&L**, never AUC alone.
+- [ ] Universe is **point-in-time** (no full-sample screening before splitting).
+- [ ] Model comparisons are budget-equalized with family-wise correction before claiming superiority.
+- Any unchecked box ⇒ backtest result flagged UNRELIABLE and blocked from factor admission (feeds `triple_gate_admission`, §13.9.2).
+
+**Caveat:** These checks reject bad evidence; they cannot create edge. A strategy passing all checks may still be INCONCLUSIVE (§13.9.2 taxonomy).
+
+---
+
 ## Usage Examples
 
 **Example 1: Build a multi-factor scoring system for A-shares**
@@ -1051,6 +1167,59 @@ For detailed implementation of each module, refer to the code files created in t
 16. **推荐**：危机/regime 判定应加入**领先指标**——协方差矩阵特征向量旋转率（arXiv:2607.11935），在波动率爆发前提前收紧否决项与 `risk_scale`；默认用"顶层主成分载荷周度变化"代理，TVP-Kalman 为可选
 17. **强制**：尾部风险/CVaR 估计必须采用**时间感知（block/diachronic）采样**（arXiv:2607.10810），与 §13.7 的"禁止 IID 自助法"规则一致；禁止用 i.i.d. 历史样本直接估计 VaR/CVaR
 18. **推荐**：新闻情绪作为**低频另类数据叠加**，权重宜小（如 fundamental 桶 5%），仅作确认层/软否决，不与动量因子重复计数；加密标的可叠加 on-chain 情绪（arXiv:2607.15258）
+19. **强制**：因子治理（正交化/走航/衰减/熔断/三级评估链）默认全部关闭，必须由 `config.py` 的 `ENABLE_GOVERNANCE` / `GOV_*` 显式开启；禁止为"顺手启用"将默认值改为 `True`
+20. **强制**：因子分值相关性 > `GOV_CORR_THRESHOLD`(0.7) 的冗余因子必须剔除并重新归一化权重（`govern_scores`）；禁止在高冗余下直接叠加权重导致因子重复计数
+21. **强制**：`CircuitBreaker` 一旦 `tripped()`，`SignalGenerator.generate_signals` **必须**返回空信号帧；禁止在信号路径中静默绕过熔断（try/except 吞掉、强制回退历史信号均属违规）
+22. **强制**：评估结果落盘必须走 `atomic_write`（临时文件 + `os.replace`），模块间通信统一使用 `FactorEvaluation` 契约；禁止无契约持久化（裸写结构漂移的 dict）
+23. **推荐**：因子准入/淘汰优先走三级评估链（`evaluate_factor_3level`）与走航验证（`walk_forward_validate`）；L2 经济逻辑需 `≥ 3/4` 维通过，L3 必须做 Bonferroni + BH-FDR 多重检验校正
+24. **推荐**：走航验证（`GOV_WALK_FORWARD`）与衰减检验（`GOV_DECAY_TEST`）开启时，IC 一致性/衰减率不达标应触发因子剔除或降级，而非仅打印告警
+25. **强制**：任何回测在被采信前必须通过 `audit_checklist()`（arXiv:2607.19453/2607.20168）：标签视界 purge + embargo、次日开盘价入场（禁止 same-close 入场）、时点宇宙（禁止全样本筛选后再切分）、预算对齐 + 族错校正后再比模型；任一项不过 → 结果标记 UNRELIABLE，禁止进入因子准入
+26. **强制**：不平衡标签（极值/顶底/涨停等）分类器**禁止**只报 ROC-AUC；必须同时给出 average precision 与净费后 P&L（arXiv:2607.19453 实证 AUC 0.87–0.90 仍净亏 44%）
+27. **强制**：因子准入采用三闸门合取（arXiv:2607.20093）：统计闸（多重校正后显著）× 经济闸（费后为正）× 生存闸（杠杆下破产概率达标）；三者同时通过才可全权重进入，"未显著"只可判 INCONCLUSIVE 降权，禁止当作"已验证"
+28. **推荐**：概率/区间型信号源接入 Brier + Winkler 校准评分（arXiv:2607.16229，严格时间门控），以校准技能分作为 `risk_scale` 的乘子——过度自信的信号源结构性缩仓；不足 60 个已计分预测前不得启用该乘子
+29. **推荐**：趋势/动量因子的回看窗口按**成本最优 span**（arXiv:2607.19497）选取而非固定 20/60/120；标的是否适合趋势跟随以低频谱质量（excess spectral mass）诊断为准，样本 < 250 时回退固定窗口
+30. **推荐**：组合分散化用 TDA 拓扑距离聚类 + 保留机制滞回换仓（arXiv:2607.21170，得分差 > 10 分才换仓以控制换手），regime/广度判定仍用 §13.8.3 去噪相关——两者用途不得混用；CVaR 优化权重天然集中（arXiv:2607.16450），必须叠加单标的/单行业上限，且回测同时报告 Sharpe 型与 Rachev 型指标并在两者排名冲突时显式标记
+
+## §14 因子治理模块（FTS 派生的 6 项工程化能力）
+
+> 来源：微信公众号《FTS：一套贯彻 Harness 工程规范的 AI 原生量化因子系统》。
+> 实现：`scripts/factor_governance.py`，全部 **config 驱动、默认关闭**，与 §11–§13 的 arXiv 模块保持同一 opt-in 范式。
+> 启用：在 `config.py` 将 `ENABLE_GOVERNANCE` / `GOV_*` 置 `True`，或在构造时传 `enable_governance=True` / `circuit_breaker=...`。
+
+### 14.1 能力清单
+
+| # | 能力 | 入口 | 接入的管线环节 |
+|---|------|------|----------------|
+| 1 | 契约先行 (TypedDict) + 原子持久化 | `FactorEvaluation` / `atomic_write` | 评估/治理结果落盘 |
+| 2 | 三级评估链 L1回测 / L2经济逻辑 / L3多重检验 | `evaluate_factor_3level` | 因子准入（可编排进评分前置） |
+| 3 | 走航验证 (Walk-forward) | `walk_forward_validate` | `BacktestEngine.run_walk_forward_validation` |
+| 4 | 因子衰减检验 (Decay Test) | `factor_decay_test` | `BacktestEngine.run_decay_test` |
+| 5 | 熔断机制 (Circuit Breaker) | `CircuitBreaker` | `SignalGenerator(circuit_breaker=...)` |
+| 6 | 正交化 (Orthogonalization) | `orthogonalize_factors` / `govern_scores` | `MultiFactorScorer.calculate_scores` Step 2b |
+
+### 14.2 关键契约与默认值
+
+- **正交化阈值**：`GOV_CORR_THRESHOLD = 0.7`，因子分值相关性 >0.7 成对因子贪心剔除后者（保留先出现者），权重在保留因子上重新归一化。
+- **走航验证**：`GOV_WALK_FORWARD` 关闭时 `run_walk_forward_validation` 直接返回 `None`（无副作用）；开启后要求滚动窗口 `mean_ic > 0.03` 且 `consistency ≥ 0.75`。
+- **衰减检验**：`GOV_DECAY_WINDOW = 126`（≈6 月交易日），`GOV_DECAY_THRESHOLD = 0.30`，近期 IC 相对历史衰减 `> 30%` → 标记剔除。
+- **熔断三类触发**：单日 token 超预算 2×、连续 3 代 `IC < 0.01`、失败率 `> 90%`；熔断后 `generate_signals` 必须返回空信号，不得绕过。
+- **三级评估链 L2**：经济逻辑四维（theory/behavior/microstructure/institution）默认 rubric 见 `config.GOV_ECONOMIC_RUBRIC`，需 `≥ 3/4` 通过；L3 用 Bonferroni + BH-FDR 校正。
+- **原子持久化**：`atomic_write` 写临时文件后 `os.replace`，中途崩溃不产生半截文件；评估结果统一走 `FactorEvaluation` 契约。
+
+### 14.3 调用示例
+
+```python
+from scoring_engine import MultiFactorScorer
+from signal_generator import SignalGenerator
+from factor_governance import CircuitBreaker
+
+scorer = MultiFactorScorer(enable_governance=True)          # 正交化去冗余
+scores = scorer.calculate_scores(data, fundamentals, macro)
+
+cb = CircuitBreaker(token_budget_daily=2_000_000)           # 自动化跑批安全网
+gen = SignalGenerator(circuit_breaker=cb)
+signals = gen.generate_signals(scores, realized_ic=0.05, passed=True)  # 熔断则空
+```
 
 ## 版本历史
 
@@ -1060,6 +1229,8 @@ For detailed implementation of each module, refer to the code files created in t
 | v2.1.0 | 2026-07-11 | SkillEvolver 演化（arXiv:2607.05291）：新增波动率预测模块 `volatility_forecaster.py`，实现 Log-HAR + TTM 等权集成（带 TTM 缺失优雅回退与 Mincer-Zarnowitz 重校准），接入 `MultiFactorScorer` 为可选 `volatility` 维度分数（config 驱动，默认关闭） |
 | v2.2.0 | 2026-07-11 | SkillEvolver 演化（arXiv:2607.06690）：新增无分布不确定性量化模块 `uncertainty_quantification.py`，实现依赖感知移动块自助法 CI（tsbootstrap 主路径 + 纯numpy回退）、split-conformal 预测半宽、仓位置信度映射与风控闸门（CI跨零则否决），接入 `MultiFactorScorer` 为可选 `confidence`/`ci_low`/`ci_high`/`edge_significant`/`risk_scale` 字段（config 驱动，默认关闭） |
 | v2.3.0 | 2026-07-18 | SkillEvolver 周度自进化（arXiv 2026-07-14~18）：新增 6 篇本周论文集成 — §13.8.1 成本感知多期配置(arXiv:2607.15195)、§13.8.2 基率诚实方向显著性(arXiv:2607.12248)、§13.8.3 去噪相关广度因子(arXiv:2607.10297)、§13.8.4 特征向量旋转危机领先指标(arXiv:2607.11935)、§13.8.5 厚尾风险闸门(arXiv:2607.10810)、§13.8.6 新闻情绪另类因子(arXiv:2607.13968)；新增约束 #14–#18 |
+| v2.5.0 | 2026-07-25 | SkillEvolver 周度自进化（arXiv 2026-07-20~24，64 篇扫描选 6）：新增 §13.9 — §13.9.1 趋势跟随谱质量诊断与成本最优 span(arXiv:2607.19497)、§13.9.2 三闸门因子准入(arXiv:2607.20093)、§13.9.3 Brier+Winkler 校准评分乘子(arXiv:2607.16229)、§13.9.4 非对称波动 CVaR 配置与度量分歧标记(arXiv:2607.16450)、§13.9.5 TDA 拓扑分散化+保留滞回换仓(arXiv:2607.21170)、§13.9.6 回测取证清单 audit_checklist(arXiv:2607.19453+2607.20168)；新增约束 #25–#30；修正 frontmatter 版本号漂移（v2.4.0 时未同步） |
+| v2.4.0 | 2026-07-24 | SkillEvolver + Loop 演化（FTS 文章派生）：新增因子治理模块 `scripts/factor_governance.py`，实现 6 项工程化能力——契约先行(TypedDict)+原子持久化、三级评估链(L1回测/L2经济逻辑/L3多重检验)、走航验证(Walk-forward)、因子衰减检验(Decay Test)、熔断机制(Circuit Breaker)、正交化(去冗余)；接入 `scoring_engine`(正交化)、`signal_generator`(熔断网关)、`backtest`(走航/衰减报告)，全部 config 驱动默认关闭；SKILL.md 新增 §14 与约束 #19–#24 |
 | v1.x | 2026-06 | 初始版本：6-Category 多因子评分框架，支持 A股/港股/美股，含 2026 arXiv 研究集成 |
 
 ---

@@ -20,6 +20,16 @@ except ImportError:
 
 from config import *
 
+try:
+    from factor_governance import (
+        orthogonalize_factors, govern_scores,
+        evaluate_factor_3level, walk_forward_validate, factor_decay_test,
+        CircuitBreaker, atomic_write, FactorEvaluation,
+    )
+    GOVERNANCE_AVAILABLE = True
+except ImportError:
+    GOVERNANCE_AVAILABLE = False
+
 
 class MultiFactorScorer:
     """
@@ -38,7 +48,8 @@ class MultiFactorScorer:
     def __init__(self, factor_weights=None, enable_market_impact=True, 
                  enable_regime_detection=True, enable_robust_bayesian=False,
                  enable_vol_forecast=None, vol_horizon=None, enable_ttm_vol=None,
-                 vol_context_length=None, enable_uncertainty=None):
+                 vol_context_length=None, enable_uncertainty=None,
+                 enable_governance=None, gov_corr_threshold=None):
         """
         Initialize scorer with factor weights
         
@@ -56,6 +67,10 @@ class MultiFactorScorer:
             vol_context_length: Context length for TTM; defaults to config.VOL_CONTEXT_LENGTH
             enable_uncertainty: Enable distribution-free uncertainty quantification of the
                                 return signal (arXiv:2607.06690); defaults to config.ENABLE_UNCERTAINTY
+            enable_governance: Enable factor governance (orthogonalization dedup);
+                               defaults to config.ENABLE_GOVERNANCE
+            gov_corr_threshold: Correlation threshold for orthogonalization;
+                                defaults to config.GOV_CORR_THRESHOLD
         """
         if factor_weights is None:
             self.factor_weights = FACTOR_WEIGHTS
@@ -81,6 +96,11 @@ class MultiFactorScorer:
         # Uncertainty quantification flag resolves from config when not explicitly passed
         self.enable_uncertainty = ENABLE_UNCERTAINTY if enable_uncertainty is None else enable_uncertainty
         
+        # Governance flag (FTS-derived) resolves from config when not explicitly passed
+        self.enable_governance = ENABLE_GOVERNANCE if enable_governance is None else enable_governance
+        self.gov_corr_threshold = GOV_CORR_THRESHOLD if gov_corr_threshold is None else gov_corr_threshold
+        self.governance_report = None  # populated by calculate_scores when governance ON
+        
         # Regime detection state
         self.current_regime = 'normal'  # 'bull', 'bear', 'normal', 'crisis'
         self.regime_confidence = 0.5
@@ -91,6 +111,8 @@ class MultiFactorScorer:
         print(f"Robust Bayesian: {'ON' if enable_robust_bayesian else 'OFF'}")
         print(f"Vol forecast (arXiv:2607.05291): {'ON' if self.enable_vol_forecast else 'OFF'}")
         print(f"Uncertainty quantification (arXiv:2607.06690): {'ON' if self.enable_uncertainty else 'OFF'}")
+        if GOVERNANCE_AVAILABLE:
+            print(f"Factor governance (orthogonalization): {'ON' if self.enable_governance else 'OFF'}")
 
     def calculate_scores(self, data, fundamentals=None, macro_data=None, position_sizes=None):
         """
@@ -106,19 +128,18 @@ class MultiFactorScorer:
             DataFrame: Index = symbols, columns = factor scores + composite score
         """
         scores = {}
-        
+
         # Step 1: Detect market regime (if enabled)
         if self.enable_regime_detection:
             self._detect_regime(data)
             print(f"Detected regime: {self.current_regime} (confidence: {self.regime_confidence:.2f})")
-        
-        # Step 2: Calculate scores for each symbol
+
+        # Step 2: Calculate raw factor scores for each symbol (no composite yet)
         for symbol, df in data.items():
             if df is None or df.empty or len(df) < 50:
                 print(f"Skipping {symbol}: insufficient data")
                 continue
-            
-            # Calculate each factor score
+
             momentum_score = self._calculate_momentum_score(df)
             technical_score = self._calculate_technical_score(df)
             volume_score = self._calculate_volume_score(df)
@@ -126,12 +147,6 @@ class MultiFactorScorer:
             macro_score = self._calculate_macro_score(macro_data)
             sector_score = self._calculate_sector_score(symbol, data)
 
-            # Optional volatility-dimension score (arXiv:2607.05291)
-            vol_score = None
-            if self.enable_vol_forecast:
-                vol_score = self._calculate_volatility_score(df)
-            
-            # Store individual scores
             scores[symbol] = {
                 'momentum': momentum_score,
                 'technical': technical_score,
@@ -140,33 +155,44 @@ class MultiFactorScorer:
                 'macro': macro_score,
                 'sector': sector_score
             }
-            if vol_score is not None:
+
+            if self.enable_vol_forecast:
+                vol_score = self._calculate_volatility_score(df)
                 scores[symbol]['volatility'] = vol_score
-            
-            # Calculate weighted composite score
-            composite = (
-                momentum_score * self.factor_weights['momentum'] +
-                technical_score * self.factor_weights['technical'] +
-                volume_score * self.factor_weights['volume'] +
-                fundamental_score * self.factor_weights['fundamental'] +
-                macro_score * self.factor_weights['macro'] +
-                sector_score * self.factor_weights['sector']
-            )
-            
-            # Step 3: Apply market impact adjustment (arXiv:2606.24019)
+
+        # Step 2b: Governance — orthogonalization dedup across factor columns
+        weights = dict(self.factor_weights)
+        if self.enable_governance and GOVERNANCE_AVAILABLE and scores:
+            factor_cols = ['momentum', 'technical', 'volume', 'fundamental', 'macro', 'sector']
+            sdf = pd.DataFrame.from_dict(scores, orient='index')
+            gov = govern_scores(sdf, factor_cols, self.gov_corr_threshold)
+            self.governance_report = gov
+            kept = gov['kept_factors']
+            wsum = sum(self.factor_weights.get(c, 0) for c in kept)
+            if wsum > 0:
+                weights = {c: self.factor_weights.get(c, 0) / wsum for c in kept}
+            print(f"Governance: dropped {gov['dropped_factors']}, kept {kept}, "
+                  f"renorm weights sum={sum(weights.values()):.2f}")
+
+        # Step 3: Compute composite per symbol (second pass) with governance weights
+        for symbol in list(scores.keys()):
+            s = scores[symbol]
+            composite = sum(s.get(c, 50.0) * weights.get(c, 0) for c in weights)
+
+            # Step 3a: Apply market impact adjustment (arXiv:2606.24019)
             if self.enable_market_impact and position_sizes and symbol in position_sizes:
                 impact_adjustment = self._calculate_market_impact_adjustment(
                     symbol, df, position_sizes[symbol]
                 )
                 composite = composite * (1 - impact_adjustment)  # Reduce score for high impact
                 scores[symbol]['market_impact_adjustment'] = impact_adjustment
-            
-            # Step 4: Apply regime-based weight adjustment (arXiv:2606.23596)
+
+            # Step 3b: Apply regime-based weight adjustment (arXiv:2606.23596)
             if self.enable_regime_detection:
                 regime_adjustment = self._apply_regime_adjustment(scores[symbol])
                 composite = composite * regime_adjustment
                 scores[symbol]['regime_adjustment'] = regime_adjustment
-            
+
             scores[symbol]['composite'] = round(composite, 2)
 
             # Optional distribution-free uncertainty quantification (arXiv:2607.06690)
@@ -174,10 +200,10 @@ class MultiFactorScorer:
                 uq = self._quantify_signal_uncertainty(df)
                 if uq is not None:
                     scores[symbol].update(uq)
-        
+
         # Convert to DataFrame
         scores_df = pd.DataFrame.from_dict(scores, orient='index')
-        
+
         return scores_df
 
     def _calculate_momentum_score(self, df, periods=MOMENTUM_PERIODS):
