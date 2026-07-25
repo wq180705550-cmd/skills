@@ -2,75 +2,56 @@
 
 个人 WorkBuddy / Claude Code 技能库，包含自定义 skill 定义。
 
-技能存放在仓库根目录下，每个 skill 包含 SKILL.md、脚本、参考文档和测试。
+技能按主题分类存放在仓库根目录的分类子文件夹中（tools/、quant-framework/、quant-strategy/、investment-thinking/、finance-cert/、data/、system/、content-creation/，金融服务合集在 financial-skill/），每个 skill 包含 SKILL.md、脚本、参考文档和测试。
 
 ## 技能一览
 
-### 📈 能源
-| Skill | 说明 | 版本 |
-|-------|------|------|
-| [crude-oil-daily-news](./crude-oil-daily-news/) | 国际原油每日资讯（WTI/布伦特），四层分析框架+20项技术指标 | v9.0 |
-| [energy-chain-analysis](./energy-chain-analysis/) | 能源产业链整体分析（SC/BU/FU/LU/PG），五层量化打分+七步决策法 | v2.19.0 |
-
-### 💎 贵金属
-| Skill | 说明 | 版本 |
-|-------|------|------|
-| [precious-metals-daily-news](./precious-metals-daily-news/) | 贵金属每日资讯（黄金/白银/铂钯），19项技术指标+右侧交易原则 | v4.3.0 |
-| [precious-metals-data-validation](./precious-metals-data-validation/) | 贵金属数据标准化采集与验证，多源交叉校验 | v2.0.0 |
-| [precious-metals-trading-decision](./precious-metals-trading-decision/) | 三层架构贵金属交易决策（宏观→载体→多周期），R1-R5 Regime诊断 | v3.0.0 |
-
-### 🚜 期货
-| Skill | 说明 | 版本 |
-|-------|------|------|
-| [futures-industry-chain-analysis](./futures-industry-chain-analysis/) | 12大产业链自动化分析，自下而上+置信度优先，67+品种 | v2.9.1 |
-| [futures-trading-analysis](./futures-trading-analysis/) | 多角色辩论式交易分析，12专业Agent，单品/产业链双模式 | v1.0 |
-
-### 📊 数据
-| Skill | 说明 | 版本 |
-|-------|------|------|
-| [exchange-futures-data](./exchange-futures-data/) | 中国五大期货交易所（DCE/SHFE/CZCE/CFFEX/GFEX）官方数据采集 | - |
-
 ### 🛠 工具
+
 | Skill | 说明 | 版本 |
 |-------|------|------|
-| [goal](./goal/) | `/goal` 会话目标管理 | - |
-| [grill-me](./grill-me/) | 深度压力测试，系统性拷问计划/设计 | - |
-| [loop](./loop/) | `/loop` 循环执行任务，支持固定间隔、动态间隔、停滞检测、熔断机制 | - |
-| [schedule](./schedule/) | 定时自动化任务管理（创建/列出/删除），复刻 Claude Code `/schedule` 交互体验 | - |
-| [ai-website-cloner](./ai-website-cloner/) | AI 网站克隆器 — 五阶段流水线将任意网站逆向工程为 pixel-perfect Next.js 组件 | v1.0.0 |
+| [goal](./tools/goal/) | `/goal` 会话目标管理 | - |
+| [grill-me](./tools/grill-me/) | 深度压力测试，系统性拷问计划/设计 | - |
+| [loop](./tools/loop/) | `/loop` 循环执行任务，支持固定间隔、动态间隔、停滞检测、熔断机制 | - |
+| [schedule](./tools/schedule/) | 定时自动化任务管理（创建/列出/删除），复刻 Claude Code `/schedule` 交互体验 | - |
+| [ai-website-cloner](./tools/ai-website-cloner/) | AI 网站克隆器 — 五阶段流水线将任意网站逆向工程为 pixel-perfect Next.js 组件 | v1.0.0 |
 
 ### 🧠 量化框架
+
 | Skill | 说明 | 版本 |
 |-------|------|------|
-| [capm-analysis](./capm-analysis/) | CAPM（资本资产定价模型）分析与可视化，支持A股/美股/港股适配、量化框架集成、交互式Web应用 | - |
-| [frontier-model-orchestration](./frontier-model-orchestration/) | 将昂贵前沿模型（frontier model）的判断力用在刀刃上：委托子 Agent 处理高 token 消耗任务，保留主 Agent 做架构规划与最终审查 | - |
-| [efficient-frontier](./efficient-frontier/) | 基于现代投资组合理论（MPT）的有效前沿计算与投资组合优化，支持A股市场数据获取与资产配置 | - |
-| [skillevolver](./skillevolver/) | 面向在线技能学习的元技能自演化框架 | v2.0 |
-| [skill-adaptor](./skill-adaptor/) | 基于轨迹的LLM智能体自适应技能，显式故障归因 | - |
-| [factorengine](./factorengine/) | 程序级知识注入因子挖掘框架 | v2.0 |
-| [agentic-factor-investing](./agentic-factor-investing/) | AI 自主因子发现与系统化投资框架 | v2.0 |
-| [embodiskill](./embodiskill/) | 面向具身技能自演化的技能感知反思与进化 | v2.0 |
+| [capm-analysis](./quant-framework/capm-analysis/) | CAPM（资本资产定价模型）分析与可视化，支持A股/美股/港股适配、量化框架集成、交互式Web应用 | - |
+| [frontier-model-orchestration](./quant-framework/frontier-model-orchestration/) | 将昂贵前沿模型（frontier model）的判断力用在刀刃上：委托子 Agent 处理高 token 消耗任务，保留主 Agent 做架构规划与最终审查 | - |
+| [efficient-frontier](./quant-framework/efficient-frontier/) | 基于现代投资组合理论（MPT）的有效前沿计算与投资组合优化，支持A股市场数据获取与资产配置 | - |
+| [skillevolver](./quant-framework/skillevolver/) | 面向在线技能学习的元技能自演化框架 | v2.0 |
+| [skill-adaptor](./quant-framework/skill-adaptor/) | 基于轨迹的LLM智能体自适应技能，显式故障归因 | - |
+| [factorengine](./quant-framework/factorengine/) | 程序级知识注入因子挖掘框架 | v2.0 |
+| [agentic-factor-investing](./quant-framework/agentic-factor-investing/) | AI 自主因子发现与系统化投资框架 | v2.0 |
+| [embodiskill](./quant-framework/embodiskill/) | 面向具身技能自演化的技能感知反思与进化 | v2.0 |
 
 ### 📘 量化策略
+
 | Skill | 说明 | 版本 |
 |-------|------|------|
-| [stock-debate-team](./stock-debate-team/) | 股票交易辩论多空专家团，组织巴菲特/芒格/段永平/史文森四大投资大师视角进行多空辩论分析 | v1.0.0 |
-| [multi-factor-scoring](./multi-factor-scoring/) | 多因子量化交易系统：6-Category 因子选股 + 4-Layer 趋势萌芽框架（OI/ATR/OBV/CMF/Supertrend/HMA/Donchian/DMI/MACD）+ 否决项规则 | v2.0.0 |
-| [auto-research-stock-selection](./auto-research-stock-selection/) | 基于华泰证券自进化Skill框架的稳健低波价值优选策略，支持训练集/验证集/测试集样本隔离和版本化管理 | - |
-| [a-share-etf-momentum](./a-share-etf-momentum/) | A股行业ETF双动量轮动：绝对动量择时+相对动量轮动+估值分位刹车+ATR移动跟踪止损 | v2.0.0 |
-| [etf-dual-momentum](./etf-dual-momentum/) | ETF双动量轮动：31行业全覆盖、斜率×R²排名、风险平价仓位、逐ETF PE刹车、收盘止损 | v1.3.0 |
-| [etf-trend-signal](./etf-trend-signal/) | 行业ETF趋势信号：周频趋势跟踪轮动，腾讯自选股/通达信双数据源 | v2.5.0 |
-| [quantitative-momentum-stock-selection](./quantitative-momentum-stock-selection/) | 量化动量选股：多维度动量打分识别强势股，A股优化（涨跌停过滤+T+1+北向资金） | v1.2.0 |
+| [stock-debate-team](./quant-strategy/stock-debate-team/) | 股票交易辩论多空专家团，组织巴菲特/芒格/段永平/史文森四大投资大师视角进行多空辩论分析 | v1.0.0 |
+| [multi-factor-scoring](./quant-strategy/multi-factor-scoring/) | 多因子量化交易系统：6-Category 因子选股 + 4-Layer 趋势萌芽框架（OI/ATR/OBV/CMF/Supertrend/HMA/Donchian/DMI/MACD）+ 否决项规则 | v2.0.0 |
+| [auto-research-stock-selection](./quant-strategy/auto-research-stock-selection/) | 基于华泰证券自进化Skill框架的稳健低波价值优选策略，支持训练集/验证集/测试集样本隔离和版本化管理 | - |
+| [a-share-etf-momentum](./quant-strategy/a-share-etf-momentum/) | A股行业ETF双动量轮动：绝对动量择时+相对动量轮动+估值分位刹车+ATR移动跟踪止损 | v2.0.0 |
+| [etf-dual-momentum](./quant-strategy/etf-dual-momentum/) | ETF双动量轮动：31行业全覆盖、斜率×R²排名、风险平价仓位、逐ETF PE刹车、收盘止损 | v1.3.0 |
+| [etf-trend-signal](./quant-strategy/etf-trend-signal/) | 行业ETF趋势信号：周频趋势跟踪轮动，腾讯自选股/通达信双数据源 | v2.5.0 |
+| [quantitative-momentum-stock-selection](./quant-strategy/quantitative-momentum-stock-selection/) | 量化动量选股：多维度动量打分识别强势股，A股优化（涨跌停过滤+T+1+北向资金） | v1.2.0 |
 
 ### 💡 投资思维
+
 | Skill | 说明 | 版本 |
 |-------|------|------|
-| [warren-buffett](./warren-buffett/) | 巴菲特投资决策框架与商业分析思维，5大心智模型+8个决策启发式+A股适配 | v2.0 |
+| [warren-buffett](./investment-thinking/warren-buffett/) | 巴菲特投资决策框架与商业分析思维，5大心智模型+8个决策启发式+A股适配 | v2.0 |
 
 ### 🎓 金融考证
+
 | Skill | 说明 | 版本 |
 |-------|------|------|
-| [cfa-mastery](./cfa-mastery/) | CFA L1/L2/L3 统一备考助手：全 34 科目要点提炼（考纲权威）+ 网盘讲师资料映射（最近年份优先★）+ 跨级别递进索引，覆盖道德/数量/经济/财报/公司金融/权益估值/固收/衍生品/另类/组合管理 | v2.0.0 |
+| [cfa-mastery](./finance-cert/cfa-mastery/) | CFA L1/L2/L3 统一备考助手：全 34 科目要点提炼（考纲权威）+ 网盘讲师资料映射（最近年份优先★）+ 跨级别递进索引，覆盖道德/数量/经济/财报/公司金融/权益估值/固收/衍生品/另类/组合管理 | v2.0.0 |
 
 ### 🏦 金融服务（Anthropic 官方技能包）
 
@@ -86,26 +67,29 @@
 | [financial-skill](./financial-skill/) | Anthropic 金融服务技能合集：金融分析 / 权益研究 / 投资银行 / 私募股权 / 财富管理 / 基金行政 / 运营合规，共 55 个技能，按原命令调用各子技能 | - |
 
 ### 📡 数据
+
 | Skill | 说明 |
 |-------|------|
-| [westock-data](./westock-data/) | 金融市场结构化数据查询（A股/港股/美股/ETF/期货等） |
+| [westock-data](./data/westock-data/) | 金融市场结构化数据查询（A股/港股/美股/ETF/期货等） |
 
 ### ⚙️ 系统
+
 | Skill | 说明 | 版本 |
 |-------|------|------|
-| [wb-hooks](./wb-hooks/) | WorkBuddy 事件驱动 Hook 系统，约定式注入实现工具调用拦截 | - |
-| [dspark-inference](./dspark-inference/) | DSpark 分布式投机解码推理部署 — 双 DGX Spark 节点，vLLM, TP=2, FP8 KV Cache, InfiniBand/RoCE | v1.0.0 |
+| [wb-hooks](./system/wb-hooks/) | WorkBuddy 事件驱动 Hook 系统，约定式注入实现工具调用拦截 | - |
+| [dspark-inference](./system/dspark-inference/) | DSpark 分布式投机解码推理部署 — 双 DGX Spark 节点，vLLM, TP=2, FP8 KV Cache, InfiniBand/RoCE | v1.0.0 |
 
 ### ✍️ 内容创作
+
 | Skill | 说明 | 版本 |
 |-------|------|------|
-| [xuanti-xia](./xuanti-xia/) | 选题虾 — 为「文案虾」提供选题输入：口水稿整理、主题挖掘、热点分析、选题库存储、EMOS 四维洞察推荐 | v1.0.0 |
-| [wenan-xia](./wenan-xia/) | 文案虾 — 成文+改写流水线：大纲生成、初稿、去AI味润色、多平台改写、成品归档索引 | v1.0.0 |
-| [shenhe-xia](./shenhe-xia/) | 审核虾 — 对文案虾文章做 6 维质量审核：主标题吸引力/小标题##标记/数据准确性(硬) + 事实一致性/AI味检测/平台适配(软，LLM语义复核为主、脚本启发式为兜底)，确定性审核脚本+发布闸门 | v1.1.2 |
+| [xuanti-xia](./content-creation/xuanti-xia/) | 选题虾 — 为「文案虾」提供选题输入：口水稿整理、主题挖掘、热点分析、选题库存储、EMOS 四维洞察推荐 | v1.0.0 |
+| [wenan-xia](./content-creation/wenan-xia/) | 文案虾 — 成文+改写流水线：大纲生成、初稿、去AI味润色、多平台改写、成品归档索引 | v1.0.0 |
+| [shenhe-xia](./content-creation/shenhe-xia/) | 审核虾 — 对文案虾文章做 6 维质量审核：主标题吸引力/小标题##标记/数据准确性(硬) + 事实一致性/AI味检测/平台适配(软，LLM语义复核为主、脚本启发式为兜底)，确定性审核脚本+发布闸门 | v1.1.2 |
 
 ## 统计
 
-- 总数：**90** 个自建 Skill
+- 总数：**83** 个自建 Skill（28 个独立技能 + financial-skill 合集内 55 个金融服务技能）
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等
