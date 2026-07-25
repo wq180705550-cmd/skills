@@ -57,6 +57,10 @@
 | [stock-debate-team](./stock-debate-team/) | 股票交易辩论多空专家团，组织巴菲特/芒格/段永平/史文森四大投资大师视角进行多空辩论分析 | v1.0.0 |
 | [multi-factor-scoring](./multi-factor-scoring/) | 多因子量化交易系统：6-Category 因子选股 + 4-Layer 趋势萌芽框架（OI/ATR/OBV/CMF/Supertrend/HMA/Donchian/DMI/MACD）+ 否决项规则 | v2.0.0 |
 | [auto-research-stock-selection](./auto-research-stock-selection/) | 基于华泰证券自进化Skill框架的稳健低波价值优选策略，支持训练集/验证集/测试集样本隔离和版本化管理 | - |
+| [a-share-etf-momentum](./a-share-etf-momentum/) | A股行业ETF双动量轮动：绝对动量择时+相对动量轮动+估值分位刹车+ATR移动跟踪止损 | v2.0.0 |
+| [etf-dual-momentum](./etf-dual-momentum/) | ETF双动量轮动：31行业全覆盖、斜率×R²排名、风险平价仓位、逐ETF PE刹车、收盘止损 | v1.3.0 |
+| [etf-trend-signal](./etf-trend-signal/) | 行业ETF趋势信号：周频趋势跟踪轮动，腾讯自选股/通达信双数据源 | v2.5.0 |
+| [quantitative-momentum-stock-selection](./quantitative-momentum-stock-selection/) | 量化动量选股：多维度动量打分识别强势股，A股优化（涨跌停过滤+T+1+北向资金） | v1.2.0 |
 
 ### 💡 投资思维
 | Skill | 说明 | 版本 |
@@ -183,7 +187,7 @@
 
 ## 统计
 
-- 总数：**86** 个自建 Skill
+- 总数：**90** 个自建 Skill
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等
