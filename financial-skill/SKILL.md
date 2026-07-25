@@ -5,7 +5,7 @@ description: >-
   Anthropic 金融服务官方技能合集 — 统一收纳金融分析（Financial Analysis）、
   权益研究（Equity Research）、投资银行（Investment Banking）、
   私募股权（Private Equity）、财富管理（Wealth Management）、
-  基金行政（Fund Admin）六大领域的 53 个专业技能。
+  基金行政（Fund Admin）、运营合规（Operations）七大领域的 55 个专业技能。
   按原命令调用各子技能，子技能路径现在位于 financial-skill/ 目录下。
 agent_created: true
 user_invocable: true
@@ -18,6 +18,8 @@ triggers:
   - 财富管理
   - 基金行政
   - 财务模型
+  - 运营合规
+  - KYC
   - financial analysis
   - 三表模型
   - DCF
@@ -28,8 +30,8 @@ triggers:
 # financial-skill — Anthropic 金融服务技能合集
 
 > 来源：[anthropics/financial-services](https://github.com/anthropics/financial-services)
-> 面向投行、权益研究、私募、财富管理、基金运营等金融场景的专业技能，共 53 个技能，覆盖 6 个垂直领域。
-> 本目录将原先散落在仓库根目录的 `er-` / `fa-` / `fin-` / `ib-` / `pe-` / `wm-` 系列统一收纳，便于管理与分发。
+> 面向投行、权益研究、私募、财富管理、基金运营、运营合规等金融场景的专业技能，共 55 个技能，覆盖 7 个垂直领域。
+> 本目录将原先散落在仓库根目录的 `er-` / `fa-` / `fin-` / `ib-` / `pe-` / `wm-` / `ops-` 系列统一收纳，便于管理与分发。
 
 ## 使用方式
 
@@ -46,7 +48,8 @@ financial-skill/
 ├── ib-*    投资银行（Investment Banking）— 9 个技能
 ├── pe-*    私募股权（Private Equity）— 10 个技能
 ├── wm-*    财富管理（Wealth Management）— 6 个技能
-└── fa-*    基金行政（Fund Admin）— 6 个技能
+├── fa-*    基金行政（Fund Admin）— 6 个技能
+└── ops-*   运营合规（Operations）— 2 个技能
 ```
 
 ## 技能清单
@@ -133,6 +136,13 @@ financial-skill/
 | [fa-nav-tieout](./fa-nav-tieout/) | 基金NAV核对 | - |
 | [fa-roll-forward](./fa-roll-forward/) | 应计项roll-forward计算 | - |
 | [fa-variance-commentary](./fa-variance-commentary/) | 财务数据偏差说明撰写 | - |
+
+### 运营合规（Operations）— 2 个技能
+
+| Skill | 说明 | 命令 |
+|-------|------|------|
+| [ops-kyc-doc-parse](./ops-kyc-doc-parse/) | 开户文档解析、规则引擎匹配 | - |
+| [ops-kyc-rules](./ops-kyc-rules/) | KYC合规筛查规则 | - |
 
 ## 说明
 

@@ -77,20 +77,13 @@
 > 来源：[anthropics/financial-services](https://github.com/anthropics/financial-services)
 > 面向投行、权益研究、私募、财富管理、基金运营等金融场景的专业技能，共 55 个技能，覆盖 7 个垂直领域。
 
-#### 金融技能合集（financial-skill）— 53 个技能
+#### 金融技能合集（financial-skill）— 55 个技能
 
-> 已将 `er-`/`fa-`/`fin-`/`ib-`/`pe-`/`wm-` 六大系列共 53 个 Anthropic 官方金融服务技能统一收纳至 [financial-skill](./financial-skill/) 目录。各领域明细、命令与子技能入口见该目录的 SKILL.md。
-
-| Skill | 说明 | 命令 |
-|-------|------|------|
-| [financial-skill](./financial-skill/) | Anthropic 金融服务技能合集：金融分析 / 权益研究 / 投资银行 / 私募股权 / 财富管理 / 基金行政，共 53 个技能，按原命令调用各子技能 | - |
-
-#### 运营合规（Operations）— 2 个技能
+> 已将 `er-`/`fa-`/`fin-`/`ib-`/`pe-`/`wm-`/`ops-` 七大系列共 55 个 Anthropic 官方金融服务技能统一收纳至 [financial-skill](./financial-skill/) 目录。各领域明细、命令与子技能入口见该目录的 SKILL.md。
 
 | Skill | 说明 | 命令 |
 |-------|------|------|
-| [ops-kyc-doc-parse](./ops-kyc-doc-parse/) | 开户文档解析、规则引擎匹配 | - |
-| [ops-kyc-rules](./ops-kyc-rules/) | KYC合规筛查规则 | - |
+| [financial-skill](./financial-skill/) | Anthropic 金融服务技能合集：金融分析 / 权益研究 / 投资银行 / 私募股权 / 财富管理 / 基金行政 / 运营合规，共 55 个技能，按原命令调用各子技能 | - |
 
 ### 📡 数据
 | Skill | 说明 |
