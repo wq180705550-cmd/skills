@@ -1,4 +1,4 @@
-﻿---
+---
 name: multi-factor-scoring
 description: "Multi-factor scoring quantitative trading system. Build quantitative trading strategies from multi-factor scoring (momentum, technical, volume, fundamentals, macro, sector rotation) across A-shares, HK stocks, US stocks, and futures/derivatives on daily/4H/1H/15M timeframes. Includes a 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM ensemble), a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal intervals), and an FTS factor-governance module (3-level evaluation chain, walk-forward validation, decay test, circuit breaker, orthogonalization, atomic persistence). Triggers: multi-factor models, scoring systems, factor-based stock selection, rotation strategies, quantitative trading framework, 4-layer scoring, volatility forecasting/HAR, uncertainty quantification/conformal prediction, position confidence, risk thresholds."
 
