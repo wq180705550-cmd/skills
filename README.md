@@ -15,6 +15,7 @@
 | [loop](./tools/loop/) | `/loop` 循环执行任务，支持固定间隔、动态间隔、停滞检测、熔断机制 | - |
 | [schedule](./tools/schedule/) | 定时自动化任务管理（创建/列出/删除），复刻 Claude Code `/schedule` 交互体验 | - |
 | [ai-website-cloner](./tools/ai-website-cloner/) | AI 网站克隆器 — 五阶段流水线将任意网站逆向工程为 pixel-perfect Next.js 组件 | v1.0.0 |
+| [neat-freak](./tools/neat-freak/) | 洁癖 — 知识治理收尾：对齐项目文档/规则文件(CLAUDE.md/AGENTS.md)/获准记忆/工作区残留与真实代码运行态，让下次会话从唯一现役答案开始；含只读盘点脚本与 eval 自测 | v3.0.0 |
 
 ### 🧠 量化框架
 
@@ -89,7 +90,7 @@
 
 ## 统计
 
-- 总数：**83** 个自建 Skill（28 个独立技能 + financial-skill 合集内 55 个金融服务技能）
+- 总数：**84** 个自建 Skill（29 个独立技能 + financial-skill 合集内 55 个金融服务技能）
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等
