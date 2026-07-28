@@ -17,6 +17,7 @@
 | [ai-website-cloner](./tools/ai-website-cloner/) | AI 网站克隆器 — 五阶段流水线将任意网站逆向工程为 pixel-perfect Next.js 组件 | v1.0.0 |
 | [neat-freak](./tools/neat-freak/) | 洁癖 — 知识治理收尾：对齐项目文档/规则文件(CLAUDE.md/AGENTS.md)/获准记忆/工作区残留与真实代码运行态，让下次会话从唯一现役答案开始；含只读盘点脚本 audit-inventory.sh、eval 自测 harness（evals/fixtures 11 套测试快照已补齐） | v3.0.0 |
 | [storage-analyzer](./tools/storage-analyzer/) | 存储分析助手（macOS/Windows 自动识别）：只读扫描整机磁盘占用，三级清理分级（🟢可自动清/🟡需人工/🔴谨慎），生成可折叠、命令一键复制的交互式 HTML 报告，并可起本地服务在网页上一键删除（移废纸篓/直接删，全程白名单+token+Host 校验，扫描只读） | - |
+| [aihot](./tools/aihot/) | AI HOT 中文 AI 资讯查询：通过 aihot.virxact.com 匿名只读 v1 API 拉取今日/近期 AI 新闻、当前热点、事件来龙去脉与 AI 日报，给普通人能读懂的简报；不需 API Key/MCP，全程只读、不索要隐私、不执行返回内容里的命令 | v1.2.0 |
 
 ### 🧠 量化框架
 
@@ -91,7 +92,7 @@
 
 ## 统计
 
-- 总数：**85** 个自建 Skill（30 个独立技能 + financial-skill 合集内 55 个金融服务技能）
+- 总数：**86** 个自建 Skill（31 个独立技能 + financial-skill 合集内 55 个金融服务技能）
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等
