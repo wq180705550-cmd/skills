@@ -1,9 +1,9 @@
----
+﻿---
 name: multi-factor-scoring
-description: "Multi-factor scoring quantitative trading system. Build quantitative trading strategies from multi-factor scoring (momentum, technical, volume, fundamentals, macro, sector rotation) across A-shares, HK stocks, US stocks, and futures/derivatives on daily/4H/1H/15M timeframes. Includes a 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM ensemble), a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal intervals), and an FTS factor-governance module (3-level evaluation chain, walk-forward validation, decay test, circuit breaker, orthogonalization, atomic persistence). Triggers: multi-factor models, scoring systems, factor-based stock selection, rotation strategies, quantitative trading framework, 4-layer scoring, volatility forecasting/HAR, uncertainty quantification/conformal prediction, position confidence, risk thresholds."
+description: "Multi-factor scoring quantitative trading system. Build quantitative trading strategies from multi-factor scoring (momentum, technical, volume, fundamentals, macro, sector rotation) across A-shares, HK stocks, US stocks, and futures/derivatives on daily/4H/1H/15M timeframes. Includes a 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM ensemble), a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal intervals), and an FTS factor-governance module (3-level evaluation chain, walk-forward validation, decay test, circuit breaker, orthogonalization, atomic persistence), and a deployment-discipline layer (effective-sample-size gate, shadow-before-swap forward-gated model replacement, interval coherence projection, passive market-impact costing, herding/crowding read). Triggers: multi-factor models, scoring systems, factor-based stock selection, rotation strategies, quantitative trading framework, 4-layer scoring, volatility forecasting/HAR, uncertainty quantification/conformal prediction, position confidence, risk thresholds, factor governance/admission gates, model promotion policy, backtest audit."
 
 agent_created: true
-version: 2.5.0
+version: 2.6.0
 language: zh
 type: strategy
 priority: high
@@ -30,7 +30,14 @@ triggers:
   - "校准评分/Brier/Winkler/过度自信缩仓"
   - "TDA拓扑聚类/保留机制/换手控制"
   - "非对称波动/GJR/CVaR配置/Rachev"
-keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI, cost-aware-allocation, SciPhyRL, base-rate, directional-significance, correlation-denoising, market-breadth, eigenvector-rotation, early-warning, tail-risk, CVaR, news-sentiment, alternative-data, trend-following, spectral-mass, cost-optimal-span, triple-gate-admission, backtest-audit, purged-split, calibration, Brier-score, Winkler-score, TDA, topological-clustering, retention-mechanism, GJR-GARCH, asymmetric-volatility, Rachev-ratio]
+  - "特征驱动协方差/CD-DFM/零样本接入新标的"
+  - "影子换模/前瞻门控晋升/Shadow Before Swap"
+  - "有效样本量/ESS/能力归因/证据不足"
+  - "分位数交叉/区间相干性投影/KQSP"
+  - "被动市场冲击/限价单成交概率/未成交风险"
+  - "羊群效应/CSAD/LSV/拥挤度/动量衰竭反转"
+  - "市场对齐情绪RL/FinSMART"
+keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI, cost-aware-allocation, SciPhyRL, base-rate, directional-significance, correlation-denoising, market-breadth, eigenvector-rotation, early-warning, tail-risk, CVaR, news-sentiment, alternative-data, trend-following, spectral-mass, cost-optimal-span, triple-gate-admission, backtest-audit, purged-split, calibration, Brier-score, Winkler-score, TDA, topological-clustering, retention-mechanism, GJR-GARCH, asymmetric-volatility, Rachev-ratio, CD-DFM, characteristic-covariance, zero-shot-onboarding, critical-slowing-down, event-heterogeneity, shadow-before-swap, forward-gated-promotion, effective-sample-size, skill-attribution, quantile-crossing, KQSP, coherence-projection, passive-market-impact, fill-probability, non-execution-risk, herding, CSAD, LSV, crowding, momentum-exhaustion, market-aligned-RL, FinSMART]
 config:
   framework: "6-category"  # or "4-layer"
   ashare_data_source: "akshare"
@@ -872,6 +879,8 @@ Crawled the arXiv **q-fin** recent listing (announcements 2026-07-14 → 2026-07
 
 **Caveat:** TVP-Kalman is the heavy part; default to the **proxy** (top-PC loading change), full Kalman opt-in.
 
+> ⚠️ **Partially superseded — read §13.10.2 before using this as a leading indicator.** arXiv:2607.27070 (2026-07-29) shows the entire critical-slowing-down family (variance, AC(1), eigenvalue **and** eigenvector-rotation) is **event-heterogeneous**: it fires on endogenous-buildup cascades but is structurally silent on exogenous shocks. Treat this subsection's output as a population-level prior with a capped effect on `risk_scale`, never as the sole tail defence. See constraint #31.
+
 ---
 
 #### 13.8.5 Fat-Tail-Aware Risk Gate (arXiv:2607.10810)
@@ -1016,6 +1025,143 @@ Crawled the arXiv **q-fin** recent listing (announcements 2026-07-20 → 2026-07
 - Any unchecked box ⇒ backtest result flagged UNRELIABLE and blocked from factor admission (feeds `triple_gate_admission`, §13.9.2).
 
 **Caveat:** These checks reject bad evidence; they cannot create edge. A strategy passing all checks may still be INCONCLUSIVE (§13.9.2 taxonomy).
+
+---
+
+### 13.10 This-Week arXiv Integration (2026-07-27 ~ 2026-07-31)
+
+Crawled the arXiv **q-fin** recent listing (announcements 2026-07-27 → 2026-07-31, **76 papers** incl. cross-lists); scanned all titles, read 8 abstracts, and selected 7 subsections with a direct, non-speculative mapping. Follows the opt-in, config-driven, graceful-fallback pattern of §13.6–§13.9.
+
+This week's theme is **deployment discipline + evidence sufficiency**: three papers constrain *when you are allowed to believe or swap a model*, two upgrade the risk/cost machinery, one repairs interval coherence, one supplies an A-share-specific crowding read. Notably, §13.10.2 is a **negative result that partially retracts §13.8.4** — it is integrated as a guard-rail, not as new alpha.
+
+#### 13.10.1 Characteristic-Driven Covariance with Zero-Shot Asset Onboarding (arXiv:2607.24410)
+
+**Paper:** "The Fundamental Structure of Risk: From Characteristics to Covariance" — Alouadi & Lehalle (2026-07-27)
+
+**Key findings:** Return-based covariance estimation is hostage to noisy, asset-specific time series. The **Characteristic-Driven Dynamic Factor Model (CD-DFM)** instead builds the cross-sectional representation from *observable firm characteristics* (mainly fundamentals). The latent space jointly yields interpretable factor exposures and a **forward** covariance estimator, trained end-to-end on a Stein covariance loss + factor-reconstruction term targeting out-of-sample second moments. Because the encoder depends only on characteristics, **previously unseen assets can be embedded at inference time without retraining** (zero-shot onboarding). On S&P 500 equities it delivers competitive covariance forecasts despite using substantially lower-frequency information than return-based approaches.
+
+**Framework mapping:** Strengthens the **Fundamentals** factor (§2) and the correlation/covariance backbone shared by §13.8.3 (denoised-correlation breadth), §13.9.5 (diversification clustering) and §13.9.4 (CVaR allocation). Fixes a structural weakness: every correlation consumer in this skill currently requires a long return history per symbol, which fails on IPOs, newly listed ETFs and symbols with regime breaks.
+
+**Signal design:** Add `characteristic_covariance(characteristics, returns=None)` to `scoring_engine.py`:
+- Fit the characteristic→exposure encoder on the universe's fundamentals panel; produce forward covariance `Σ̂` **without** requiring a per-symbol return window.
+- Route `Σ̂` into the same consumers as the denoised correlation matrix: breadth (§13.8.3), diversification clustering (§13.9.5), CVaR budget (§13.8.5/§13.9.4).
+- **Zero-shot path** (the main practical gain): a symbol with < 60 return observations — new listing, post-restructuring, newly included index member — gets a covariance row from characteristics alone instead of being dropped or given a garbage estimate.
+- Blend rule: `Σ_use = w·Σ̂_char + (1−w)·Σ_denoised_returns`, with `w → 1` as the symbol's return history shortens. Never silently fall back to a return-based estimate on a short window (that is exactly the noise the paper removes).
+
+**Caveat:** Characteristics are **low-frequency** (quarterly fundamentals). CD-DFM is a *risk-model* upgrade, not a short-horizon signal — do not use it to time entries. Interpretability of the latent factors must be re-checked per market; the paper validates on S&P 500 only.
+
+---
+
+#### 13.10.2 Early-Warning Signals Are Event-Heterogeneous — Guard-Rail on §13.8.4 (arXiv:2607.27070)
+
+**Paper:** "Where does the criticality live? Early-warning signals are event-heterogeneous across seven crypto-perpetual liquidation cascades" — Garcia Seuma (2026-07-29)
+
+**Key findings:** Across seven major BTC liquidation cascades (2022–2025, incl. the record $19B event of 2025-10-10), rolling variance and lag-1 autocorrelation on detrended residuals were Kendall-tau tested over **39 analysis configurations per variable per event**. Result: **no variable is event-invariant.** Price carries the critical-slowing-down (CSD) signature in 5 of 7 events but is **silent in exactly the two exogenous news (tariff) shocks** — implying a two-type structure: *endogenous buildup* vs *exogenous shock* cascades. The October-2025 event, where the signature appeared to live in leverage rather than price, is the **outlier, not the rule**. The only regularity surviving all events is a **compression of taker order-flow variance** (300-onset placebo test, Fisher-combined p ≈ 5e-6) — but it is a *population-level precursor, not a per-event alarm*. Conclusion: single-event CSD claims in derivatives are **fragile by construction**; slowing-down is absent precisely where the destabilising mechanism is most abrupt.
+
+**Framework mapping:** Directly **constrains §13.8.4** (eigenvector-rotation crisis early-warning) and §13.3 regime detection. §13.8.4 was adopted as a *leading* crisis indicator; this paper shows that any CSD-family early-warning — variance, AC(1), eigenvalue *and* eigenvector-rotation reads — is only valid for the **endogenous-buildup** cascade type and is structurally blind to exogenous shocks.
+
+**Signal design:** Amend `covariance_early_warning()` in `scoring_engine.py`:
+- Return a **typed** warning: `{'signal': bool, 'regime_type': 'endogenous'|'unknown', 'population_level': True}` — never a bare boolean alarm.
+- Treat the output as a **population-level prior that tilts weights**, not a per-event trigger that flips the book. Concretely: cap its effect on `risk_scale` (e.g. max −30%) instead of allowing a full defensive switch.
+- **Never** rely on early warning as the sole tail defence. The exogenous-shock branch is undetectable by construction, so the standing tail protections — `tail_risk_gate` (§13.8.5), position caps, asymmetric-vol CVaR (§13.9.4) — must remain armed **at all times**, regardless of the warning state.
+- Add order-flow-variance **compression** as a secondary input where taker/aggressor flow is available (the one regularity that survived all seven events); still population-level.
+- Reporting discipline: any CSD-type claim must state the number of analysis configurations swept and pass a placebo/onset test — a single tuned configuration is not evidence (feeds `audit_checklist()`, §13.9.6).
+
+**Caveat:** Evidence base is crypto perpetuals; the *mechanism* argument (abrupt shocks cannot slow down first) generalises, the *magnitudes* do not. This subsection **removes confidence**, it does not add a factor.
+
+---
+
+#### 13.10.3 Shadow-Before-Swap: Forward-Gated Factor/Model Replacement (arXiv:2607.28577)
+
+**Paper:** "Train Often, Deploy Selectively: Forward-Gated Model Replacement in Crypto Markets" — Dutta (2026-07-30)
+
+**Key findings:** A retrained candidate does **not** necessarily beat a continuously maintained incumbent. **Shadow Before Swap (SBS)** warm-refits a challenger *off the serving path*, evaluates it against the maintained incumbent on the **same next week of delayed labels**, and promotes only after a fixed **paired negative-log-likelihood (NLL) advantage**. Over 48 UTC weeks, 3 seeds, 8 underlyings and 2 contract types, SBS cut NLL by 0.147% vs calendar replacement, 0.076% vs schedule-matched automatic promotion, and 0.043% vs continuous maintenance — while promoting only **114 of 528 challengers (−78.4% deployed model changes)**. Effect directionally consistent across seeds, trial budgets, promotion margins and an earlier 20-asset panel.
+
+**Framework mapping:** Generalises the **retention/hysteresis rule** of §13.9.5 from *portfolio holdings* to *factors and models*, and slots into **§14 factor governance** as a deployment gate downstream of `evaluate_factor_3level` / `walk_forward_validate`. Fills a real gap: the governance chain currently decides *admit vs reject* but has no rule for *replace incumbent vs keep incumbent*.
+
+**Signal design:** Add `shadow_before_swap(incumbent, challenger, holdout_labels, margin)` to `factor_governance.py`:
+- Refit the challenger **off the serving path**; score both models on the **same forward holdout** of delayed labels (never on the challenger's own fit window).
+- Promote only if `NLL(incumbent) − NLL(challenger) > margin` on a **paired** comparison (same samples, same horizon). Default `GOV_SWAP_MARGIN` conservative — the paper's value is that most challengers are correctly *not* promoted.
+- Apply the identical rule to factor rotation: a candidate factor replaces an incumbent only on a paired forward-holdout advantage, not on backtest IC superiority.
+- Log every non-promotion. A high promotion rate is a red flag for an under-strict margin, not a sign of a productive research pipeline.
+
+**Caveat:** Paired NLL requires a **probabilistic** output. For point-forecast factors, substitute a paired proper score (Brier for direction, §13.9.3; pinball for quantiles). Delayed-label evaluation must respect the purge/embargo rules of §13.9.6 — the "same next week" holdout is only valid if labels are fully realised.
+
+---
+
+#### 13.10.4 Effective Sample Size Gate: When Outcome Records Cannot Attribute Skill (arXiv:2607.27544)
+
+**Paper:** "Lucky or Good? Outcome Noise, Effective Sample Size, and the Attribution of Skill" — Ulrich (2026-07-30)
+
+**Key findings:** Any decision domain is characterised by two parameters — the **noise in each outcome** and the **effective number of independent outcomes** over the observation window. Plotted in that 2-D space, the domains where capital and prestige are routinely allocated on realised outcomes — **mutual fund management, venture capital, executive performance** — fall in the region where outcome records contain **too little signal to support reliable individual-level inference**. The prescribed substitute is the population-level empirical validation used in medicine: ask whether the actor **adopted the practices** that are associated with better outcomes at the population level.
+
+**Framework mapping:** Supplies the missing *precondition* for §13.9.2 (triple-gate admission) and §13.9.3 (calibration multiplier). Both currently ask "did it pass the test?"; this paper asks the prior question — **"does this record even have enough effective observations for the test to mean anything?"** It also formalises the existing L2 economic-logic gate of §14.2: the "practices" criterion *is* the process-based substitute when outcomes are uninformative.
+
+**Signal design:** Add `effective_sample_gate(factor_returns, outcome_noise)` to `factor_governance.py`, executed **before** the three gates:
+- Compute **ESS** with the autocorrelation correction `ESS ≈ n / (1 + 2·Σρ_k)` — overlapping windows and serially correlated factor returns inflate raw `n` badly (consistent with the no-IID rule, constraint #11).
+- Compute the noise-to-signal ratio per outcome; locate the factor in the (noise, ESS) plane. If it lands in the **insufficient-signal region**, the verdict is `INSUFFICIENT_EVIDENCE` — distinct from both PASS and REFUTED, and distinct from §13.9.2's INCONCLUSIVE (which means *tested and unresolved*; this means *not testable*).
+- On `INSUFFICIENT_EVIDENCE`, the outcome record is **inadmissible**. Fall back to the **process criterion**: does the factor implement a mechanism with population-level support (L2 four-dimension economic rubric, §14.2)? Admission then requires ≥ 3/4 L2 dimensions *and* a hard weight cap.
+- Same test on *strategy* evaluation: a live track record with low ESS may not be used to raise leverage or to claim manager skill.
+
+**Caveat:** ESS is itself estimated and is fragile when the ACF is poorly determined; prefer a conservative (lower) ESS. This gate **only removes false confidence** — passing it grants no edge.
+
+---
+
+#### 13.10.5 Coherence Projection for Probabilistic Intervals (arXiv:2607.26792)
+
+**Paper:** "Crossing-Free Probabilistic K-Line Forecasts Without Retraining" — Yu, Tao, Chen, Wang & Bunn (2026-07-29)
+
+**Key findings:** Probabilistic OHLC ("K-line") forecasts suffer two incoherence modes: **quantile crossing** (a higher-quantile forecast below a lower one) and **K-line crossing** (forecast low above open/close, or forecast high below open/close). Existing fixes handle only one, via output reordering, specialised architectures, or penalised training. **KQSP (K-line–Quantile Sequential Projection)** is **parameter-free and training-free**, applies to forecasts from *any* model (including pretrained foundation models), drives both crossing rates to **zero on all test data**, and does so with **substantially smaller corrections** to the original forecasts than competing methods.
+
+**Framework mapping:** A drop-in post-processor for **§13.7 UQ** (`conformal_halfwidth`, `bootstrap_ci`) and **§13.6** volatility prediction intervals. Relevant to this skill because interval outputs already feed sizing: `ci_low`/`ci_high` drive `position_confidence`, and an incoherent interval silently corrupts the multiplier.
+
+**Signal design:** Add `project_coherent_intervals(quantiles, ohlc=None)` to `uncertainty_quantification.py`:
+- Sequential projection onto the coherence constraint set: (a) monotone quantiles `q_τ1 ≤ q_τ2` for `τ1 < τ2`; (b) OHLC ordering `low ≤ min(open, close) ≤ max(open, close) ≤ high`; (c) `ci_low ≤ point ≤ ci_high` for every scalar signal interval.
+- **Training-free and model-agnostic** — run it as the last step on *any* interval, whether from moving-block bootstrap, split conformal, Log-HAR+TTM (§13.6) or an external TSFM.
+- Additional constraint for this skill: forecast **RV must be non-negative**, so project the volatility interval onto `[0, ∞)` before percentile scoring.
+- Log the projection magnitude. A large correction means the upstream forecaster is badly miscalibrated — feed that into the Brier/Winkler calibration multiplier (§13.9.3) rather than quietly repairing it.
+
+**Caveat:** Projection enforces *coherence*, not *coverage*. A crossing-free interval can still undercover; conformal calibration (§13.7) remains mandatory. Apply projection **after** calibration, never as a substitute.
+
+---
+
+#### 13.10.6 Passive Market Impact: Limit-Order Fills Are Not Free (arXiv:2607.28323)
+
+**Paper:** "Optimal Execution with Passive Market Impact" — Barzykin, Boyce, Neuman & Tuschmann (2026-07-30)
+
+**Key findings:** A mesoscopic optimal-execution model built on two empirical observables: (1) limit-order **fill probability decays approximately exponentially** with distance from the midprice, and (2) price changes respond **linearly, short-term, to order-flow imbalance**. Combining them yields a reduced-form **passive impact rate that decays exponentially with quote distance**. Passive execution therefore trades off higher fill intensity + larger accumulated impact against lower impact + greater **non-execution risk**, together with adverse selection and opportunity cost. Calibrated on NASDAQ equities and public FX; extensions cover heterogeneous decay rates, transient impact and target schedules.
+
+**Framework mapping:** Extends **§13.1** (square-root law, aggressive impact) and **§13.2** (dynamic commission/slippage) to the **passive** side, which both currently treat as free. Also hardens `audit_checklist()` (§13.9.6): a backtest assuming limit orders fill at the quoted price with zero impact is optimistic in two independent directions at once.
+
+**Signal design:** Extend `_calculate_dynamic_slippage()` in `simulated_broker.py` with a passive branch:
+- Model fill probability as `p_fill ≈ exp(−δ/κ)` in quote distance `δ` from mid (calibrate `κ` per symbol from realised fill data; default from the symbol's spread and volatility).
+- Charge a **passive impact** term that decays exponentially in `δ` — do **not** book passive fills at zero cost.
+- Book **non-execution risk** explicitly: with probability `1 − p_fill` the order does not fill, and the backtest must either miss the trade or cross the spread later. Both outcomes must be recorded; silently assuming a fill is look-ahead.
+- Add to `audit_checklist()`: *"Passive/limit-order fills are modelled with a fill probability and a non-zero passive impact; unfilled orders are accounted for."* Unchecked ⇒ UNRELIABLE.
+- Practical read for the 4-Layer framework: the **high-fee-rate veto** (−10) understates true cost for passive strategies. Include expected passive impact + non-execution cost in the fee-rate estimate before evaluating the veto.
+
+**Caveat:** Calibration needs order-level fill data, unavailable in most retail daily feeds. Default to a conservative parametric `κ`; the actionable takeaway without microstructure data is simply **stop assuming free passive fills**.
+
+---
+
+#### 13.10.7 A-Share Herding Crowding Read + Market-Aligned Sentiment (arXiv:2607.27063, arXiv:2607.28127)
+
+**Papers:** "Herding, Momentum, and Reversal in China's A-Share Market: An Agent-Based Network Model with Information Diffusion" — Weng (2026-07-29); "FinSMART: Financial Sentiment Analysis for Algorithmic Trading through Market-Aligned Reinforcement Learning" — Iacovides, Zhou & Mandic (2026-07-30)
+
+**Key findings (2607.27063):** An agent-based model on lattice and network topologies (von Neumann/Moore, Erdős–Rényi, Watts–Strogatz) shows that **local herding + delayed information diffusion jointly generate momentum and its subsequent reversal**. Stronger herding ⇒ spatially clustered trading, larger price fluctuations, higher **excess kurtosis**. Faster diffusion shortens convergence to the signal-implied value, but *diffusion + social reinforcement together produce overshooting and reversal*. Empirically on A-shares: conventional **CSAD** and **LSV** herding measures are compared with a **rolling tail-based herding indicator (after Johnson SU transformation)**; all display similar time variation and **rise during major market disruptions**. Momentum and reversal are attributed to information delay, local reinforcement, and the eventual **decay of herding**.
+
+**Key findings (2607.28127):** Existing financial-sentiment LLMs are **market-agnostic** — supervised on static, human-annotated data, unable to adapt as conditions change. FinSMART is a **market-aligned RL** framework that optimises sentiment signals directly against **realised market outcomes**, using market-aware data filtering plus a discrete **asymmetric** trading reward for stability under noisy, non-stationary, multifactorial data. Reported +220% cumulative return over the strongest baseline, and it supports **market-aware retraining at any time** by substituting newly observed articles + realised outcomes for manual annotation.
+
+**Framework mapping:** (a) 2607.27063 adds an **A-share crowding factor** to §2 sector/breadth and a **momentum-exhaustion condition** to §13.9.1 trend-quality — the skill's momentum block has no crowding-decay read today. (b) 2607.28127 upgrades §13.8.6 news sentiment from static supervised scoring to market-aligned, retrainable scoring, and pairs with §13.10.3 for *when* to promote a retrained sentiment model.
+
+**Signal design:**
+- Add `herding_indicator(cross_section_returns, method="tail_johnson_su")` to `scoring_engine.py`: compute CSAD, LSV, and the rolling tail-based measure after Johnson SU transformation; report all three and flag divergence (the paper finds them concordant — divergence is a data-quality alarm).
+- **Regime input:** rising herding ⇒ crowding buildup. Feed into `_detect_regime()` alongside denoised breadth (§13.8.3); herding spikes coincide with major disruptions, so it is a **coincident stress read**, deliberately *not* claimed as leading (consistent with §13.10.2's warning against fragile early-warning claims).
+- **Momentum-exhaustion condition:** high herding + decaying herding slope + price extended vs signal-implied value ⇒ elevated **reversal** risk. Apply as a soft veto on fresh momentum entries (shrink `risk_scale`), **not** as a short signal.
+- **Fat-tail linkage:** stronger herding predicts higher excess kurtosis ⇒ raise the CVaR loss-budget requirement in `tail_risk_gate` (§13.8.5) when the herding indicator is elevated.
+- **Sentiment upgrade:** make `news_sentiment_score()` pluggable with a market-aligned backend — train/refresh the sentiment scorer against realised forward returns with an asymmetric reward, rather than static annotation labels. Promote any refreshed sentiment model only through `shadow_before_swap` (§13.10.3).
+
+**Caveat:** The A-share herding evidence is model-plus-indicator, not a validated tradable factor — admit only through the ESS gate (§13.10.4) and triple-gate (§13.9.2). FinSMART's +220% headline is a single-paper backtest claim: it must clear `audit_checklist()` (§13.9.6) before its sizing is trusted, and market-aligned RL optimised on realised outcomes has an **elevated overfitting surface** precisely because it trains on the target. Keep the sentiment weight small (§13.8.6 caveat: low-frequency overlay, ~5% of the fundamentals bucket).
 
 ---
 
@@ -1165,7 +1311,7 @@ For detailed implementation of each module, refer to the code files created in t
 13. **推荐**：将 `confidence`/`risk_scale` 作为仓位乘子（精确信号满仓、噪声信号缩仓）；用 `edge_significant`（CI 排除零）作为"信号非噪声"的风控闸门，与 4-Layer 否决项叠加使用
 14. **强制**：任何"方向性准确率/涨跌预测"类 ML 信号（含 TSFM、TimesFM、LoRA 适配模型）必须通过**基率诚实显著性检验**（arXiv:2607.12248）：其命中率 CI 下界须高于市场上涨基率，否则 `risk_scale` 降至 floor；不得将"高方向准确率"直接当作可加仓信号
 15. **强制**：相关性/广度类因子（市场广度、板块协同）必须使用**去噪相关矩阵**（arXiv:2607.10297）；禁止在短窗口原始相关矩阵上做板块聚类/危机判定（窗口 < 60 观察值会导致聚类不稳定）
-16. **推荐**：危机/regime 判定应加入**领先指标**——协方差矩阵特征向量旋转率（arXiv:2607.11935），在波动率爆发前提前收紧否决项与 `risk_scale`；默认用"顶层主成分载荷周度变化"代理，TVP-Kalman 为可选
+16. **推荐**（⚠️ **已被 #31 修订，须与 #31 合并阅读**）：危机/regime 判定应加入**领先指标**——协方差矩阵特征向量旋转率（arXiv:2607.11935），在波动率爆发前提前收紧否决项与 `risk_scale`；默认用"顶层主成分载荷周度变化"代理，TVP-Kalman 为可选
 17. **强制**：尾部风险/CVaR 估计必须采用**时间感知（block/diachronic）采样**（arXiv:2607.10810），与 §13.7 的"禁止 IID 自助法"规则一致；禁止用 i.i.d. 历史样本直接估计 VaR/CVaR
 18. **推荐**：新闻情绪作为**低频另类数据叠加**，权重宜小（如 fundamental 桶 5%），仅作确认层/软否决，不与动量因子重复计数；加密标的可叠加 on-chain 情绪（arXiv:2607.15258）
 19. **强制**：因子治理（正交化/走航/衰减/熔断/三级评估链）默认全部关闭，必须由 `config.py` 的 `ENABLE_GOVERNANCE` / `GOV_*` 显式开启；禁止为"顺手启用"将默认值改为 `True`
@@ -1180,6 +1326,13 @@ For detailed implementation of each module, refer to the code files created in t
 28. **推荐**：概率/区间型信号源接入 Brier + Winkler 校准评分（arXiv:2607.16229，严格时间门控），以校准技能分作为 `risk_scale` 的乘子——过度自信的信号源结构性缩仓；不足 60 个已计分预测前不得启用该乘子
 29. **推荐**：趋势/动量因子的回看窗口按**成本最优 span**（arXiv:2607.19497）选取而非固定 20/60/120；标的是否适合趋势跟随以低频谱质量（excess spectral mass）诊断为准，样本 < 250 时回退固定窗口
 30. **推荐**：组合分散化用 TDA 拓扑距离聚类 + 保留机制滞回换仓（arXiv:2607.21170，得分差 > 10 分才换仓以控制换手），regime/广度判定仍用 §13.8.3 去噪相关——两者用途不得混用；CVaR 优化权重天然集中（arXiv:2607.16450），必须叠加单标的/单行业上限，且回测同时报告 Sharpe 型与 Rachev 型指标并在两者排名冲突时显式标记
+31. **强制**（修订 #16）：危机/regime 早期预警（临界慢化族：方差、AC(1)、特征值、§13.8.4 特征向量旋转）**只对内生累积型崩塌有效**，对外生冲击型（政策/关税/突发新闻）结构性失灵（arXiv:2607.27070：7 次事件中 2 次外生冲击完全无信号）。因此：早期预警输出必须是**群体层面先验**（带类型标注的字典，非裸布尔告警），对 `risk_scale` 的影响须设上限（建议 ≤ 30%）；**禁止**把早期预警当作唯一尾部防线——`tail_risk_gate`、单标的上限、非对称波动 CVaR 必须**全时段常备**。任何临界慢化类结论必须报告扫描的分析配置数并通过 placebo/onset 检验，单一调参配置不构成证据
+32. **强制**：因子/模型**替换**（非首次准入）必须走前瞻门控 `shadow_before_swap`（arXiv:2607.28577）：挑战者在服务路径外热重训，与在位者在**同一段前瞻延迟标签**上做**配对**比较，净优势超过固定 margin 才晋升；**禁止**按日历定期换模型、**禁止**凭回测 IC 更高就替换在位因子。晋升率过高说明 margin 过松（论文中 528 个挑战者仅晋升 114 个，部署变更减少 78.4%）。点预测因子用配对正当评分（方向用 Brier、分位数用 pinball）代替配对 NLL
+33. **强制**：三闸门准入（#27）之前必须先过**有效样本量闸门** `effective_sample_gate`（arXiv:2607.27544）：用自相关修正 `ESS ≈ n/(1+2Σρ_k)` 计算有效独立观测数（重叠窗口与序列相关会严重虚增原始 n）。落入"信号不足区"时判定 `INSUFFICIENT_EVIDENCE`（区别于 INCONCLUSIVE：后者是"测过但未解决"，前者是"根本不可测"），此时**成绩记录不可采信**，只能退回**过程准则**——即 §14.2 的 L2 经济逻辑四维 rubric（需 ≥ 3/4）并施加硬权重上限。同理，低 ESS 的实盘业绩不得用于加杠杆或宣称能力
+34. **强制**：区间型输出（`ci_low`/`ci_high`、波动率预测区间、分位数预测）在进入仓位乘子之前必须做**相干性投影** `project_coherent_intervals`（arXiv:2607.26792，KQSP：免训练、免参数、模型无关）：分位数单调、OHLC 序关系、`ci_low ≤ point ≤ ci_high`、RV 区间非负。投影**只保证相干、不保证覆盖**，必须在共形校准**之后**执行，不得替代校准；投影修正幅度须记录，幅度大说明上游预测器失准，应喂给 §13.9.3 校准乘子而非静默修复
+35. **强制**：回测**禁止**假设限价单零成本成交（arXiv:2607.28323）。被动成交必须建模：成交概率随报价距中价按指数衰减 `p_fill ≈ exp(−δ/κ)`、被动冲击随距离指数衰减且非零、以概率 `1−p_fill` 的**未成交风险**必须显式入账（错过交易或事后穿价二选一，静默假设成交属前视偏差）。该项加入 `audit_checklist()`，未勾选 ⇒ 结果标记 UNRELIABLE；4-Layer 的高费率否决项须把预期被动冲击与未成交成本计入费率估计
+36. **推荐**：A 股拥挤度用羊群效应指标 `herding_indicator`（arXiv:2607.27063：CSAD / LSV / Johnson SU 变换后的滚动尾部指标，三者应同向，背离视为数据质量告警）。定位为**同步压力读数**（在重大扰动期上升），**不得**宣称为领先指标；羊群高位 + 斜率衰减 + 价格相对信号隐含值过度延展 ⇒ 动量衰竭/反转风险，作为新开动量仓的**软否决**（缩 `risk_scale`），**不得**据此做空。羊群走强预示超额峰度上升，应同步抬高 `tail_risk_gate` 的 CVaR 损失预算要求
+37. **推荐**：新闻情绪评分器可升级为**市场对齐**范式（arXiv:2607.28127：以已实现前瞻收益 + 非对称奖励做 RL 训练，替代静态人工标注），但——(a) 直接在目标上训练**过拟合面显著扩大**，其回测宣称（如 +220%）必须先过 `audit_checklist()`（§13.9.6）；(b) 重训后的情绪模型只能经 `shadow_before_swap`（#32）晋升；(c) 权重仍受 #18 约束（低频叠加、fundamental 桶约 5%），不得因"RL 版更强"而放大
 
 ## §14 因子治理模块（FTS 派生的 6 项工程化能力）
 
@@ -1231,6 +1384,7 @@ signals = gen.generate_signals(scores, realized_ic=0.05, passed=True)  # 熔断�
 | v2.2.0 | 2026-07-11 | SkillEvolver 演化（arXiv:2607.06690）：新增无分布不确定性量化模块 `uncertainty_quantification.py`，实现依赖感知移动块自助法 CI（tsbootstrap 主路径 + 纯numpy回退）、split-conformal 预测半宽、仓位置信度映射与风控闸门（CI跨零则否决），接入 `MultiFactorScorer` 为可选 `confidence`/`ci_low`/`ci_high`/`edge_significant`/`risk_scale` 字段（config 驱动，默认关闭） |
 | v2.3.0 | 2026-07-18 | SkillEvolver 周度自进化（arXiv 2026-07-14~18）：新增 6 篇本周论文集成 — §13.8.1 成本感知多期配置(arXiv:2607.15195)、§13.8.2 基率诚实方向显著性(arXiv:2607.12248)、§13.8.3 去噪相关广度因子(arXiv:2607.10297)、§13.8.4 特征向量旋转危机领先指标(arXiv:2607.11935)、§13.8.5 厚尾风险闸门(arXiv:2607.10810)、§13.8.6 新闻情绪另类因子(arXiv:2607.13968)；新增约束 #14–#18 |
 | v2.5.0 | 2026-07-25 | SkillEvolver 周度自进化（arXiv 2026-07-20~24，64 篇扫描选 6）：新增 §13.9 — §13.9.1 趋势跟随谱质量诊断与成本最优 span(arXiv:2607.19497)、§13.9.2 三闸门因子准入(arXiv:2607.20093)、§13.9.3 Brier+Winkler 校准评分乘子(arXiv:2607.16229)、§13.9.4 非对称波动 CVaR 配置与度量分歧标记(arXiv:2607.16450)、§13.9.5 TDA 拓扑分散化+保留滞回换仓(arXiv:2607.21170)、§13.9.6 回测取证清单 audit_checklist(arXiv:2607.19453+2607.20168)；新增约束 #25–#30；修正 frontmatter 版本号漂移（v2.4.0 时未同步） |
+| v2.6.0 | 2026-08-02 | SkillEvolver 周度自进化（arXiv 2026-07-27~31，76 篇扫描选 8 篇成 7 节）：新增 §13.10 — §13.10.1 特征驱动协方差 CD-DFM 与零样本标的接入(arXiv:2607.24410)、§13.10.2 早期预警事件异质性护栏（**部分回撤 §13.8.4** 的领先指标定位，arXiv:2607.27070）、§13.10.3 Shadow-Before-Swap 前瞻门控换模/换因子(arXiv:2607.28577)、§13.10.4 有效样本量闸门 ESS 与 INSUFFICIENT_EVIDENCE 判定(arXiv:2607.27544)、§13.10.5 区间相干性投影 KQSP(arXiv:2607.26792)、§13.10.6 被动市场冲击与未成交风险(arXiv:2607.28323)、§13.10.7 A股羊群拥挤度 + 市场对齐情绪 RL(arXiv:2607.27063+2607.28127)；新增约束 #31–#37（其中 #31 为对 #16 的修订） |
 | v2.4.0 | 2026-07-24 | SkillEvolver + Loop 演化（FTS 文章派生）：新增因子治理模块 `scripts/factor_governance.py`，实现 6 项工程化能力——契约先行(TypedDict)+原子持久化、三级评估链(L1回测/L2经济逻辑/L3多重检验)、走航验证(Walk-forward)、因子衰减检验(Decay Test)、熔断机制(Circuit Breaker)、正交化(去冗余)；接入 `scoring_engine`(正交化)、`signal_generator`(熔断网关)、`backtest`(走航/衰减报告)，全部 config 驱动默认关闭；SKILL.md 新增 §14 与约束 #19–#24 |
 | v1.x | 2026-06 | 初始版本：6-Category 多因子评分框架，支持 A股/港股/美股，含 2026 arXiv 研究集成 |
 

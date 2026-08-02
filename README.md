@@ -37,7 +37,7 @@
 | Skill | 说明 | 版本 |
 |-------|------|------|
 | [stock-debate-team](./quant-strategy/stock-debate-team/) | 股票交易辩论多空专家团，组织巴菲特/芒格/段永平/史文森四大投资大师视角进行多空辩论分析 | v1.0.0 |
-| [multi-factor-scoring](./quant-strategy/multi-factor-scoring/) | 多因子量化交易系统：6-Category 因子选股 + 4-Layer 趋势萌芽框架（OI/ATR/OBV/CMF/Supertrend/HMA/Donchian/DMI/MACD）+ 否决项规则 + FTS 因子治理（三级评估链/走航验证/衰减检验/熔断/正交化/原子持久化） | v2.5.0 |
+| [multi-factor-scoring](./quant-strategy/multi-factor-scoring/) | 多因子量化交易系统：6-Category 因子选股 + 4-Layer 趋势萌芽框架（OI/ATR/OBV/CMF/Supertrend/HMA/Donchian/DMI/MACD）+ 否决项规则 + FTS 因子治理（三级评估链/走航验证/衰减检验/熔断/正交化/原子持久化）+ 部署纪律层（ESS 有效样本量闸门/Shadow-Before-Swap 换模门控/区间相干性投影/被动市场冲击成本/羊群拥挤度） | v2.6.0 |
 | [auto-research-stock-selection](./quant-strategy/auto-research-stock-selection/) | 基于华泰证券自进化Skill框架的稳健低波价值优选策略，支持训练集/验证集/测试集样本隔离和版本化管理 | - |
 | [a-share-etf-momentum](./quant-strategy/a-share-etf-momentum/) | A股行业ETF双动量轮动：绝对动量择时+相对动量轮动+估值分位刹车+ATR移动跟踪止损 | v2.0.0 |
 | [etf-dual-momentum](./quant-strategy/etf-dual-momentum/) | ETF双动量轮动：31行业全覆盖、斜率×R²排名、风险平价仓位、逐ETF PE刹车、收盘止损 | v1.3.0 |
