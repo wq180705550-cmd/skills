@@ -1,9 +1,9 @@
 ﻿---
 name: multi-factor-scoring
-description: "Multi-factor scoring quantitative trading system. Build quantitative trading strategies from multi-factor scoring (momentum, technical, volume, fundamentals, macro, sector rotation) across A-shares, HK stocks, US stocks, and futures/derivatives on daily/4H/1H/15M timeframes. Includes a 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM ensemble), a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal intervals), and an FTS factor-governance module (3-level evaluation chain, walk-forward validation, decay test, circuit breaker, orthogonalization, atomic persistence), and a deployment-discipline layer (effective-sample-size gate, shadow-before-swap forward-gated model replacement, interval coherence projection, passive market-impact costing, herding/crowding read). Triggers: multi-factor models, scoring systems, factor-based stock selection, rotation strategies, quantitative trading framework, 4-layer scoring, volatility forecasting/HAR, uncertainty quantification/conformal prediction, position confidence, risk thresholds, factor governance/admission gates, model promotion policy, backtest audit."
+description: "Multi-factor scoring quantitative trading system. Build quantitative trading strategies from multi-factor scoring (momentum, technical, volume, fundamentals, macro, sector rotation) across A-shares, HK stocks, US stocks, and futures/derivatives on daily/4H/1H/15M timeframes. Includes a 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM ensemble), a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal intervals), and an FTS factor-governance module (3-level evaluation chain, walk-forward validation, decay test, circuit breaker, orthogonalization, atomic persistence), and a deployment-discipline layer (effective-sample-size gate, shadow-before-swap forward-gated model replacement, interval coherence projection, passive market-impact costing, herding/crowding read), and an uncertainty-to-sizing & robust-structure layer (conformal-Kelly interval-width position sizing, exposure-similarity factor-graph structure, non-Gaussian long-memory drawdown budgeting, certified Wasserstein distributionally-robust allocation, forecast-gap Shapley attribution, sentiment classification-vs-return-predictability guard, sector-embedding cross-sectional heterogeneity). Triggers: multi-factor models, scoring systems, factor-based stock selection, rotation strategies, quantitative trading framework, 4-layer scoring, volatility forecasting/HAR, uncertainty quantification/conformal prediction, position confidence, risk thresholds, factor governance/admission gates, model promotion policy, backtest audit, conformal-Kelly sizing, distributionally-robust portfolio optimization, drawdown budgeting, forecast attribution."
 
 agent_created: true
-version: 2.6.0
+version: 2.7.0
 language: zh
 type: strategy
 priority: high
@@ -37,7 +37,14 @@ triggers:
   - "被动市场冲击/限价单成交概率/未成交风险"
   - "羊群效应/CSAD/LSV/拥挤度/动量衰竭反转"
   - "市场对齐情绪RL/FinSMART"
-keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI, cost-aware-allocation, SciPhyRL, base-rate, directional-significance, correlation-denoising, market-breadth, eigenvector-rotation, early-warning, tail-risk, CVaR, news-sentiment, alternative-data, trend-following, spectral-mass, cost-optimal-span, triple-gate-admission, backtest-audit, purged-split, calibration, Brier-score, Winkler-score, TDA, topological-clustering, retention-mechanism, GJR-GARCH, asymmetric-volatility, Rachev-ratio, CD-DFM, characteristic-covariance, zero-shot-onboarding, critical-slowing-down, event-heterogeneity, shadow-before-swap, forward-gated-promotion, effective-sample-size, skill-attribution, quantile-crossing, KQSP, coherence-projection, passive-market-impact, fill-probability, non-execution-risk, herding, CSAD, LSV, crowding, momentum-exhaustion, market-aligned-RL, FinSMART]
+  - "共形Kelly/区间宽度仓位/分数Kelly/Conformal Kelly"
+  - "因子暴露图/MINGLE/暴露相似度/图局部性"
+  - "回撤预算/最长恢复时间/长记忆回撤/非高斯回撤/fBM"
+  - "Wasserstein鲁棒优化/分布鲁棒配置/认证近似LP/DRO"
+  - "预测差归因/Shapley归因/CCAR/CECL"
+  - "情绪分类vs收益可预测/QLoRA/前瞻IC显著性/Newey-West"
+  - "板块嵌入/横截面异质性/短期反转/知情流持续性/龙虎榜席位"
+keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI, cost-aware-allocation, SciPhyRL, base-rate, directional-significance, correlation-denoising, market-breadth, eigenvector-rotation, early-warning, tail-risk, CVaR, news-sentiment, alternative-data, trend-following, spectral-mass, cost-optimal-span, triple-gate-admission, backtest-audit, purged-split, calibration, Brier-score, Winkler-score, TDA, topological-clustering, retention-mechanism, GJR-GARCH, asymmetric-volatility, Rachev-ratio, CD-DFM, characteristic-covariance, zero-shot-onboarding, critical-slowing-down, event-heterogeneity, shadow-before-swap, forward-gated-promotion, effective-sample-size, skill-attribution, quantile-crossing, KQSP, coherence-projection, passive-market-impact, fill-probability, non-execution-risk, herding, CSAD, LSV, crowding, momentum-exhaustion, market-aligned-RL, FinSMART, conformal-kelly, fractional-kelly, interval-width-sizing, MINGLE, exposure-similarity-graph, factor-graph, drawdown-budget, fractional-brownian, long-memory-drawdown, wasserstein-dro, distributionally-robust, certified-approximation, forecast-gap-attribution, shapley-attribution, CCAR, CECL, sentiment-return-gap, QLoRA, forward-IC, newey-west, sector-embeddings, cross-sectional-heterogeneity, short-term-reversal, informed-flow, LHB-seat-persistence]
 config:
   framework: "6-category"  # or "4-layer"
   ashare_data_source: "akshare"
@@ -1165,6 +1172,99 @@ This week's theme is **deployment discipline + evidence sufficiency**: three pap
 
 ---
 
+### 13.11 This-Week arXiv Integration (2026-08-04 ~ 2026-08-10)
+
+Crawled the arXiv **q-fin** recent listing (announcements 2026-08-04 → 2026-08-10, **92 papers** incl. cross-lists); scanned all titles, read 8 abstracts, and selected 8 papers grouped into 7 subsections with a direct, non-speculative mapping. Follows the opt-in, config-driven, graceful-fallback pattern of §13.6–§13.10.
+
+This week's theme is **uncertainty → sizing, co-movement → structure, sharp → robust**, with a strong *evidence-discipline* throughline. Three of the eight papers are as much about **how not to fool yourself** as about new alpha: Conformal Kelly's development-window edge collapsed out-of-sample under pre-registration (§13.11.1); a QLoRA LLM sentiment benchmark shows classification accuracy does **not** survive as tradable IC (§13.11.6); and a Shapley forecast-gap attribution supplies the missing "why did the number change" decomposition for shadow-before-swap (§13.11.5).
+
+#### 13.11.1 Conformal Kelly: Interval-Width Position Sizing + an Honest OOS Collapse (arXiv:2608.01494)
+
+**Finding:** Reuse a 75% conformal interval (from the §13.7 / `uncertainty_quantification` module) as the **scale** in fractional Kelly — wider interval ⇒ shrink the position, narrower ⇒ grow it. Counter-intuitive robustness result: when an interval **sizes** a position rather than describing a forecast, **width stability beats local sharpness** — the winner was the *simplest* slow, unweighted, per-asset rolling quantile; every faster-adapting tweak cost 0.7–5.3 pts of annual growth, and it beat textbook std-dev sizing by 2.1 pts at matched leverage. A downside-breach de-lever (cut leverage when intervals miss low far above their historical rate) cut max DD 27.7%→20.3% while raising Sharpe, beating all 40 placebo timings (p = 1/41). **But**: the 28.5% development-window CAGR came from an autonomous 200-config LLM-agent search; after sealing 2022+ data and pre-registering, the two chosen configs earned only 8.5% / 7.0% — **below passive benchmarks** — even though calibration held (0.745 vs 0.750 nominal).
+
+**Framework mapping:** Directly connects the **uncertainty-quantification module** (§13.7 conformal half-width `ci_low`/`ci_high`) to **position sizing** (§5) and `risk_scale`. Fills a gap: the skill already computes conformal intervals and a linear `risk_scale`, but has no principled interval-width → Kelly-fraction map nor a downside-breach de-lever rule.
+
+- `conformal_kelly_scale(point, ci_low, ci_high, kelly_fraction)`: map interval **width** to a fractional-Kelly multiplier; **default to slow, unweighted, per-asset rolling quantiles** (do not adaptively reweight for speed — width stability is the design goal). Run through coherence projection (#34) and calibration (§13.9.3) **before** sizing.
+- Downside-breach de-lever: track rolling downside coverage; when realized downside misses exceed the nominal rate by a margin, tighten the `risk_scale` floor (a leverage cut, **not** a directional/short signal).
+- Config-driven, default off (`ENABLE_CONFORMAL_KELLY=False`); `kelly_fraction ≤ 0.5`.
+
+**Caveat (evidence discipline, feeds §13.9.6 / §13.10.4):** the paper is itself a cautionary tale — a 200-config agentic search produced a development edge that **did not survive pre-registered OOS**. Any Conformal-Kelly config must be sealed / pre-registered and clear `audit_checklist()` (#25) + the ESS gate (#33) before its sizing is trusted; *calibration holding is not evidence of growth*. Keep all standing tail protections (#31) armed.
+
+#### 13.11.2 MINGLE: Locality by Factor Exposures, Not Co-Movement (arXiv:2608.06618)
+
+**Finding:** MINGLE jointly learns a latent factor representation and its induced graph topology via a unified ADMM, redefining graph **locality** through **systematic factor-exposure similarity** rather than observed co-movement. The exposure-similarity graph aligns more closely with established economic sectors than correlation-based graphs; portfolios built on it consistently beat correlation-based counterparts across volatility regimes and transaction-cost levels (confirmed by paired statistical testing).
+
+**Framework mapping:** Upgrades the correlation/covariance backbone shared by §13.8.3 (denoised-correlation breadth), §13.9.5 (TDA diversification clustering), §13.10.1 (CD-DFM covariance) and §2 sector. All of these currently derive structure from *observed return co-movement*; MINGLE groups by *why* assets move together (shared exposures), which is more stable and sector-aligned.
+
+- `exposure_similarity_graph(returns, factor_loadings)`: build the breadth/clustering graph from exposure profiles, not raw correlation; feed the sector-aligned graph into breadth (§13.8.3), diversification clustering (§13.9.5) and the covariance consumers (§13.10.1 / §13.9.4).
+- Graceful fallback: when factor loadings are unavailable (IPOs, short history), fall back to the denoised-correlation graph (§13.8.3) / CD-DFM zero-shot covariance (§13.10.1).
+- Config-driven, default off.
+
+**Caveat:** MINGLE requires a credible factor model; a mis-specified exposure set yields a confidently wrong graph. Treat exposure-graph vs correlation-graph disagreement as a **data-quality flag**, and keep single-name / sector caps (#30) armed regardless of which graph is used.
+
+#### 13.11.3 Drawdown Beyond Brownian: Non-Gaussian, Long-Memory Drawdown Calibration (arXiv:2608.00127)
+
+**Finding:** Extends the Rej–Seager–Bouchaud drawdown framework as a transparent Monte-Carlo experiment mapping Sharpe + return structure to four decision measures — **max drawdown, max loss, longest negative time, longest recovery time**. Relaxing Gaussianity (skew, fat tails, vol clustering, Sharpe-estimation uncertainty) moves the four measures *differently* — a single Gaussian table mis-warns. Under fractional Brownian motion, the apparent persistence-driven amplification of *max-DD depth* is almost entirely self-similar dispersion scaling **T^(H−1/2)** — a **square-root-of-time calibration failure**, not intrinsic path danger.
+
+**Framework mapping:** Upgrades §13.8.5 `tail_risk_gate` and drawdown expectations, and continues the standing "no-IID / no-Gaussian" rule (#11 / #17). Also refines §13.10.2: don't over-attribute danger to persistence — correct the time-scaling first.
+
+- `drawdown_budget(sharpe, return_stats, horizon)`: return expected {maxDD, maxLoss, negTime, recoveryTime} from a Monte-Carlo lookup **calibrated to the strategy's own skew / kurtosis / vol-clustering**, not a Gaussian closed form; use it to set drawdown alarms and de-lever thresholds.
+- Long-memory correction: scale DD-depth expectations by T^(H−1/2) rather than √T when H≠0.5; **label the difference as calibration, not new risk**.
+- Config-driven, default off; fall back to the Gaussian table with an explicit "mis-warn risk" log when higher moments can't be estimated.
+
+**Caveat:** the four measures must be budgeted **separately** — a strategy can be fine on max-DD depth yet fail on recovery time. Report all four; never collapse to a single drawdown number.
+
+#### 13.11.4 Certified Wasserstein Distributionally-Robust Allocation (arXiv:2608.07032)
+
+**Finding:** A **certified**, scalable approximation for high-dimensional Wasserstein DRO portfolio optimization. For long-only box-support portfolios under the one-norm ground metric, the robust expected-utility problem reduces to a **polynomial-size linear program** (hyperplane majorization + support dualization); the uniform utility-approximation error **bounds both the robust-value error and the near-optimality gap**. Demonstrated on 476-asset monthly rebalancing, scalable to 1,000 assets.
+
+**Framework mapping:** Upgrades §5 allocation and §13.9.4 CVaR allocation with a *worst-case-robust* weight solver carrying an explicit **certificate** — a stronger guarantee than point-estimate mean-variance / CVaR. Pairs naturally with §13.11.2 / §13.10.1 covariance inputs.
+
+- `wasserstein_robust_weights(mu, support_box, radius, utility)`: solve the finite hyperplane-dual LP over polyhedral constraints; expose the approximation-error bound as the allocation's **certificate** and log it.
+- Set the Wasserstein radius from estimation uncertainty (link to ESS #33 — smaller effective sample ⇒ larger ambiguity radius).
+- Config-driven, default off; fall back to CVaR / mean-variance when the LP is infeasible or the asset count is small.
+
+**Caveat:** robustness is not free — an over-large radius yields overly conservative, near-equal-weight portfolios. Tune the radius by OOS performance under `audit_checklist()`, and keep single-name / sector caps (#30).
+
+#### 13.11.5 Forecast-Gap Attribution as a Cooperative Game (arXiv:2608.04547)
+
+**Finding:** When a forecast changes run-to-run, decompose the total change into per-input contributions (portfolio data, macro scenario, model spec, business assumptions, management overlays) as a **cooperative game** — exact Shapley, nested/hierarchical Shapley, Integrated Gradients, Gradient/Permutation/Kernel SHAP — with an allocation that **reconciles to the total** without an arbitrary sequence of input replacements. The paper compares allocation rules, cost, and governance suitability (CCAR / CECL context).
+
+**Framework mapping:** Fills a real gap in **§14 governance** and **§13.10.3 shadow-before-swap**. Today the governance chain decides admit/replace but has **no principled decomposition of why a challenger's or incumbent's forecast moved**. Forecast-gap attribution answers "which input drove the delta," which is exactly what a shadow-before-swap decision and a §13.10.4 skill-attribution audit require.
+
+- `attribute_forecast_gap(inputs_run_a, inputs_run_b, model)`: return an additive, total-reconciling attribution over inputs; default to **nested Shapley** for hierarchical input groups, fall back to Kernel SHAP when exact Shapley is infeasible (record which estimator was used).
+- Wire into `shadow_before_swap` (#32): before promoting a challenger, report the attribution of its edge to inputs vs model change; an edge driven purely by a single volatile input is a **demotion flag**.
+- Config-driven, default off.
+
+**Caveat:** attribution explains a change, it does **not** validate it — a large "model-spec" contribution is not evidence the model is better; it still must clear the triple gate (#27) and ESS gate (#33). Approximate SHAP estimators need not reconcile exactly; use exact/nested Shapley only when reconciliation to the total is required for governance sign-off.
+
+#### 13.11.6 Sentiment Classification ≠ Return Predictability — Guard on §13.8.6 / §13.10.7 (arXiv:2608.04200)
+
+**Finding:** A unified QLoRA benchmark separates linguistic performance from economic value. Mistral-7B tops classification (acc 0.884, macro-F1 0.877) and QLoRA lifts Qwen2.5's macro-F1 from 0.727→0.862 — **but** on a temporally separate 2019 sample (10,637 headlines, S&P100), all seven downstream models give only small positive one-day rank IC (largest **0.0143**, FinBERT), and **none of the 28 model-horizon tests survive Newey–West + FDR**; portfolio results show no robust advantage.
+
+**Framework mapping:** A rigorous guard-rail on the §13.8.6 news-sentiment factor and the §13.10.7 market-aligned upgrade. It mandates: do **not** size a sentiment factor by its classification accuracy; require forward-return IC that survives multiple-testing correction with HAC / Newey–West inference.
+
+- Harden `news_sentiment_score()` admission: gate on **forward-return rank IC significant after Newey–West + BH-FDR**, not classification F1 (feeds triple gate #27 and audit #25). QLoRA is confirmed effective for *adaptation*, so keep it as the encoder — just don't trust its labels as alpha.
+- Enforce the existing small-weight cap (#18, ~5% of the fundamentals bucket) until the IC clears correction; if it never does, the factor stays a soft confirmation overlay, never a sizer.
+
+**Caveat:** consistent with §13.10.7's warning that market-aligned RL sentiment has an elevated overfitting surface. Classification benchmarks are necessary but not sufficient; the burden of proof is **tradable, multiple-testing-robust IC**.
+
+#### 13.11.7 Cross-Sectional Heterogeneity: Sector Embeddings + Informed-Flow Persistence (arXiv:2608.05755, arXiv:2608.04373)
+
+**(a) Sector embeddings (2608.05755):** An LSTM augmented with **learnable sector embeddings + macro covariates** beats a plain LSTM, Random Forest and buy-and-hold on a cross-sectional S&P500 long-short; the predictive signal decomposes into a **short-term reversal factor + an industry-momentum factor**, and a weight-based contribution metric quantifies sector influence. Confirms that a single one-size-fits-all cross-sectional model is mis-specified — heterogeneity must be modeled explicitly.
+
+**(b) Informed-flow persistence (2608.04373):** On a fully public-identity DEX order book (17.1B messages, 147k wallets), **informativeness is a persistent per-wallet attribute** (10-day rank corr 0.52); adding top-ranked wallets' live activity to an anonymous benchmark raises 1-second OOS R² by 13.2% (t = 9.2), 1.6× the best of 200 placebo cohorts.
+
+**Framework mapping:** (a) Strengthens §2 **sector** (heterogeneous, sector-aware treatment rather than pooled scoring — aligns with §13.11.2's exposure grouping), reinforces the §13.9.1 **industry-momentum** read, and legitimizes a **short-term reversal** factor. (b) Supplies an informed-flow read for §2 volume/fund-flow — its A-share analog is **龙虎榜 (LHB) seat-level informativeness persistence**: rank broker/seat identities by post-print price impact and treat persistently informed seats as a fund-flow confirmation.
+
+- Sector-aware scoring: allow per-sector factor treatment (learnable/embedded sector adjustment or, minimally, sector-conditional normalization); add a short-term-reversal sub-factor alongside industry momentum, both admitted through the triple gate (#27) and ESS gate (#33).
+- Informed-flow (A-share): `informed_seat_score()` — rank LHB seats by persistence of post-appearance forward returns over adjacent windows; use persistent-informed-seat activity as a small fund-flow confirmation, **never** a standalone sizer.
+- Config-driven, default off.
+
+**Caveat:** (a) sector embeddings risk overfitting on short histories — regularize and validate OOS. (b) The public-wallet mechanism does **not** transfer directly to A-shares (no per-order public identity); the LHB-seat analog is delayed (T+1 disclosure), coarse (seat-level, not order-level) and gameable — admit only through the ESS gate (#33) and treat as a coincident / short-horizon confirmation, **not** a leading signal (consistent with #31).
+
+---
+
 ## Usage Examples
 
 **Example 1: Build a multi-factor scoring system for A-shares**
@@ -1333,6 +1433,13 @@ For detailed implementation of each module, refer to the code files created in t
 35. **强制**：回测**禁止**假设限价单零成本成交（arXiv:2607.28323）。被动成交必须建模：成交概率随报价距中价按指数衰减 `p_fill ≈ exp(−δ/κ)`、被动冲击随距离指数衰减且非零、以概率 `1−p_fill` 的**未成交风险**必须显式入账（错过交易或事后穿价二选一，静默假设成交属前视偏差）。该项加入 `audit_checklist()`，未勾选 ⇒ 结果标记 UNRELIABLE；4-Layer 的高费率否决项须把预期被动冲击与未成交成本计入费率估计
 36. **推荐**：A 股拥挤度用羊群效应指标 `herding_indicator`（arXiv:2607.27063：CSAD / LSV / Johnson SU 变换后的滚动尾部指标，三者应同向，背离视为数据质量告警）。定位为**同步压力读数**（在重大扰动期上升），**不得**宣称为领先指标；羊群高位 + 斜率衰减 + 价格相对信号隐含值过度延展 ⇒ 动量衰竭/反转风险，作为新开动量仓的**软否决**（缩 `risk_scale`），**不得**据此做空。羊群走强预示超额峰度上升，应同步抬高 `tail_risk_gate` 的 CVaR 损失预算要求
 37. **推荐**：新闻情绪评分器可升级为**市场对齐**范式（arXiv:2607.28127：以已实现前瞻收益 + 非对称奖励做 RL 训练，替代静态人工标注），但——(a) 直接在目标上训练**过拟合面显著扩大**，其回测宣称（如 +220%）必须先过 `audit_checklist()`（§13.9.6）；(b) 重训后的情绪模型只能经 `shadow_before_swap`（#32）晋升；(c) 权重仍受 #18 约束（低频叠加、fundamental 桶约 5%），不得因"RL 版更强"而放大
+38. **推荐**：共形 Kelly 仓位（arXiv:2608.01494）——用共形区间**宽度**（§13.7）映射分数 Kelly 乘子（宽→缩、窄→放），`kelly_fraction ≤ 0.5`，区间必须用**慢速、不加权、按标的滚动分位**（宽度稳定优于局部锐利，任何加速自适应会掉 0.7–5.3pt 年化），先过 #34 相干投影 + §13.9.3 校准再入仓；下侧覆盖被突破超历史率时**降杠杆**（非方向信号）。⚠️ 该论文自身为反面教材：200 配置 agentic 搜索开发窗 28.5% CAGR，封存 2022+ 数据并预注册后跌至 8.5%/7.0%（低于被动）——**校准成立 ≠ 增长成立**；任何配置必须封存/预注册并过 `audit_checklist()`(#25) + ESS 闸(#33) 方可采信
+39. **推荐**：相关/广度/聚类**结构**优先按**因子暴露相似度**建图（MINGLE，arXiv:2608.06618）而非观测共动——暴露图更贴合经济板块、跨波动率/成本更稳；接入 §13.8.3 广度、§13.9.5 分散聚类、§13.10.1 协方差。缺因子载荷（IPO/短史）**优雅回退**去噪相关图 / CD-DFM 零样本协方差；暴露图与相关图**分歧视为数据质量告警**，#30 单标的/行业上限全时段常备
+40. **强制**：回撤预算必须**区分四项度量**（最大回撤 / 最大亏损 / 最长负收益时间 / 最长恢复时间，arXiv:2608.00127），**禁止**用单一高斯回撤表（会误警）；须按策略自身偏度/峰度/波动聚集做蒙特卡洛标定。长记忆（H≠0.5）下最大回撤**深度**按 **T^(H−1/2)** 而非 √T 标度——这是**时间标度校准问题，不得当作内生新风险**（与 #11/#17 无 IID/高斯规则一致，精化 §13.10.2）；四项须分别报告，不得塌缩为单一回撤数
+41. **推荐**：组合配置可用**认证型 Wasserstein 分布鲁棒**求解（arXiv:2608.07032）：一范数地度量 + 多面体约束下退化为**多项式规模 LP**，近似误差**同时**界定鲁棒值误差与近优间隙——须把该误差界作为**配置证书**记录。歧义半径由估计不确定性设定（接 ESS #33：有效样本越小半径越大）；半径过大 → 过度保守近等权，须按 `audit_checklist()` 下 OOS 调参，#30 上限常备；LP 不可行或标的数小时回退 CVaR/均值方差
+42. **推荐**：模型/预测**换代或跨 run 变化**须做**预测差归因**（合作博弈，arXiv:2608.04547）：把总变化**可加、可对账**地分解到各输入（组合/宏观/模型/假设/人工调整），默认**嵌套 Shapley**（层级输入），不可行时回退 Kernel SHAP 并记录估计器。接入 `shadow_before_swap`(#32)——晋升挑战者前须报告其优势归因，优势若**全由单一波动输入驱动**则为降级标记。归因只解释变化、**不验证优劣**，仍须过三闸门(#27) + ESS 闸(#33)
+43. **强制**：新闻情绪因子**禁止**以分类准确率/F1 定权或采信（arXiv:2608.04200：Mistral-7B acc 0.884，但 28 个 model-horizon 前瞻 IC 经 Newey-West + FDR 校正后**无一显著**，最大仅 0.0143）；准入须以**多重校正后仍显著的前瞻收益秩 IC** 为准（接 #27 三闸门、#25 审计）。QLoRA 仅用于**编码器适配**，未过 IC 校正前情绪权重保持 #18 小上限（fundamental 桶约 5%），只作软确认、**绝不作 sizer**；与 #37 市场对齐 RL 过拟合告警一致
+44. **推荐**：横截面评分应显式建模**板块异质性**（arXiv:2608.05755：LSTM + 可学习板块嵌入 + 宏观协变量优于池化模型，信号 = 短期反转 + 行业动量）——允许**按板块条件归一化/嵌入**而非全体池化，可新增短期反转子因子（与行业动量并列，均过 #27/#33）。资金流可加**知情流持续性**读数（arXiv:2608.04373：知情度是持续的个体属性）——A 股类比为**龙虎榜席位知情度持续性**（按席位事后前瞻收益排序），仅作**小幅资金流确认**；因 T+1 延迟、席位级粗粒度、可被操纵，须经 ESS 闸(#33)，定位为**同步/短周期确认而非领先**（与 #31 一致）
 
 ## §14 因子治理模块（FTS 派生的 6 项工程化能力）
 
@@ -1385,6 +1492,7 @@ signals = gen.generate_signals(scores, realized_ic=0.05, passed=True)  # 熔断�
 | v2.3.0 | 2026-07-18 | SkillEvolver 周度自进化（arXiv 2026-07-14~18）：新增 6 篇本周论文集成 — §13.8.1 成本感知多期配置(arXiv:2607.15195)、§13.8.2 基率诚实方向显著性(arXiv:2607.12248)、§13.8.3 去噪相关广度因子(arXiv:2607.10297)、§13.8.4 特征向量旋转危机领先指标(arXiv:2607.11935)、§13.8.5 厚尾风险闸门(arXiv:2607.10810)、§13.8.6 新闻情绪另类因子(arXiv:2607.13968)；新增约束 #14–#18 |
 | v2.5.0 | 2026-07-25 | SkillEvolver 周度自进化（arXiv 2026-07-20~24，64 篇扫描选 6）：新增 §13.9 — §13.9.1 趋势跟随谱质量诊断与成本最优 span(arXiv:2607.19497)、§13.9.2 三闸门因子准入(arXiv:2607.20093)、§13.9.3 Brier+Winkler 校准评分乘子(arXiv:2607.16229)、§13.9.4 非对称波动 CVaR 配置与度量分歧标记(arXiv:2607.16450)、§13.9.5 TDA 拓扑分散化+保留滞回换仓(arXiv:2607.21170)、§13.9.6 回测取证清单 audit_checklist(arXiv:2607.19453+2607.20168)；新增约束 #25–#30；修正 frontmatter 版本号漂移（v2.4.0 时未同步） |
 | v2.6.0 | 2026-08-02 | SkillEvolver 周度自进化（arXiv 2026-07-27~31，76 篇扫描选 8 篇成 7 节）：新增 §13.10 — §13.10.1 特征驱动协方差 CD-DFM 与零样本标的接入(arXiv:2607.24410)、§13.10.2 早期预警事件异质性护栏（**部分回撤 §13.8.4** 的领先指标定位，arXiv:2607.27070）、§13.10.3 Shadow-Before-Swap 前瞻门控换模/换因子(arXiv:2607.28577)、§13.10.4 有效样本量闸门 ESS 与 INSUFFICIENT_EVIDENCE 判定(arXiv:2607.27544)、§13.10.5 区间相干性投影 KQSP(arXiv:2607.26792)、§13.10.6 被动市场冲击与未成交风险(arXiv:2607.28323)、§13.10.7 A股羊群拥挤度 + 市场对齐情绪 RL(arXiv:2607.27063+2607.28127)；新增约束 #31–#37（其中 #31 为对 #16 的修订） |
+| v2.7.0 | 2026-08-10 | SkillEvolver 周度自进化（arXiv 2026-08-04~10，92 篇扫描选 8 篇成 7 节）：新增 §13.11 — §13.11.1 共形 Kelly 区间宽度仓位 + 诚实 OOS 崩塌(arXiv:2608.01494)、§13.11.2 MINGLE 因子暴露相似度建图(arXiv:2608.06618)、§13.11.3 非高斯长记忆回撤预算 T^(H−1/2) 标度(arXiv:2608.00127)、§13.11.4 认证型 Wasserstein 分布鲁棒配置(arXiv:2608.07032)、§13.11.5 预测差 Shapley 归因(arXiv:2608.04547)、§13.11.6 情绪分类≠收益可预测护栏(arXiv:2608.04200)、§13.11.7 板块嵌入横截面异质性 + 知情流/龙虎榜席位持续性(arXiv:2608.05755+2608.04373)；新增约束 #38–#44。本周主题：不确定性→仓位、共动→结构、锐利→稳健（证据纪律贯穿：共形 Kelly OOS 崩塌 / 情绪 IC 无一显著 / 预测差归因） |
 | v2.4.0 | 2026-07-24 | SkillEvolver + Loop 演化（FTS 文章派生）：新增因子治理模块 `scripts/factor_governance.py`，实现 6 项工程化能力——契约先行(TypedDict)+原子持久化、三级评估链(L1回测/L2经济逻辑/L3多重检验)、走航验证(Walk-forward)、因子衰减检验(Decay Test)、熔断机制(Circuit Breaker)、正交化(去冗余)；接入 `scoring_engine`(正交化)、`signal_generator`(熔断网关)、`backtest`(走航/衰减报告)，全部 config 驱动默认关闭；SKILL.md 新增 §14 与约束 #19–#24 |
 | v1.x | 2026-06 | 初始版本：6-Category 多因子评分框架，支持 A股/港股/美股，含 2026 arXiv 研究集成 |
 
