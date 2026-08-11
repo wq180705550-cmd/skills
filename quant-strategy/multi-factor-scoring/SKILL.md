@@ -1,9 +1,9 @@
 ﻿---
 name: multi-factor-scoring
-description: "Multi-factor scoring quantitative trading system. Build quantitative trading strategies from multi-factor scoring (momentum, technical, volume, fundamentals, macro, sector rotation) across A-shares, HK stocks, US stocks, and futures/derivatives on daily/4H/1H/15M timeframes. Includes a 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM ensemble), a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal intervals), and an FTS factor-governance module (3-level evaluation chain, walk-forward validation, decay test, circuit breaker, orthogonalization, atomic persistence), and a deployment-discipline layer (effective-sample-size gate, shadow-before-swap forward-gated model replacement, interval coherence projection, passive market-impact costing, herding/crowding read), and an uncertainty-to-sizing & robust-structure layer (conformal-Kelly interval-width position sizing, exposure-similarity factor-graph structure, non-Gaussian long-memory drawdown budgeting, certified Wasserstein distributionally-robust allocation, forecast-gap Shapley attribution, sentiment classification-vs-return-predictability guard, sector-embedding cross-sectional heterogeneity). Triggers: multi-factor models, scoring systems, factor-based stock selection, rotation strategies, quantitative trading framework, 4-layer scoring, volatility forecasting/HAR, uncertainty quantification/conformal prediction, position confidence, risk thresholds, factor governance/admission gates, model promotion policy, backtest audit, conformal-Kelly sizing, distributionally-robust portfolio optimization, drawdown budgeting, forecast attribution."
+description: "Multi-factor scoring quantitative trading system. Build quantitative trading strategies from multi-factor scoring (momentum, technical, volume, fundamentals, macro, sector rotation) across A-shares, HK stocks, US stocks, and futures/derivatives on daily/4H/1H/15M timeframes. Includes a 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM ensemble), a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal intervals), and an FTS factor-governance module (3-level evaluation chain, walk-forward validation, decay test, circuit breaker, orthogonalization, atomic persistence), and a deployment-discipline layer (effective-sample-size gate, shadow-before-swap forward-gated model replacement, interval coherence projection, passive market-impact costing, herding/crowding read), and an uncertainty-to-sizing & robust-structure layer (conformal-Kelly interval-width position sizing, exposure-similarity factor-graph structure, non-Gaussian long-memory drawdown budgeting, certified Wasserstein distributionally-robust allocation, forecast-gap Shapley attribution, sentiment classification-vs-return-predictability guard, sector-embedding cross-sectional heterogeneity), and a production-feedback & scope-boundary layer (auto-recalibration trigger, online-learning guard, real-time cost calibration, ML-portfolio scope boundary, alternative-data admission). Triggers: multi-factor models, scoring systems, factor-based stock selection, rotation strategies, quantitative trading framework, 4-layer scoring, volatility forecasting/HAR, uncertainty quantification/conformal prediction, position confidence, risk thresholds, factor governance/admission gates, model promotion policy, backtest audit, conformal-Kelly sizing, distributionally-robust portfolio optimization, drawdown budgeting, forecast attribution."
 
 agent_created: true
-version: 2.7.0
+version: 2.8.0
 language: zh
 type: strategy
 priority: high
@@ -44,7 +44,13 @@ triggers:
   - "预测差归因/Shapley归因/CCAR/CECL"
   - "情绪分类vs收益可预测/QLoRA/前瞻IC显著性/Newey-West"
   - "板块嵌入/横截面异质性/短期反转/知情流持续性/龙虎榜席位"
-keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI, cost-aware-allocation, SciPhyRL, base-rate, directional-significance, correlation-denoising, market-breadth, eigenvector-rotation, early-warning, tail-risk, CVaR, news-sentiment, alternative-data, trend-following, spectral-mass, cost-optimal-span, triple-gate-admission, backtest-audit, purged-split, calibration, Brier-score, Winkler-score, TDA, topological-clustering, retention-mechanism, GJR-GARCH, asymmetric-volatility, Rachev-ratio, CD-DFM, characteristic-covariance, zero-shot-onboarding, critical-slowing-down, event-heterogeneity, shadow-before-swap, forward-gated-promotion, effective-sample-size, skill-attribution, quantile-crossing, KQSP, coherence-projection, passive-market-impact, fill-probability, non-execution-risk, herding, CSAD, LSV, crowding, momentum-exhaustion, market-aligned-RL, FinSMART, conformal-kelly, fractional-kelly, interval-width-sizing, MINGLE, exposure-similarity-graph, factor-graph, drawdown-budget, fractional-brownian, long-memory-drawdown, wasserstein-dro, distributionally-robust, certified-approximation, forecast-gap-attribution, shapley-attribution, CCAR, CECL, sentiment-return-gap, QLoRA, forward-IC, newey-west, sector-embeddings, cross-sectional-heterogeneity, short-term-reversal, informed-flow, LHB-seat-persistence]
+  - "自动重校准/实盘反馈闭环/auto-recalibration trigger"
+  - "在线学习护栏/权重热替换/shadow-before-swap 升级"
+  - "实时成本监控/冲击成本实证标定/成本回流校准"
+  - "ML组合层/学习排序/RL配置/组合器范围边界"
+  - "另类数据准入/卫星数据/供应链数据/point-in-time校验"
+  - "能力差距矩阵/FTS对标/演进路线"
+keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI, cost-aware-allocation, SciPhyRL, base-rate, directional-significance, correlation-denoising, market-breadth, eigenvector-rotation, early-warning, tail-risk, CVaR, news-sentiment, alternative-data, trend-following, spectral-mass, cost-optimal-span, triple-gate-admission, backtest-audit, purged-split, calibration, Brier-score, Winkler-score, TDA, topological-clustering, retention-mechanism, GJR-GARCH, asymmetric-volatility, Rachev-ratio, CD-DFM, characteristic-covariance, zero-shot-onboarding, critical-slowing-down, event-heterogeneity, shadow-before-swap, forward-gated-promotion, effective-sample-size, skill-attribution, quantile-crossing, KQSP, coherence-projection, passive-market-impact, fill-probability, non-execution-risk, herding, CSAD, LSV, crowding, momentum-exhaustion, market-aligned-RL, FinSMART, conformal-kelly, fractional-kelly, interval-width-sizing, MINGLE, exposure-similarity-graph, factor-graph, drawdown-budget, fractional-brownian, long-memory-drawdown, wasserstein-dro, distributionally-robust, certified-approximation, forecast-gap-attribution, shapley-attribution, CCAR, CECL, sentiment-return-gap, QLoRA, forward-IC, newey-west, sector-embeddings, cross-sectional-heterogeneity, short-term-reversal, informed-flow, LHB-seat-persistence, auto-recalibration, live-feedback-loop, online-learning-guard, hot-weight-replacement, real-time-cost-monitoring, cost-calibration, ml-portfolio-layer, learning-to-rank, rl-allocation, portfolio-scope-boundary, alternative-data-admission, satellite-data, supply-chain-data, point-in-time-validation, capability-gap-matrix, fts-benchmark]
 config:
   framework: "6-category"  # or "4-layer"
   ashare_data_source: "akshare"
@@ -1440,6 +1446,8 @@ For detailed implementation of each module, refer to the code files created in t
 42. **推荐**：模型/预测**换代或跨 run 变化**须做**预测差归因**（合作博弈，arXiv:2608.04547）：把总变化**可加、可对账**地分解到各输入（组合/宏观/模型/假设/人工调整），默认**嵌套 Shapley**（层级输入），不可行时回退 Kernel SHAP 并记录估计器。接入 `shadow_before_swap`(#32)——晋升挑战者前须报告其优势归因，优势若**全由单一波动输入驱动**则为降级标记。归因只解释变化、**不验证优劣**，仍须过三闸门(#27) + ESS 闸(#33)
 43. **强制**：新闻情绪因子**禁止**以分类准确率/F1 定权或采信（arXiv:2608.04200：Mistral-7B acc 0.884，但 28 个 model-horizon 前瞻 IC 经 Newey-West + FDR 校正后**无一显著**，最大仅 0.0143）；准入须以**多重校正后仍显著的前瞻收益秩 IC** 为准（接 #27 三闸门、#25 审计）。QLoRA 仅用于**编码器适配**，未过 IC 校正前情绪权重保持 #18 小上限（fundamental 桶约 5%），只作软确认、**绝不作 sizer**；与 #37 市场对齐 RL 过拟合告警一致
 44. **推荐**：横截面评分应显式建模**板块异质性**（arXiv:2608.05755：LSTM + 可学习板块嵌入 + 宏观协变量优于池化模型，信号 = 短期反转 + 行业动量）——允许**按板块条件归一化/嵌入**而非全体池化，可新增短期反转子因子（与行业动量并列，均过 #27/#33）。资金流可加**知情流持续性**读数（arXiv:2608.04373：知情度是持续的个体属性）——A 股类比为**龙虎榜席位知情度持续性**（按席位事后前瞻收益排序），仅作**小幅资金流确认**；因 T+1 延迟、席位级粗粒度、可被操纵，须经 ESS 闸(#33)，定位为**同步/短周期确认而非领先**（与 #31 一致）
+45. **强制**：L4 实盘反馈必须接入**自动重校准审计**——`auto_recalibrate_watch` 触发的 challenger 只能经 `shadow_before_swap`（#32）晋升，**禁止**自动直接替换在位模型；重训触发须受 `CircuitBreaker`（#21）兜底防止抖动式反复换模（§15.2）。自动重校准产出的是候选 challenger，不是上线动作
+46. **强制**：任何**在线学习 / 权重热替换**禁止**静默绕过**——必须先走 `shadow_before_swap`（#32）配对比较，净优势超 margin 才晋升，且同样过 ESS 闸（#33）与三闸门（#27）；低 ESS 下在线更新只能作流程准则降级处理（§15.3）。本条旨在防"热权重漂移"型静默绕过（SkillEvolver 关键失败模式之一），而非禁止学习
 
 ## §14 因子治理模块（FTS 派生的 6 项工程化能力）
 
@@ -1482,6 +1490,49 @@ gen = SignalGenerator(circuit_breaker=cb)
 signals = gen.generate_signals(scores, realized_ic=0.05, passed=True)  # 熔断则空
 ```
 
+## §15 FTS 差距矩阵映射：能力演进路线（2026-08-11）
+
+> **来源**：FTS 能力差距总览矩阵（L1~L4 × T1/T2/T3 机构对标）。本技能已覆盖多数 T1/T2 维度；以下仅就 T3（海外顶级）差距中**属于技能范畴**的 5 项给出演进路线，明确哪些纳入技能、哪些标注为外部依赖（呼应 skillevolver「精准修订、不过拟合单实例」原则）。
+
+### §15.1 实时成本监控与冲击成本实证标定
+**Gap（T3）**：L2 过拟合控制缺实时成本监控；基础层回溯复盘缺冲击成本实证标定 / 融资成本。
+**Framework mapping**：升级 §13.10.6 被动市场冲击与未成交风险。
+- `cost_calibration_loop(fills, ref_prices)`: 用实盘成交滑点分布定期重估 `p_fill ≈ exp(−δ/κ)` 的 `κ` 与被动冲击系数，写回 `SimulatedBroker`，并触发 `audit_checklist()` 重标（#35）。
+- 融资成本（融券/保证金）作为固定日费计入 `tail_risk_gate` 损失预算。
+- 默认关闭，配置 `ENABLE_LIVE_COST_CALIB=True` 时启用；缺实盘数据则保留 §13.10.6 理论值并记日志。
+- **Caveat**：实证标定须用同标的同周期实盘成交，禁止用模拟盘滑点反标（前视偏差）。
+
+### §15.2 自动重校准触发器（核心优先级）
+**Gap（T3）**：L4 反馈闭环缺自动重校准。
+**Framework mapping**：在 §13.10.3 `shadow_before_swap` 与 §13.10.4 `effective_sample_gate` 基础上新增触发协议。
+- `auto_recalibrate_watch(live_ic, bt_ic, ess)`: 当 `|live_ic − bt_ic|` 持续超过 `RECALIB_IC_GAP`（默认 0.02）且 `ESS ≥ ESS_MIN` 时，自动在 shadow 路径外热重训 challenger；晋升仍须过 #32 配对比较（margin 固定），**禁止**日历式或自动直接替换在位模型。
+- 重训触发频率受 `CircuitBreaker`（#21）兜底，避免抖动式反复换模。
+- **Caveat**：自动重校准不是自动上线——它只产出候选 challenger，最终晋升由 #32 门控决定。
+
+### §15.3 在线学习护栏（核心优先级）
+**Gap（T3）**：L4 在线监控缺在线学习 / 实时重标定深度。
+**Framework mapping**：强化 #32 / #37 / #43 的「禁止静默替换」语义。
+- **强制**：任何 online update（增量训练、权重热替换、RL 在线策略更新）**不得**直接替换在位模型权重；必须先走 `shadow_before_swap` 配对比较，净优势超 margin 才晋升。
+- 在线学习得到的模型同样须过 ESS 闸（#33）与三闸门（#27）方可放量；低 ESS 下在线更新只能作流程准则降级处理。
+- 与 §13.10.7 市场对齐 RL 过拟合告警一致：直接在目标上在线训练扩大过拟合面，必须封存/预注册并过 `audit_checklist()`（#25）。
+- **Caveat**：本护栏目的是防「热权重漂移」型静默绕过（SkillEvolver 关键失败模式之一），而非禁止学习。
+
+### §15.4 ML 组合层范围边界
+**Gap（T3）**：L3 组合层 / 优化器缺 ML 组合层（Transformer/GAN/RL 组合器）。
+**Framework mapping**：界定技能当前范围，防止范围蔓延。
+- 技能当前组合层 = Elastic Net + Regime 切换 + 风险平价/均值方差 + Ledoit-Wolf 收缩（§14.2）；**维持**此实现为默认。
+- ML 组合器（learning-to-rank、RL 配置、Transformer 时序组合）列为**路线图项**，默认禁用；启用前必须：(a) 经 `shadow_before_swap`（#32）晋升；(b) 过 `audit_checklist()`（#25）；(c) 保留单标的/单行业上限（#30）。
+- 与 #9（禁止盲目上大模型 TSFM）一致：ML 组合器须有 MCS / 多重检验支撑，不得仅凭回测 Sharpe 上线。
+
+### §15.5 另类数据准入边界
+**Gap（T3）**：L1 知识补给 / 基础数据深度缺海外另类数据（卫星、供应链）。
+**Framework mapping**：明确技能只做**准入审计**，不内建另类数据抓取。
+- 卫星/供应链/舆情图谱等另类数据经外部 pipeline 接入，技能仅负责其因子化后的准入：须过前瞻收益秩 IC（#43 校正）与 ESS 闸（#33），未过则保持小权重软确认（#18）。
+- 与 §13.8.6 新闻情绪、§13.10.7 市场对齐 RL 情绪保持同一套「分类≠收益」护栏。
+- **Caveat**：另类数据常含非结构化/低频/口径漂移，必须在 `cost_calibration_loop` 之外单独做时点对齐（point-in-time）校验，禁止未来函数。
+
+**本周主题**：把「实盘反馈 → 重校准 → 在线学习」闭环作为技能的**第三类治理对象**（与 §14 因子治理并列），并以 scope boundary 防止 ML 组合器 / 另类数据的范围蔓延。
+
 ## 版本历史
 
 | 版本 | 日期 | 变更说明 |
@@ -1493,6 +1544,7 @@ signals = gen.generate_signals(scores, realized_ic=0.05, passed=True)  # 熔断�
 | v2.5.0 | 2026-07-25 | SkillEvolver 周度自进化（arXiv 2026-07-20~24，64 篇扫描选 6）：新增 §13.9 — §13.9.1 趋势跟随谱质量诊断与成本最优 span(arXiv:2607.19497)、§13.9.2 三闸门因子准入(arXiv:2607.20093)、§13.9.3 Brier+Winkler 校准评分乘子(arXiv:2607.16229)、§13.9.4 非对称波动 CVaR 配置与度量分歧标记(arXiv:2607.16450)、§13.9.5 TDA 拓扑分散化+保留滞回换仓(arXiv:2607.21170)、§13.9.6 回测取证清单 audit_checklist(arXiv:2607.19453+2607.20168)；新增约束 #25–#30；修正 frontmatter 版本号漂移（v2.4.0 时未同步） |
 | v2.6.0 | 2026-08-02 | SkillEvolver 周度自进化（arXiv 2026-07-27~31，76 篇扫描选 8 篇成 7 节）：新增 §13.10 — §13.10.1 特征驱动协方差 CD-DFM 与零样本标的接入(arXiv:2607.24410)、§13.10.2 早期预警事件异质性护栏（**部分回撤 §13.8.4** 的领先指标定位，arXiv:2607.27070）、§13.10.3 Shadow-Before-Swap 前瞻门控换模/换因子(arXiv:2607.28577)、§13.10.4 有效样本量闸门 ESS 与 INSUFFICIENT_EVIDENCE 判定(arXiv:2607.27544)、§13.10.5 区间相干性投影 KQSP(arXiv:2607.26792)、§13.10.6 被动市场冲击与未成交风险(arXiv:2607.28323)、§13.10.7 A股羊群拥挤度 + 市场对齐情绪 RL(arXiv:2607.27063+2607.28127)；新增约束 #31–#37（其中 #31 为对 #16 的修订） |
 | v2.7.0 | 2026-08-10 | SkillEvolver 周度自进化（arXiv 2026-08-04~10，92 篇扫描选 8 篇成 7 节）：新增 §13.11 — §13.11.1 共形 Kelly 区间宽度仓位 + 诚实 OOS 崩塌(arXiv:2608.01494)、§13.11.2 MINGLE 因子暴露相似度建图(arXiv:2608.06618)、§13.11.3 非高斯长记忆回撤预算 T^(H−1/2) 标度(arXiv:2608.00127)、§13.11.4 认证型 Wasserstein 分布鲁棒配置(arXiv:2608.07032)、§13.11.5 预测差 Shapley 归因(arXiv:2608.04547)、§13.11.6 情绪分类≠收益可预测护栏(arXiv:2608.04200)、§13.11.7 板块嵌入横截面异质性 + 知情流/龙虎榜席位持续性(arXiv:2608.05755+2608.04373)；新增约束 #38–#44。本周主题：不确定性→仓位、共动→结构、锐利→稳健（证据纪律贯穿：共形 Kelly OOS 崩塌 / 情绪 IC 无一显著 / 预测差归因） |
+| v2.8.0 | 2026-08-11 | SkillEvolver 演化（FTS 差距矩阵 L1-L4×T1/T2/T3 对标）：新增 §15 FTS 差距矩阵映射：能力演进路线 — §15.1 实时成本监控与冲击成本实证标定、§15.2 自动重校准触发器、§15.3 在线学习护栏、§15.4 ML 组合层范围边界、§15.5 另类数据准入边界；新增约束 #45–#46。本周主题：实盘反馈→重校准→在线学习闭环作为第三类治理对象（与 §14 因子治理并列），并以 scope boundary 防 ML 组合器/另类数据范围蔓延 |
 | v2.4.0 | 2026-07-24 | SkillEvolver + Loop 演化（FTS 文章派生）：新增因子治理模块 `scripts/factor_governance.py`，实现 6 项工程化能力——契约先行(TypedDict)+原子持久化、三级评估链(L1回测/L2经济逻辑/L3多重检验)、走航验证(Walk-forward)、因子衰减检验(Decay Test)、熔断机制(Circuit Breaker)、正交化(去冗余)；接入 `scoring_engine`(正交化)、`signal_generator`(熔断网关)、`backtest`(走航/衰减报告)，全部 config 驱动默认关闭；SKILL.md 新增 §14 与约束 #19–#24 |
 | v1.x | 2026-06 | 初始版本：6-Category 多因子评分框架，支持 A股/港股/美股，含 2026 arXiv 研究集成 |
 
