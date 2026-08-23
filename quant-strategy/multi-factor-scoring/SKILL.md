@@ -1,9 +1,9 @@
 ﻿---
 name: multi-factor-scoring
-description: "Multi-factor scoring quantitative trading system. Build quantitative trading strategies from multi-factor scoring (momentum, technical, volume, fundamentals, macro, sector rotation) across A-shares, HK stocks, US stocks, and futures/derivatives on daily/4H/1H/15M timeframes. Includes a 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM ensemble), a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal intervals), and an FTS factor-governance module (3-level evaluation chain, walk-forward validation, decay test, circuit breaker, orthogonalization, atomic persistence), and a deployment-discipline layer (effective-sample-size gate, shadow-before-swap forward-gated model replacement, interval coherence projection, passive market-impact costing, herding/crowding read), and an uncertainty-to-sizing & robust-structure layer (conformal-Kelly interval-width position sizing, exposure-similarity factor-graph structure, non-Gaussian long-memory drawdown budgeting, certified Wasserstein distributionally-robust allocation, forecast-gap Shapley attribution, sentiment classification-vs-return-predictability guard, sector-embedding cross-sectional heterogeneity), and a production-feedback & scope-boundary layer (auto-recalibration trigger, online-learning guard, real-time cost calibration, ML-portfolio scope boundary, alternative-data admission), and a this-week arXiv integration layer (regime-gated MoE volatility routing, calibration-period-aware quantization deployment gate, disentangled alpha/beta trigger signals with epistemic covariance shrinkage, specification-satisfaction backtest verification, inter-sectoral signed-network imbalance monitor, lower-spectrum synchronization factor, FOMC pre-announcement volatility gate, classification-boundary proximity monitor). Triggers: multi-factor models, scoring systems, factor-based stock selection, rotation strategies, quantitative trading framework, 4-layer scoring, volatility forecasting/HAR, uncertainty quantification/conformal prediction, position confidence, risk thresholds, factor governance/admission gates, model promotion policy, backtest audit, conformal-Kelly sizing, distributionally-robust portfolio optimization, drawdown budgeting, forecast attribution."
+description: "Multi-factor scoring quantitative trading system. Build quantitative trading strategies from multi-factor scoring (momentum, technical, volume, fundamentals, macro, sector rotation) across A-shares, HK stocks, US stocks, and futures/derivatives on daily/4H/1H/15M timeframes. Includes a 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM ensemble), a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal intervals), and an FTS factor-governance module (3-level evaluation chain, walk-forward validation, decay test, circuit breaker, orthogonalization, atomic persistence), and a deployment-discipline layer (effective-sample-size gate, shadow-before-swap forward-gated model replacement, interval coherence projection, passive market-impact costing, herding/crowding read), and an uncertainty-to-sizing & robust-structure layer (conformal-Kelly interval-width position sizing, exposure-similarity factor-graph structure, non-Gaussian long-memory drawdown budgeting, certified Wasserstein distributionally-robust allocation, forecast-gap Shapley attribution, sentiment classification-vs-return-predictability guard, sector-embedding cross-sectional heterogeneity), and a production-feedback & scope-boundary layer (auto-recalibration trigger, online-learning guard, real-time cost calibration, ML-portfolio scope boundary, alternative-data admission), and a this-week arXiv integration layer (regime-gated MoE volatility routing, calibration-period-aware quantization deployment gate, disentangled alpha/beta trigger signals with epistemic covariance shrinkage, specification-satisfaction backtest verification, inter-sectoral signed-network imbalance monitor, lower-spectrum synchronization factor, FOMC pre-announcement volatility gate, classification-boundary proximity monitor, and a §13.13 this-week arXiv layer covering interpretable Itô-signature features, correlation-reconfiguration rate, representation crowding, cross-asset rough-volatility, CVaR state-dependent sizing, LLM calibration-viability checkpoint, microstructure stress simulation, and stable-RL auxiliary-task discovery). Triggers: multi-factor models, scoring systems, factor-based stock selection, rotation strategies, quantitative trading framework, 4-layer scoring, volatility forecasting/HAR, uncertainty quantification/conformal prediction, position confidence, risk thresholds, factor governance/admission gates, model promotion policy, backtest audit, conformal-Kelly sizing, distributionally-robust portfolio optimization, drawdown budgeting, forecast attribution."
 
 agent_created: true
-version: 2.9.0
+version: 2.10.0
 language: zh
 type: strategy
 priority: high
@@ -58,6 +58,14 @@ triggers:
   - "相关矩阵下谱/市场同步/最小特征值/分散度因子"
   - "FOMC预告/波动率曲面/事件驱动波动闸门"
   - "分类边界邻近/准入不确定性/ST监控状态"
+  - "Itô签名/路径签名/可解释特征/模型无关对冲/Tradable Itô Signatures"
+  - "共动结构重构/相关矩阵主角度/重构速率/方差风险溢价未定价维度"
+  - "表征拥挤/惯例多重性/驱动空间重叠/表征均衡"
+  - "粗糙波动率/跨资产Hurst/rough volatility/Hurst指数跨资产标尺"
+  - "CVaR约束动态配置/状态依赖再配置/非对称再配置/终端CVaR"
+  - "校准诱导退化/LLM预测校准/校准可行性检查点/标题计数信号"
+  - "微观结构生成基础模型/M3/反事实订单流/LOB压力测试"
+  - "自监督辅助任务/稳定RL/股票交易RL/元梯度"
 keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI, cost-aware-allocation, SciPhyRL, base-rate, directional-significance, correlation-denoising, market-breadth, eigenvector-rotation, early-warning, tail-risk, CVaR, news-sentiment, alternative-data, trend-following, spectral-mass, cost-optimal-span, triple-gate-admission, backtest-audit, purged-split, calibration, Brier-score, Winkler-score, TDA, topological-clustering, retention-mechanism, GJR-GARCH, asymmetric-volatility, Rachev-ratio, CD-DFM, characteristic-covariance, zero-shot-onboarding, critical-slowing-down, event-heterogeneity, shadow-before-swap, forward-gated-promotion, effective-sample-size, skill-attribution, quantile-crossing, KQSP, coherence-projection, passive-market-impact, fill-probability, non-execution-risk, herding, CSAD, LSV, crowding, momentum-exhaustion, market-aligned-RL, FinSMART, conformal-kelly, fractional-kelly, interval-width-sizing, MINGLE, exposure-similarity-graph, factor-graph, drawdown-budget, fractional-brownian, long-memory-drawdown, wasserstein-dro, distributionally-robust, certified-approximation, forecast-gap-attribution, shapley-attribution, CCAR, CECL, sentiment-return-gap, QLoRA, forward-IC, newey-west, sector-embeddings, cross-sectional-heterogeneity, short-term-reversal, informed-flow, LHB-seat-persistence, auto-recalibration, live-feedback-loop, online-learning-guard, hot-weight-replacement, real-time-cost-monitoring, cost-calibration, ml-portfolio-layer, learning-to-rank, rl-allocation, portfolio-scope-boundary, alternative-data-admission, satellite-data, supply-chain-data, point-in-time-validation, capability-gap-matrix, fts-benchmark, regime-gated-moe, volatility-routing, ptq-calibration, quantization-deployment-gate, alpha-beta-trigger, epistemic-covariance-shrinkage, spec-satisfaction-verification, intersectoral-imbalance, signed-network, lower-spectrum-sync, fomc-preannouncement, volatility-gate, classification-boundary-proximity, eligibility-monitor]
 config:
   framework: "6-category"  # or "4-layer"
@@ -1430,6 +1438,123 @@ For detailed implementation of each module, refer to the code files created in t
 
 ---
 
+## 13.13 This-Week arXiv Integration (2026-08-17 ~ 2026-08-23)
+
+Crawled the arXiv **q-fin** `pastweek` listing (announcements 2026-08-17 → 2026-08-21, ~50+ papers incl. cross-lists) plus the `q-fin.TR` API set; scanned all titles, read 8 abstracts, and selected 8 papers grouped into 8 subsections with a direct, non-speculative mapping. Follows the opt-in, config-driven, graceful-fallback pattern of §13.6–§13.12.
+
+This week's theme is **interpretable/structural features + evidence-integrity gates**: three papers supply *model-free, transparent features* (Itô signatures, correlation-reconfiguration rate, representation crowding), two upgrade the *volatility/risk machinery* (cross-asset rough-vol, CVaR state-dependent sizing), and three are *guard-rails / diagnostic engines* (LLM calibration-viability checkpoint, microstructure stress simulation, stable-RL auxiliary-task discovery). Notably, §13.13.6 is a **negative-result guard** — it says "your expensive LLM signal may be degenerate; verify calibration transmits to forecast," not new alpha.
+
+#### §13.13.1 Tradable Itô Signatures: 模型无关可解释路径特征 (arXiv:2608.18120)
+
+**Paper:** "Tradable Itô Signatures: A Model-Free, Interpretable Framework for Dynamic Hedging" (Guo, Wang, Zhang; submitted 2026-07-14)
+
+**Method:** The Itô signature transform turns asset-price paths into a set of *linear* features that universally represent nonlinear functions on time series. Each discretized signature component can be perfectly replicated by a simple self-financing strategy using only the underlying and cash — making each component a **tradable, transparent hedging basis**. Avoids estimating future conditional expectations. Empirically strong sample efficiency at far lower compute than NN benchmarks; a signature-kernel-weighted variant localizes estimation to similar historical paths.
+
+**Framework mapping:** Upgrades **§2 trend/structure factors** and pairs with **§13.11.2 exposure graph** and the interpretability philosophy of **§13.8.6 / §13.10.7**. Signature components are *model-free, interpretable* features for dynamic hedging/derivative payoffs — a natural **"signature feature" factor** that is transparent (each term = a tradable strategy) and resistant to NN overfitting. Avoids the "black-box factor" failure mode flagged in #43/#37.
+
+**Signal design (opt-in, default OFF):**
+- `signature_features(prices, depth=3)` → intercept + level + iterated 2D/3D integrals; feed as interpretable inputs to L2/L3 scoring (e.g. a microstructure/trend "signature factor"), replacing or augmenting raw-moment features.
+- `signature_kernel_localize(query_path, hist_paths, k)` → kNN localization in signature space (the paper's kernel-weighted variant) for path-similar estimation.
+- **Admission:** requires ≥ ~20 bars for stable signatures; graceful fallback to raw return moments when path length < minimum. Enable via `ENABLE_SIGNATURE_FEATURES` in `config.py`.
+- **Caveat:** validated on S&P 500 index options hedging; A-share application must clear `audit_checklist()` (#25) + ESS gate (#33) and must **not** replace veto rules. Treat as a factor input, not a sizer.
+
+#### §13.13.2 Reconfiguration Premium: 共动结构重构速率作为未定价维度 (arXiv:2608.20020)
+
+**Paper:** "The Reconfiguration Premium: Co-movement Structure as an Unspanned Dimension of the Variance Risk Premium" (Carvalho; submitted 2026-08-20)
+
+**Method:** Measures the *rate* at which the cross-sectional organization turns — the mean squared sine of the principal angles between subdominant eigenspaces of consecutive 12-month S&P 500 correlation matrices. A typical month rewrites ~1/5 of the structure and carries 4/5 forward. This rate is **priced**: it couples to the aggregate variance risk premium at t = 5.40, while no level measure correlates above 0.32 and the implied-correlation surface spans ≤ 6.7% of it. Only the *persistent* component is priced (premium compensates pace of revision, not distance traveled). Mechanism is prepayment: implied variance rises on impact, realized vol follows 2–3 quarters later (simulated-null p < 0.03 at h = 1–9). Three pre-registered nulls hold: no timing alpha, no crash protection, downside inseparable from intensity.
+
+**Framework mapping:** Upgrades **§2 market breadth / correlation-regime**, **§13.3 regime**, **§13.8.3** denoised-correlation breadth, and **§13.11.2** exposure graph. The contribution is a *velocity* of correlation-structure change — strictly superior to a static correlation *level* as a regime input.
+
+**Signal design (opt-in, default OFF):**
+- `correlation_reconfiguration_rate(corr_t, corr_{t-12m})` → mean-squared-sine of principal angles between subdominant eigenspaces; feed `_detect_regime()` as a **structural-velocity read**.
+- High rate ⇒ structural instability ⇒ tighten `risk_scale` / widen CI (pairs with #31/#43).
+- **Admission:** requires ≥ 12-month rolling correlation history; recompute monthly; graceful fallback to eigenvalue-gap / breadth rate-of-change when < 12m.
+- **Caveat (evidence discipline):** the paper's three pre-registered nulls make clear this is a **risk premium, not a timing alpha**. Use as risk/regime modulation only — never as a directional signal.
+
+#### §13.13.3 Market Conditioning Representation: 表征拥挤与惯例多重性 (arXiv:2608.18299)
+
+**Paper:** "The Market's Conditioning Representation: Equilibrium, Crowding, and Convention Multiplicity" (Rodriguez Dominguez; submitted 2026-08-18)
+
+**Method:** Endogenizes the market's conditioning architecture: portfolios choose representations whose induced exposures affect prices. A *representation equilibrium* is the fixed point of the configuration–price–certification loop. It separates **position crowding** (market impact) from **representation crowding** (driver-space overlap, priced via a basis-invariant information-capacity cost). A spectral statistic combining cross-impact, covariance, and deployed capacity determines three position-path regimes: below 0.5 the fundamental solution is unique; at the boundary only innovation-free deviations remain; above it, destabilizing directions support a continuum of self-confirming conventions. The multiplicity threshold is *not estimated in data* — only an out-of-sample, driver-specific signature is documented.
+
+**Framework mapping:** Extends **§13.8.3 crowding / §13.10.7 A-share herding** and **§13.11.7 sector embeddings**. Moves crowding from *return co-movement* to *driver-space overlap* (representation crowding), and supplies a spectral crowding/instability monitor feeding `risk_scale`.
+
+**Signal design (opt-in, default OFF):**
+- `representation_crowding_read(cross_impact, cov, deployed_capacity)` → spectral statistic ρ; ρ > 0.5 ⇒ convention-multiplicity / destabilizing regime ⇒ flag crowding, tighten position caps; ρ at boundary ⇒ only innovation-free deviations admissible.
+- **Admission:** requires cross-impact estimates (from order-flow / LOB or a proxy); graceful fallback to CSAD/LSV herding (§13.10.7) when cross-impact unavailable.
+- **Caveat (evidence discipline):** the multiplicity threshold is *not estimated in data* — only an out-of-sample signature is documented. Treat as a **diagnostic / monitoring state**, never a precise trigger; pair with §13.12.5 inter-sectoral imbalance. Avoids 越过 #43 / #18.
+
+#### §13.13.4 Rough Volatility Across Assets: 跨资产粗糙波动率标尺 (arXiv:2608.16749)
+
+**Paper:** "Rough Volatility Across Assets" (Mouti; submitted 2026-08-17)
+
+**Method:** Measures volatility roughness on a common pipeline across 3,926 US equities, 34 CME futures roots, rates, FX, commodities, and options on 44 underlyings (2010–2025). Realized vol is **rough everywhere**. Class-median Hurst estimate: 0.05 (livestock) → 0.07–0.10 (rates, FX, agriculture, energy, metals) → 0.13 (single stocks) → 0.20 (equity indices). Option-implied H is only identifiable where the leverage effect gives a clean skew (indices 0.21–0.28, just above realized). Provides a mean-reversion contamination correction for the fOU second-moment estimator and a failure taxonomy.
+
+**Framework mapping:** Upgrades **§2 volatility factor**, **§13.3 regime**, **§13.8.5** tail/vol gate, **§13.11.3** long-memory drawdown, and **§13.10.2** event-heterogeneity. Supplies a *cross-asset empirical Hurst baseline* that calibrates the rough-vol regime read and the long-memory drawdown exponent (§13.11.3's T^(H−1/2) scaling), and a calibration correction relevant to that estimator.
+
+**Signal design (opt-in, default OFF):**
+- `roughness_regime(hurst_estimate, asset_class)` → compare estimated H to the cross-asset median table (asset-class baseline); deviation ⇒ vol-regime classification; feed §13.8.5 tail gate and §13.11.3 drawdown exponent.
+- Apply the mean-reversion contamination correction when log-realized-vol has additive noise.
+- **Admission:** requires ≥ N obs for a stable H; graceful fallback to ATR / realized-vol z-score when H estimate is unstable. H is a **regime descriptor, not a directional signal**.
+- **Caveat:** implied-vol H estimation **fails** (R² ≈ 0) for rates/FX even though realized vol is rough — do **not** rely on implied skew there; use realized.
+
+#### §13.13.5 Dynamic Portfolio Optimization under CVaR Constraints: 状态依赖的非对称再配置 (arXiv:2608.20179)
+
+**Paper:** "Dynamic Portfolio Optimization under CVaR Constraints" (Hu, Pesenti, Shi; submitted 2026-08-20)
+
+**Method:** Continuous-time dynamic portfolio optimization under a terminal-loss CVaR constraint. The auxiliary-threshold CVaR representation gives existence + strong duality without market completeness. A dual-based nested bisection–golden-search over threshold + Lagrangian converges to the optimal control. When the constraint is nonbinding → Merton policy; when binding → **state-dependent**: the investor reduces risky exposure after adverse outcomes but preserves (and near maturity may increase) exposure after favorable ones — an **asymmetric reallocation across states, not uniform de-risking**. Nontraded endowment risk amplifies the conservative adjustment; price impact lowers desired positions/speeds.
+
+**Framework mapping:** Upgrades **§5 position sizing**, **§13.7 risk gate**, **§13.9.4 CVaR allocation**, and **§13.11.4** Wasserstein DRO. Key upgrade: a CVaR constraint yields *state-dependent asymmetric* reallocation, refining the tail-risk gate (#11/#17) and the conformal-Kelly sizing (§13.11.1) with a state-contingent rule.
+
+**Signal design (opt-in, default OFF):**
+- `cvar_state_dependent_sizing(posture, terminal_cvar_budget)` → after an adverse P&L shock, scale down risky weight; after a favorable one, preserve or (near horizon) increase — asymmetric; replaces blanket vol-target de-risking.
+- **Admission:** requires a terminal CVaR budget estimate (from §13.7 / §13.9.4); graceful fallback to symmetric vol-target when CVaR budget unavailable.
+- **Caveat:** the asymmetric rule needs a *verified* shock classifier; pair with `audit_checklist()` (#25) before trusting state-dependent sizing. Consistent with the §13.11.1 honest-OOS caveat.
+
+#### §13.13.6 Calibration-Induced Degeneracy in LLM Forecasting: 校准可行性检查点 (arXiv:2608.20304)
+
+**Paper:** "Calibration-Induced Degeneracy in LLM Financial Forecasting: An Audit-Trailed Case Study on Next-Day Market Risk" (Mohanty; submitted 2026-08-20)
+
+**Method:** Costly LLM features only matter if calibration lets them affect the forecast. Documents a failure: full-history scoring preceded the 2022 calibration; calibration then set **all four LLM weights to zero** → the 856 later scores could not affect evaluation ("calibration-induced degeneracy"). Allowing signed weights reactivated the mappings; none improved forecasts after familywise correction. By contrast, a near-zero-cost **headline count** reduced SPY variance-forecast loss by 0.001720 (95% FI [0.000719, 0.002830]). Proposes a **calibration-viability checkpoint**: fit the mapping, perturb the feature over prespecified calibration values, and require a meaningful forecast response *before* acquiring holdout/paid features. Uses no holdout outcomes.
+
+**Framework mapping:** A strong **guard-rail** on **§2 alternative-data (news/LLM sentiment)**, **§13.8.6**, **§13.10.7** market-aligned sentiment, **§13.11.6** "classification ≠ return," and **§13.12.3** disentangled alpha/beta. A paid LLM feature that passes fitting but whose calibrated weights → 0 is *degenerate*; the cheap baseline (headline count) beats it. Mandates a **calibration-viability checkpoint** before any alt-data/LLM feature is acquired or trusted.
+
+**Signal design (guard, opt-in, recommended ON for all alt-data features):**
+- `calibration_viability_checkpoint(feature_fn, calibration_grid)` → fit mapping on in-sample, sweep the feature over prespecified calibration values, require a forecast-response Δ beyond a meaningful threshold *before* acquiring holdout/paid features; if calibrated weights → 0 (or response is flat), **reject** the feature as degenerate.
+- **Admission:** applies to **all** alt-data/LLM features (§13.10.7, §13.11.6, §13.12.3). Uses no holdout outcomes, so it is a *pre-acquisition gate*. Stricter than #43 (it checks calibration *transmission*, not just IC).
+- **Caveat:** this is a **negative-result guard**, not new alpha. It lands as a governance checkpoint in §14 / §13.10.4. Pair with #43 (IC must survive multiple-testing) — calibration-viability is the *necessary* precondition for any IC claim to be meaningful.
+
+#### §13.13.7 M3 Generative Foundation Model for Microstructure: 反事实订单流仿真与压力测试 (arXiv:2608.19227)
+
+**Paper:** "M3: A State-Event Generative Foundation Model for Market Microstructure Dynamics" (Zhang et al.; submitted 2026-07-29)
+
+**Method:** M3 is a state-event generative foundation model for microstructure that generates future order-flow trajectories while accounting for the evolving interaction between order events and LOB liquidity. Trained on large-scale order-level stock data; shows predictable scaling, reproduces key stylized facts, and enables simulation-based forecasting, **stress testing**, and market-impact analysis — i.e. counterfactual trajectory-level simulation.
+
+**Framework mapping:** Upgrades **§13.10.6 passive market impact**, **§13.12.5 inter-sectoral imbalance**, and **§13.13.3 representation crowding**. M3 supplies *counterfactual LOB trajectories* → a simulation engine for stressing market impact and liquidity under hypothetical scenarios, feeding the cost/impact calibration (§13.10.6) and the crowding/imbalance monitors with synthetic stress paths.
+
+**Signal design (opt-in, default OFF):**
+- `microstructure_stress_sim(lob_state, scenario)` → generate counterfactual order-flow / LOB paths under a stress scenario (e.g. liquidity withdrawal); estimate the expected market-impact / fill-probability distribution to calibrate `simulated_broker` cost model (§13.10.6) and stress the crowding read (§13.13.3).
+- **Admission:** requires LOB / order-flow data (A-share L2); graceful fallback to historical stress replay when LOB unavailable. Configure via `ENABLE_MICRO_SIM`.
+- **Caveat:** a *generative* model — validate that trajectories reproduce stylized facts (the paper's check) before trusting impact estimates; pair with §13.12.4 specification-satisfaction backtest. It is a **scenario generator, not a directional signal**.
+
+#### §13.13.8 Self-Supervised Auxiliary Task Discovery for Stable RL in Trading: 自动发现辅助任务稳定训练 (arXiv:2608.15841)
+
+**Paper:** "Self-Supervised Auxiliary Task Discovery for Stable Reinforcement Learning in Stock Trading" (Orra, Choudhary, Thakur; submitted 2026-08-16)
+
+**Method:** RL for stock trading suffers from non-stationarity and noisy rewards. Proposes a self-supervised framework that *automatically discovers* auxiliary tasks (formulated as General Value Functions) to enrich state representation and stabilize training. Two networks: a main network (policy + aux predictions) and a secondary network that generates aux-task definitions via learned cumulants + discount factors, updated by a meta-gradient accounting for long-term trading impact. Evaluated on DJI, FTSE, Sensex, TAIEX — more robust learning and improved trading vs baselines.
+
+**Framework mapping:** Upgrades **§15.3 online-learning guard** and **§15.4 ML-portfolio scope boundary**, and pairs with **§13.10.3 shadow-before-swap**. RL trading is in-scope only as a *meta-stabilizer*; this paper's auto-discovered auxiliary tasks address the #46 scope-boundary concern (fixed auxiliary designs fail across regimes) by discovering *regime-adaptive* aux tasks.
+
+**Signal design (opt-in, default OFF; only if an RL component is enabled):**
+- `stable_rl_aux_discovery(state, policy_net, aux_net)` → meta-gradient updates aux-task definitions (cumulants + discount) to maximize long-term trading stability; use as a *training-stability protocol* for any in-skill RL component, gated by §15.3 + `shadow_before_swap`.
+- **Admission:** applies only if an RL component is enabled (§15.4 boundary); otherwise N/A. Requires the dual-network + meta-gradient infra; graceful fallback to manually-designed aux tasks or disable RL.
+- **Caveat:** improves *stability/robustness*, not necessarily alpha; pair with §13.12.4 spec-satisfaction backtest + #25 before any RL promotion.
+
+> **本周集成小结**：8 篇全部 opt-in / config 驱动 / graceful-fallback 落位，无投机性新 `.py` 代码。信号设计以「函数签名 + 准入条件 + Caveat」表述，延续 §13.6–§13.12 的文档化范式。其中 §13.13.6（校准诱导退化）为**负结果护栏**，明确"昂贵 LLM 信号可能退化，须先验证校准是否传导至预测"，非新 alpha。
+
+---
+
 # S_appendix：技能附录
 
 > **重要提示**：本附录包含使用 multi-factor-scoring 技能时的关键约束和常见失误。使用 4 层评分框架（萌芽/量价/结构/确认）时，必须严格遵守以下规则。
@@ -1546,6 +1671,15 @@ For detailed implementation of each module, refer to the code files created in t
 53. **推荐**：波动率预测应叠加 **事件日历预公告闸门**（arXiv:2608.10693）——FOMC 等预定会议前 N 日收窄 sizer、抬升 `risk_scale`；无 IV 曲面仅用日历窗口，非美股退化为通用事件闸门（财报/央行）。
 54. **强制**：受限市场/指数调整的 **分类边界邻近**须作组合监控状态（arXiv:2608.12634）——ST、指数调入调出、通股通标的变动等临近边界或规则分歧时标记 `MONITOR`，**禁止**当作可交易 alpha 或 sizer；仅触发集中度/再分类监控，与 #43 准入纪律一致。
 
+55. **推荐**：路径特征优先用**模型无关可解释**的 Itô 签名（arXiv:2608.18120）——把价格路径转为线性可交易特征，每项是自融资策略、透明可审计；优于 NN 黑箱因子（呼应 #37/#43 过拟合告警）。仅作 L2/L3 因子输入（`ENABLE_SIGNATURE_FEATURES`），路径长度 < ~20 根优雅回退原始矩特征；须过 `audit_checklist()`(#25)+ESS 闸(#33)，**禁止**替代否决项。
+56. **强制**：共动结构应监控其**重构速率**（主角度均方正弦，arXiv:2608.20020）而非仅静态相关水平——速率对方差风险溢价定价（t=5.40，水平度量相关 ≤0.32）。作为 regime/风险调制（高速率 ⇒ 收紧 `risk_scale`/拓宽 CI），**禁止**作方向信号（论文三预注册零假设：无择时 alpha、无崩盘保护、下行不可分离）；需 ≥12 月滚动相关，不足则回退特征值缺口/广度变化率。
+57. **推荐**：拥挤度除收益共动外应补**表征拥挤**（驱动空间重叠，arXiv:2608.18299）——谱统计量 ρ 结合 cross-impact/协方差/部署容量：ρ>0.5 ⇒ 惯例多重性/失稳区 ⇒ 收紧仓位上限；缺 cross-impact 优雅回退 CSAD/LSV(§13.10.7)。⚠️ 多重性阈值**未在数据中估计**（仅文档化 OOS 签名），只作**诊断/监控态**，不得作精确触发器，与 #43/#18 一致；配对 §13.12.5 行业间失衡。
+58. **推荐**：粗糙波动率须用**跨资产 Hurst 经验基线**标定（arXiv:2608.16749）——类中位数 H： livestock 0.05 / rates·FX·农产品 0.07–0.10 / 个股 0.13 / 股指 0.20；用于 §13.8.5 尾部闸门与 §13.11.3 长记忆回撤指数 T^(H−1/2) 标度校准。H 是**regime 描述符非方向信号**；rates/FX 的隐含 H 估计失效(R²≈0)须改用已实现 H；H 不稳优雅回退 ATR/已实现波动率 z 分数。
+59. **推荐**：终端 CVaR 约束产生**状态依赖非对称再配置**（arXiv:2608.20179）——不利结果后降险、有利结果后维持/临近到期可加仓，替代一刀切去风险；升级 §5 仓位 / §13.7 风险闸门 / §13.9.4 CVaR 配置 / §13.11.4 Wasserstein DRO。需**已验证的冲击分类器**，过 `audit_checklist()`(#25)；无 CVaR 预算优雅回退对称 vol-target；与 §13.11.1 诚实 OOS 告警一致。
+60. **强制**：任何**另类数据/LLM 特征**上线前须过**校准可行性检查点**（arXiv:2608.20304）——拟合映射后在预设校准值上扰动特征，要求预测响应 Δ 超有意义阈值**方可**获取 holdout/付费特征；若校准权重→0 或响应平坦即判**退化**并拒绝。比 #43 更严（校验校准**传导**而非仅 IC），且**不用** holdout 结果故可作获取前闸门；本条为**负结果护栏**，落位 §14 / §13.10.4 治理检查点，非新 alpha。
+61. **推荐**：微观结构压力测试可用**生成式订单流仿真**（M3，arXiv:2608.19227）——反事实 LOB 轨迹标定 `simulated_broker` 成本模型(§13.10.6)并压力测试拥挤读数(§13.13.3)；需 LOB/订单流数据(A股L2)，缺则历史压力回放；`ENABLE_MICRO_SIM` 默认关。⚠️ 生成模型须先验证轨迹复现 stylized facts(论文检查)再采信冲击估计，配对 §13.12.4 规范满足回测；是**情景生成器非方向信号**。
+62. **推荐**：若启用 RL 组件，其训练稳定性应采用**自监督辅助任务自动发现**（arXiv:2608.15841，元梯度更新 cumulants+折扣）作为 meta-stabilizer，呼应 #46 范围边界（固定辅助设计跨 regime 失效）；仅当 RL 启用时适用(§15.4)，缺双网络+元梯度基础设施则回退手工辅助任务或禁用 RL；提升**稳定性/鲁棒性非必然 alpha**，晋升前过 §13.12.4 + #25。
+
 ## §14 因子治理模块（FTS 派生的 6 项工程化能力）
 
 > 来源：微信公众号《FTS：一套贯彻 Harness 工程规范的 AI 原生量化因子系统》。
@@ -1643,6 +1777,7 @@ signals = gen.generate_signals(scores, realized_ic=0.05, passed=True)  # 熔断�
 | v2.7.0 | 2026-08-10 | SkillEvolver 周度自进化（arXiv 2026-08-04~10，92 篇扫描选 8 篇成 7 节）：新增 §13.11 — §13.11.1 共形 Kelly 区间宽度仓位 + 诚实 OOS 崩塌(arXiv:2608.01494)、§13.11.2 MINGLE 因子暴露相似度建图(arXiv:2608.06618)、§13.11.3 非高斯长记忆回撤预算 T^(H−1/2) 标度(arXiv:2608.00127)、§13.11.4 认证型 Wasserstein 分布鲁棒配置(arXiv:2608.07032)、§13.11.5 预测差 Shapley 归因(arXiv:2608.04547)、§13.11.6 情绪分类≠收益可预测护栏(arXiv:2608.04200)、§13.11.7 板块嵌入横截面异质性 + 知情流/龙虎榜席位持续性(arXiv:2608.05755+2608.04373)；新增约束 #38–#44。本周主题：不确定性→仓位、共动→结构、锐利→稳健（证据纪律贯穿：共形 Kelly OOS 崩塌 / 情绪 IC 无一显著 / 预测差归因） |
 | v2.8.0 | 2026-08-11 | SkillEvolver 演化（FTS 差距矩阵 L1-L4×T1/T2/T3 对标）：新增 §15 FTS 差距矩阵映射：能力演进路线 — §15.1 实时成本监控与冲击成本实证标定、§15.2 自动重校准触发器、§15.3 在线学习护栏、§15.4 ML 组合层范围边界、§15.5 另类数据准入边界；新增约束 #45–#46。本周主题：实盘反馈→重校准→在线学习闭环作为第三类治理对象（与 §14 因子治理并列），并以 scope boundary 防 ML 组合器/另类数据范围蔓延 |
 | v2.9.0 | 2026-08-16 | SkillEvolver 周度自进化（arXiv 2026-08-10~16，约 120 篇扫描选 8 篇成 8 节 + 1 护栏）：新增 §13.12 — §13.12.1 regime 路由波动率集成(arXiv:2608.12251)、§13.12.2 校准期覆盖部署闸门(arXiv:2608.12259)、§13.12.3 解耦 alpha/beta 触发+认知协方差收缩(arXiv:2608.12283)、§13.12.4 规范满足回测验证(arXiv:2608.10410)、§13.12.5 部门间失衡监控(arXiv:2608.12023)、§13.12.6 下谱同步因子(arXiv:2608.09641)、§13.12.7 FOMC 预公告波动闸门(arXiv:2608.10693)、§13.12.8 分类边界邻近监控(arXiv:2608.12634)；+ 护栏 §13.12 TSI 同步态(arXiv:2608.10788)；新增约束 #47–#54。本周主题：波动率集成回归(regime路由+部署期校准)、信号解耦、回测可取性证明、结构网络、准入边界 |
+| v2.10.0 | 2026-08-23 | SkillEvolver 周度自进化（arXiv 2026-08-17~23，pastweek ~50+ 篇扫描选 8 篇成 8 节）：新增 §13.13 — §13.13.1 可解释 Itô 签名路径特征(arXiv:2608.18120)、§13.13.2 共动结构重构速率(arXiv:2608.20020)、§13.13.3 表征拥挤与惯例多重性(arXiv:2608.18299)、§13.13.4 跨资产粗糙波动率标尺(arXiv:2608.16749)、§13.13.5 CVaR 状态依赖非对称再配置(arXiv:2608.20179)、§13.13.6 LLM 校准可行性检查点护栏(arXiv:2608.20304)、§13.13.7 M3 微观结构反事实压力仿真(arXiv:2608.19227)、§13.13.8 自监督辅助任务稳定 RL(arXiv:2608.15841)；新增约束 #55–#62。本周主题：可解释/结构特征 + 证据完整性闸门（签名/重构速率/表征拥挤为透明特征，跨资产粗糙 vol/CVaR 非对称升级风险机器，校准可行性/微观仿真/稳定RL 为诊断或护栏） |
 | v2.4.0 | 2026-07-24 | SkillEvolver + Loop 演化（FTS 文章派生）：新增因子治理模块 `scripts/factor_governance.py`，实现 6 项工程化能力——契约先行(TypedDict)+原子持久化、三级评估链(L1回测/L2经济逻辑/L3多重检验)、走航验证(Walk-forward)、因子衰减检验(Decay Test)、熔断机制(Circuit Breaker)、正交化(去冗余)；接入 `scoring_engine`(正交化)、`signal_generator`(熔断网关)、`backtest`(走航/衰减报告)，全部 config 驱动默认关闭；SKILL.md 新增 §14 与约束 #19–#24 |
 | v1.x | 2026-06 | 初始版本：6-Category 多因子评分框架，支持 A股/港股/美股，含 2026 arXiv 研究集成 |
 
