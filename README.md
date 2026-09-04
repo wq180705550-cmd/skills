@@ -74,6 +74,7 @@
 | Skill | 说明 |
 |-------|------|
 | [westock-data](./data/westock-data/) | 金融市场结构化数据查询（A股/港股/美股/ETF/期货等） |
+| [macro-quarterly-report](./data/macro-quarterly-report/) | 宏观季度报告生成：westock-data 宏观接口抓取 → 月度→季度聚合 → 同比/环比百分点差 → 零依赖 SVG 折线+柱状图 HTML（24 指标 / 7 板块），含定时自动化与完整季度判定踩坑记录 | v1.0 |
 
 ### ⚙️ 系统
 
