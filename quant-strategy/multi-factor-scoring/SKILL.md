@@ -3,7 +3,7 @@ name: multi-factor-scoring
 description: "Multi-factor scoring quantitative trading system. Build quantitative trading strategies from multi-factor scoring (momentum, technical, volume, fundamentals, macro, sector rotation) across A-shares, HK stocks, US stocks, and futures/derivatives on daily/4H/1H/15M timeframes. Includes a 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM ensemble), a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal intervals), and an FTS factor-governance module (3-level evaluation chain, walk-forward validation, decay test, circuit breaker, orthogonalization, atomic persistence), and a deployment-discipline layer (effective-sample-size gate, shadow-before-swap forward-gated model replacement, interval coherence projection, passive market-impact costing, herding/crowding read), and an uncertainty-to-sizing & robust-structure layer (conformal-Kelly interval-width position sizing, exposure-similarity factor-graph structure, non-Gaussian long-memory drawdown budgeting, certified Wasserstein distributionally-robust allocation, forecast-gap Shapley attribution, sentiment classification-vs-return-predictability guard, sector-embedding cross-sectional heterogeneity), and a production-feedback & scope-boundary layer (auto-recalibration trigger, online-learning guard, real-time cost calibration, ML-portfolio scope boundary, alternative-data admission), and a this-week arXiv integration layer (regime-gated MoE volatility routing, calibration-period-aware quantization deployment gate, disentangled alpha/beta trigger signals with epistemic covariance shrinkage, specification-satisfaction backtest verification, inter-sectoral signed-network imbalance monitor, lower-spectrum synchronization factor, FOMC pre-announcement volatility gate, classification-boundary proximity monitor, and a §13.13 this-week arXiv layer covering interpretable Itô-signature features, correlation-reconfiguration rate, representation crowding, cross-asset rough-volatility, CVaR state-dependent sizing, LLM calibration-viability checkpoint, microstructure stress simulation, and stable-RL auxiliary-task discovery). Triggers: multi-factor models, scoring systems, factor-based stock selection, rotation strategies, quantitative trading framework, 4-layer scoring, volatility forecasting/HAR, uncertainty quantification/conformal prediction, position confidence, risk thresholds, factor governance/admission gates, model promotion policy, backtest audit, conformal-Kelly sizing, distributionally-robust portfolio optimization, drawdown budgeting, forecast attribution. and a §13.14 this-week arXiv layer (backtest robustness grade MinervaScore, growth-optimal KellyBoost tree portfolio, loop-gain rebalancing-feedback stability, quadratic-risk Markowitz generalization, option-implied crash-risk regime gate, systemic-risk transmission multiplex GNN, cross-regime Bayesian signal search, temporally-correlated random-matrix spectral guard, same-day directional benchmark guard)"
 
 agent_created: true
-version: 2.11.0
+version: 2.12.0
 language: zh
 type: strategy
 priority: high
@@ -1690,6 +1690,90 @@ This week's theme is **backtest evidence-discipline upgrade + growth-optimal / g
 > **本周集成小结**：9 篇全部 opt-in / config 驱动 / graceful-fallback 落位，无投机性新 `.py` 代码。信号设计以「函数签名 + 准入条件 + Caveat」表述，延续 §13.6–§13.13 的文档化范式。其中 §13.14.1（MinervaScore）为回测审计的量化升级、§13.14.9（同日方向基准）为**负倾向护栏**（明确"同日方向预测虽可检但经济意义有限，须严格样本量核算"）、§13.14.8（时序相关随机矩阵）为谱方法**校准护栏**，三者均非新 alpha。
 
 
+## 13.15 This-Week arXiv Integration (2026-08-31 ~ 2026-09-06)
+
+Crawled the arXiv **q-fin** `pastweek` listing (announcements 2026-08-31 → 2026-09-04, **50 papers** across q-fin.{CP,PM,ST,TR,RM,MF,GN} + cross-lists from cs.LG/cs.AI/cs.CL/econ/stat) plus the September 2026 monthly listing; scanned all titles, read 8 abstracts, and selected 8 papers grouped into 8 subsections with a direct, non-speculative mapping. Follows the opt-in, config-driven, graceful-fallback pattern of §13.6–§13.14.
+
+This week's theme is **agentic workflow discipline + robust factor/correlation structure + honest evaluation (evidence discipline continues)**: one survey frames the agentic quant workflow that this skill's own skillevolver/loop evolution embodies; three papers harden the factor/covariance backbone (entropic replication, neural small-cap shrinkage, order-flow long-memory); two upgrade the risk machinery (VRP derisking, illiquidity-at-risk); and two are *guard-rails* on LLM/agentic strategy discovery (regime-conditioned disclosure betas with a calibration gate, and leakage-safe search-aware evaluation).
+
+#### §13.15.1 Agentic Quantitative Trading: A Workflow Survey (arXiv:2608.31041)
+- **论文**：Agentic Quantitative Trading: A Survey of Workflows, Systems, and Evaluation（q-fin.CP，2026-08-31）。
+- **核心发现**：量化交易正从孤立预测模型走向"推理 + 工具 + 记忆 + 反馈"的 agentic workflow；综述覆盖五阶段——因子挖掘、信号发现、组合构建、订单执行、风险管理。关键发现：(1) 现有系统**高度集中于信号发现**，与组合构建/执行/风控的完整集成仍罕见；(2) benchmark 证据显示**强模型/强预测能力并不必然转化为实盘交易表现**（在可靠性控制下）；(3) 多智能体仍重度依赖聚合，工作流结构已更多样。
+- **Framework mapping**：直接框定本技能的**自身 agentic 演化范式**（skillevolver + loop + §14/§15 治理）。技能已天然分五阶段：因子挖掘(scoring_engine) → 信号发现(uncertainty_quantification) → 组合构建(§5 sizing) → 执行(simulated_broker) → 风控(否决项/tail gate)。综述的"集成缺口"与"预测≠交易表现"恰恰印证本技能贯穿的证据纪律主线（#25 审计、#38 校准≠增长、#63 MinervaScore）。
+- **信号设计**（meta，opt-in，默认 ON 作为工作流纪律）：
+  - `workflow_stage_coverage_check(stages)`：校验 agentic loop 是否覆盖全部五阶段（而非仅信号发现），任一阶段缺失 → 标记为不完整工作流；
+  - `reliability_matched_eval(capability)`：按被评估能力的层级选用匹配评估工具（信号用方向 IC、组合用 OOS Sharpe、执行用冲击成本、风控用 tail 覆盖），禁止跨层级错配。
+  - 优雅回退：单阶段脚本无需 coverage 校验；仅当启用多阶段 agentic 流程时强制。
+- **Caveat（证据纪律）**：本文是**综述/元层**，非新 alpha；其"预测≠实盘"结论正是 #38（校准≠增长）、#71（方向信号怀疑论）的文献支撑。本技能须把 skillevolver/loop 的演化产出经 #25/#33 审计后再采纳，避免"agent 能发现信号"被误读为"能赚钱"。
+
+#### §13.15.2 Entropic Factor Model for Robust Portfolio Replication (arXiv:2609.03552)
+- **论文**：An Entropic Factor Model for Robust Portfolio Replication（q-fin.PM / math.OC / q-fin.CP，2026-09-03）。
+- **核心发现**：组合复制（用可交易篮子匹配目标基准的风险收益）本质是病态逆问题；经典 OLS 方差最小化在资产子集上常给出不稳定、高杠杆、对冲击脆弱的组合。提出两阶段熵方法：(1) 以**熵最小化原理**（Fermi-Dirac 型熵，定义在逆问题约束集上）在 data-driven 经验界内估计因子载荷；(2) 同法确定最优复制权重。五组数值实验（含 COVID 崩盘与严重特异性数据损坏）显示 EFM 在年化换手与费后收益上持续优于 OLS；关键地，在压力情景下熵框架充当**概率性"熔断"**——防御性地削减对受损资产的资本配置。
+- **Framework mapping**：升级 **§5 仓位 / §13.10.1 特征驱动协方差（CD-DFM）**——提供一类**稳健因子复制权重估计器**：与 CD-DFM 同样不依赖长回报历史，且在压力下自带防御性（充当 CircuitBreaker）。把"复制权重估计"从 OLS 替换为熵最小化，直接强化 §13.9.4 CVaR 配置与 §5 配置层的稳健性。
+- **信号设计**（opt-in，默认 OFF）：
+  - `entropic_replication_weights(target, factors, asset_returns, bounds)` → 熵最小化（Fermi-Dirac）约束下的因子载荷 + 复制权重；验证其在压力期充当防御性熔断（受损资产权重自动收缩）。
+  - 优雅回退：无熵求解器 → 退化为 §13.10.1 特征协方差 / OLS 复制；不报错。
+  - 验证：在 COVID 类压力样本上须展现权重收缩（接 #21 CircuitBreaker 语义）。
+- **Caveat**：权重估计器，**非收益预测器**；论文验证含股权跟踪/多资产/压力三类，但未接本技能实盘成本模型——须经 `audit_checklist()`(#25) + ESS 闸(#33) 后再用于实盘配置；与 #21 熔断语义一致，可作防御性兜底。
+
+#### §13.15.3 End-to-End Neural Shrinkage of Indefinite Correlation Matrices for Small-Cap-Inclusive Portfolios (arXiv:2608.30446)
+- **论文**：End-to-End Neural Shrinkage of Indefinite Pairwise Correlation Matrices for Small-Cap-Inclusive Portfolios（q-fin.PM / cs.LG / q-fin.ST，2026-08-31）。
+- **核心发现**：小盘含权宇宙含新上市/间歇性交易标的，强制统一回看会丢弃大量信息；pairwise-complete 估计保留每对最长重叠，但不同样本算出的相关矩阵**可能非正定（indefinite）**，既无法用于 Markowitz，也超出标准随机矩阵收缩假设。本文把旋转不变神经协方差估计器适配到此场景：mask-aware 边缘矩 + 成对相关代理 → 处理其**带符号谱** → 用基于因子对齐有效样本长度（来自重叠矩阵与特征向量载荷）的双向 GRU，把包括负特征值在内的所有特征值映射到正逆谱，得到**正定**协方差，端到端最小化 5 日实现全局最小方差风险。2000–2025 年 26 个扩张窗口、最多 1500 支美股、含时点选择/佣金/融资/公司行动/市场冲击的收盘竞价模拟器中，神经估计器相对次优协方差估计**年化 5 日波动降约 20%、Sharpe 升约 40%**，且 99.9% Model Confidence Set 仅保留该神经估计器。
+- **Framework mapping**：直接升级协方差主干——(a) pairwise-complete 估计保留小盘信息，正是 §13.10.1 **零样本标的接入**的协方差侧实现；(b) 神经收缩把 indefinite 矩阵转为 PD，修复了 §13.11.2 暴露图 / §13.12.6 下谱因子 / §13.14.8 谱校准护栏对 PD 协方差的隐含假设；(c) 有效样本长度条件化直接对接 **ESS 闸(#33)**。
+- **信号设计**（opt-in，默认 OFF）：
+  - `neural_shrinkage_covariance(pairwise_corr, overlap_matrix, factor_loadings)` → PD 协方差，路由进 §5 / §13.9.4 CVaR / §13.10.1；
+  - 优雅回退：无神经估计器 → 退化为 Ledoit-Wolf 收缩（技能已有）；仅当小盘含权且 pairwise-complete 产生 indefinite 矩阵时启用收益最大。
+  - 验证：在 1500 美股时点宇宙上须复现 PD + 低于 Ledoit-Wolf 的 5 日方差（接 #33 ESS，有效样本长度来自重叠矩阵）。
+- **Caveat**：需重叠矩阵 + 因子载荷 + 已训神经估计器；99.9% MCS 与 26 年 OOS 很强，但用收盘竞价模拟器——须在 A 股 L2 上重验；与 #33（有效样本长度）、#70（谱校准护栏）直接衔接。默认关闭，避免把重模型当默认。
+
+#### §13.15.4 Switching Frictions, Heterogeneous Trading Horizons, and Long-Memory Order Flow (arXiv:2609.02525)
+- **论文**：Switching Frictions, Heterogeneous Trading Horizons, and Long-Memory Order Flow（q-fin.PM，2026-09-02）。
+- **核心发现**：构建机制说明"组合选择所用表征的昂贵切换"如何贡献于持续的有符号订单流。异质切换阈值与机会波动生成异质驻留时间，renewal 聚合把其执行加权尾部映射到聚合流协方差的衰减；在共同执行权重下，**同一尾部同时决定**：表征持续时长指数、订单流记忆指数、以及有限市场标度必须终止的视界。首通 renewal 分析建立这些联合约束；结构仿真从实现路径复原它们，量化错配权重的扭曲，并展示有限横截面如何缩短可用推断视界。
+- **Framework mapping**：升级 **§13.13.4 跨资产粗糙波动率标尺** 与 **§13.11.3 长记忆回撤预算**——给出订单流长记忆指数的**理论推导**（与 Hurst H 关联），以及有限市场标度视界（§13.11.3 的 T^(H−1/2) 标度须在此视界内有效）；同时衔接 §13.13.3 表征拥挤（表征持续时长 = 表征维持多久）。
+- **信号设计**（opt-in，默认 OFF）：
+  - `order_flow_memory_exponent(signed_flow, switch_thresholds)` → 估计长记忆/订单流指数（→ Hurst 校准 §13.13.4、回撤视界 §13.11.3）；
+  - 优雅回退：无订单流数据 → 退化为 ATR / 已实现波动率 Hurst z 分数；H 是**regime 描述符非方向信号**（#58）。
+- **Caveat**：重 renew 理论推导；"有限横截面缩短可用推断视界" → 直接对接 #33 ESS（小横截面 ⇒ 短推断视界）；理论结果须谨慎迁移至金融相关矩阵；与 #58（H 非方向）、#31（系统/事件异质）一致。
+
+#### §13.15.5 Harvesting the Variance Risk Premium in Nuclear and Energy Equities (arXiv:2609.01183)
+- **论文**：Harvesting the Variance Risk Premium in Nuclear and Energy Equities: A Short-Put Portfolio Derisking Strategy（q-fin.PM，2026-09-01）。
+- **核心发现**：检验核/能源相关股权期权是否存在可收割的方差风险溢价（VRP）。用 CRSP + OptionMetrics（2000–2024），在精选核相关公司宇宙上构建系统化现金担保卖 Put 策略：比较 ATM Put 隐含波动率与 GARCH 实现波动率预测，评估无条件与 IV/RV 过滤的卖 Put 组合。结果：正期权溢价、高胜率、波动显著低于等权股票基准——但**业绩为费前、固定宇宙、仅 4 页初步稿**。
+- **Framework mapping**：强化 **§13.13.2 共动结构重构速率（VRP 的未定价维度）** 与 **§13.8.5 尾部/CVaR 闸门**——提供 VRP 收割 + 去风险的机制；IV-vs-GARCH-RV 过滤衔接 §13.6 波动率预测（GARCH 类比）与 §13.14.5 期权隐含崩盘闸门。
+- **信号设计**（opt-in，默认 OFF；作风险调制/去风险，**非主 alpha**）：
+  - `vrp_short_put_gate(iv_atm, garch_rv_forecast, regime)` → 当 IV ≫ GARCH-RV（正 VRP）且非压力 regime → 经卖 Put 去风险收割；IV/RV 过滤同时喂给 §13.8.5 尾部闸门。
+  - 优雅回退：无期权链 → 仅用 §13.6 波动率预测做 VRP 代理；
+- **Caveat**：费前 + 固定宇宙 + 初步稿（4 页），**不得**当作主 alpha；与 #18（小权重软确认）、#67（期权隐含 regime 闸门，须按 regime 选信号）一致。默认关闭，待更完整实证。
+
+#### §13.15.6 DisclosureBeta: Regime-Conditioned Betas from LLM-Read Risk Disclosures (arXiv:2609.02900)
+- **论文**：DisclosureBeta: A Measurement-Channel Theory for Regime-Conditioned Betas from LLM-Read Risk Disclosures（q-fin.RM / cs.CL / q-fin.GN，理论预印本 2026-07-05，本周 pastweek 重现）。
+- **核心发现**：解决"价格历史太短不可信时的 beta"问题（S-1 申报、新上市、刚过 regime 断裂的标的）。把 LLM 建模为对公司潜在风险特征的**噪声测量信道**，把信道噪声写入资产定价误差预算；在分段平稳 FF5 模型中，载荷是潜在风险特征与推断 regime 的函数。证明在显式假设下 regime-条件载荷函数的**识别与一致性**，并给出下界（披露噪声 + 检测器误分类项对任意仅观察收益/因子/LLM 特征/regime 估计的估计器均不可避免）。披露激励推论使估计精度随公司级披露激励测度（DIM）单调；文本与滚动窗口估计的自适应凸组合**永不差于任一分量**，并在价格历史短/陈旧/跨 regime 断裂时把权重移向文本。实证在冻结预注册面板上（结果待伴生论文）。
+- **Framework mapping**：直接升级 **§13.10.1 CD-DFM 零样本接入**（价格历史薄标的 = 正是零样本情形）与 **§13.12.3 解耦 alpha/beta**（regime-条件 beta）；属另类数据（LLM 披露），须服从 #43/#18/#60 校准闸门。
+- **信号设计**（opt-in，默认 OFF；仅作软确认/零样本 beta）：
+  - `disclosure_beta(llm_features, rolling_beta, price_history_len, regime)` → 自适应凸组合；当历史薄/陈旧/跨 regime 断裂时权重移向文本；
+  - 准入：必须过**校准可行性检查点(#60)** + 前瞻收益秩 IC 校正(#43) 方可使用；价格历史薄标的作**零样本 beta 软确认**，**绝不**作 sizer。
+  - 优雅回退：无 LLM 披露 → 退化为 §13.10.1 特征协方差 beta / 可比公司 peer beta。
+- **Caveat**：**理论预印本**，实证待发表（已预注册）；下界证明披露+检测器噪声不可避免 ⇒ 权重须小(#18)；与 #43（情绪 IC 校正）、#60（校准可行性，比 IC 更严）一致。默认关闭，待实证验证；不得因"LLM 版更强"放大权重。
+
+#### §13.15.7 Leakage-Safe, Search-Aware Evaluation of LLM Trading Strategy Discovery (arXiv:2608.27734)
+- **论文**：What survives honest evaluation? Leakage-safe, search-aware assessment of LLM-driven trading strategy discovery（q-fin.ST，2026-08-27）。
+- **核心发现**：LLM 发现交易策略的文献普遍缺陷——生成大量候选、只报最优、既不校正前视偏差也不校正搜索强度。本文把两类校正**结构化**（非流程化）：(1) agent 只能通过**注册表校验工具**行动，其特征空间**按构造排除前视**；证明此护栏**不冗余于**统计校正——一个故意泄漏、Sharpe 35 的 oracle 能完全通过 DSR + PBO 检验；(2) 系统记录搜索执行的**每一次评估**，用试验次数对报告业绩做** deflation**，追踪最优 in-sample Sharpe 随试验上升、而由 agent 自身搜索驱动的 deflation 阈值上升更快。在 453 股时点宇宙 + 39 ETF 多资产宇宙（含真实交易成本/冲击/借券）上，诚实评估**认证被动基准**（OOS 置信区间排除零）、**拒绝每一个 LLM 发现策略**（两前沿模型、搜索预算至 100 候选、5 次重复），并用人交易员生产规则系统做同工具评估。框架形式化了"预注册假设比暴力搜索获得更低证据门槛"及"可信认证中等边缘所需样本量"。
+- **Framework mapping**：强化 **#25 `audit_checklist()`** 与 **#50 deflation**——新增**结构性**（非流程）前视护栏（注册表校验工具，特征空间按构造无前视）与**搜索试验次数 deflation**。直接支撑证据纪律主线，与 §13.12.4 规范满足回测、§13.14.1 MinervaScore 并列。
+- **信号设计**（护栏，opt-in，推荐 ON 于所有 LLM/agentic 策略发现）：
+  - `leakage_safe_eval(registry_tools, trial_log)` → (a) 强制注册表校验工具、特征空间按构造无前视（结构护栏，#25）；(b) `search_deflation(reported_sharpe, n_trials)` → 按试验次数 deflation，与 agent 自身搜索驱动的阈值比较，低于则**拒绝**；
+  - 落位为**晋升前治理检查点**（接 #25/#50/#63），**非新 alpha**；与 #71（方向信号怀疑论）一致。
+- **Caveat**：**负结果护栏**——论文结论拒绝所有 LLM 发现策略，是"诚实评估"的警示基准，强化 #38（校准≠增长）、#71（方向信号怀疑论）；与 §13.13.6 校准可行性同属"获取/信任前须验证"的精神。仅作审计层，不得读作"本技能策略会赚钱"。
+
+#### §13.15.8 Illiquidity-at-Risk: A Jump-Aware Liquidity Tail Metric (arXiv:2609.00943)
+- **论文**：Illiquidity at Risk（q-fin.RM / econ.EM，2026-09-01）。
+- **核心发现**：提出尾部流动性风险新指标 **IlliQaR**，量化极端流动性枯竭的幅度。基于**实现 Amihud**（高频数据推导的精确非流动性测度 = 实现波动率 / 成交量），评估多种线性/非线性计量模型的预测力，重点在**不连续跳跃成分**的影响。计入跳跃对系统性压力期的准确概率覆盖与更好 IlliQaR 预测至关重要（标准连续模型系统性低估流动性蒸发严重性）。实证（S&P 500 + 25 支美股横截面）显示计入跳跃显著改善预测；个股 IlliQaR 违例常在 S&P 500 流动性压力期聚集——表明 IlliQaR 非局部问题而是**系统性**问题，主指数作个股流动性极端枯竭的**领先指标**。
+- **Framework mapping**：为 **§13.8.5 尾部/CVaR 闸门** 与 **§13.10.6 市场冲击** 新增**流动性尾部风险读数**——与 CVaR 互补；S&P 500 IlliQaR 作系统性**领先指标**（流动性维度），衔接 §13.13.3 表征拥挤与 §13.12.5 行业间失衡的系统性监控。
+- **信号设计**（opt-in，默认 OFF；监控/风险调制态）：
+  - `illiquidity_at_risk(amihud_realized, jump_component, spx_illiq)` → 估计 IlliQaR（非流动性尾部分位）；S&P 500 IlliQaR 作系统性领先指标，当个股违例聚集 → 收紧 `risk_scale` / 冲击缓冲 / 否决项；
+  - 优雅回退：无高频数据 → 退化为成交量/ADV 流动性代理（§13.10.6 被动冲击 κ 标定）；
+- **Caveat**：需高频（实现 Amihud）数据，A 股 L2 可得；跳跃成分对覆盖必要，须用跳跃感知模型；属**同步/系统性读数非方向信号**，与 #31（系统非外生领先）、#35（冲击建模）一致。
+
+> **本周集成小结**：8 篇全部 opt-in / config 驱动 / graceful-fallback 落位，无投机性新 `.py` 代码。信号设计以「函数签名 + 准入条件 + Caveat」表述，延续 §13.6–§13.14 的文档化范式。其中 §13.15.1 为 agentic 工作流元层（综述，框定本技能自身 skillevolver/loop 演化）、§13.15.7 为**诚实评估护栏**（结构化无前视 + 搜索 deflation，拒绝 LLM 发现策略）、§13.15.6 为另类数据 beta（须过校准闸门，理论预印本）——三者均非新 alpha；§13.15.2/3/4 升级因子/协方差主干，§13.15.5/8 升级风险机器（VRP 去风险 / 流动性尾部）。新增约束 #72–#79。
+
 # S_appendix：技能附录
 
 > **重要提示**：本附录包含使用 multi-factor-scoring 技能时的关键约束和常见失误。使用 4 层评分框架（萌芽/量价/结构/确认）时，必须严格遵守以下规则。
@@ -1825,6 +1909,16 @@ This week's theme is **backtest evidence-discipline upgrade + growth-optimal / g
 70. **强制**：任何**经验相关矩阵的谱方法**（§13.11.2 暴露图 / §13.12.6 下谱因子）须先做**时序相关校准护栏**——估计时间相关指数 γ，γ < 1/2 时体/边偏离 iid Marchenko–Pastur 参考 ⇒ 调整特征值收缩/下谱标定并标记非 iid 污染；直接落实 #16 无 IID 假设（及 #11/#17 依赖感知）。纯理论(Wigner 型)须谨慎迁移至金融相关矩阵。
 71. **强制**：任何**方向性/分类信号**的评估须带**样本量核算 + bootstrap CI**（同日方向基准护栏，arXiv:2608.26106：71% 准确率但 |move| > 1% 可用样本仅 154、经济意义有限）；边缘在严格样本量核算下消失的策略判拒；与 #14 基率诚实、§13.11.6 情绪 ≠ 收益、#25/#33 一致——强化"方向信号怀疑论"纪律。
 
+
+72. **推荐**：agentic 工作流须覆盖五阶段（因子挖掘→信号发现→组合构建→执行→风控），不得仅停留信号发现；按能力层级选用匹配评估工具（信号用方向 IC、组合用 OOS Sharpe、执行用冲击成本、风控用 tail 覆盖），禁止跨层错配（arXiv:2608.31041 综述：强预测≠实盘表现）；与 #25/#38/#63 一致。
+73. **推荐**：组合复制权重可用**熵最小化（Fermi-Dirac）估计器**（arXiv:2609.03552），在压力下充当概率性熔断（受损资产权重自动收缩）；接入 §5 / §13.9.4 / §13.10.1，优雅回退 OLS/特征协方差；与 #21 CircuitBreaker 语义一致；须过 #25/#33 再实盘。
+74. **推荐**：小盘含权宇宙协方差用**pairwise-complete + 神经 PD 收缩**（arXiv:2608.30446）——保留小盘信息（零样本接入 §13.10.1）并修复 indefinite 矩阵（§13.11.2/§13.12.6/§13.14.8 隐含 PD 假设）；有效样本长度条件化对接 ESS(#33)；优雅回退 Ledoit-Wolf；默认 OFF。
+75. **推荐**：订单流长记忆指数可由异质切换阈值理论推导（arXiv:2609.02525），喂 §13.13.4 粗糙波动率 Hurst 校准与 §13.11.3 回撤标度视界；H 是 regime 描述符非方向信号(#58)；有限横截面缩短推断视界 ⇒ 接 #33 ESS；默认 OFF。
+76. **推荐**：VRP 可经 IV-vs-GARCH-RV 过滤收割并去风险（arXiv:2609.01183）；作风险调制/去风险**非主 alpha**；费前+固定宇宙+初步稿 ⇒ 默认 OFF；与 #18（小权重软确认）、#67（期权隐含 regime 闸门）一致。
+77. **强制**：LLM 披露 regime-条件 beta（DisclosureBeta，arXiv:2609.02900）必须过**校准可行性检查点(#60)** + 前瞻收益秩 IC 校正(#43) 方可使用；价格历史薄标的作**零样本 beta 软确认**（§13.10.1/§13.12.3），**绝不**作 sizer；理论预印本+披露噪声下界 ⇒ 权重须小(#18)；默认 OFF 待实证。
+78. **强制**：任何 LLM/agentic 策略发现须做**结构化无前视 + 搜索 deflation**（arXiv:2608.27734）——(a) 注册表校验工具、特征空间按构造无前视（不冗余于统计校正）；(b) 按搜索试验次数对报告业绩 deflation，低于 agent 自身搜索驱动的阈值即拒绝；落位晋升前治理检查点，与 #25/#50/#63/#71 一致；是**护栏非 alpha**。
+79. **推荐**：流动性尾部风险可用 **IlliQaR**（跳跃感知实现 Amihud 尾部分位，arXiv:2609.00943）作 §13.8.5 尾部闸门与 §13.10.6 冲击的补充读数；S&P 500 IlliQaR 作系统性领先指标，个股违例聚集 ⇒ 收紧 risk_scale/冲击缓冲/否决项；无高频退化为 ADV 代理；与 #31/#35 一致；默认 OFF。
+
 ## §14 因子治理模块（FTS 派生的 6 项工程化能力）
 
 > 来源：微信公众号《FTS：一套贯彻 Harness 工程规范的 AI 原生量化因子系统》。
@@ -1923,7 +2017,8 @@ signals = gen.generate_signals(scores, realized_ic=0.05, passed=True)  # 熔断�
 | v2.8.0 | 2026-08-11 | SkillEvolver 演化（FTS 差距矩阵 L1-L4×T1/T2/T3 对标）：新增 §15 FTS 差距矩阵映射：能力演进路线 — §15.1 实时成本监控与冲击成本实证标定、§15.2 自动重校准触发器、§15.3 在线学习护栏、§15.4 ML 组合层范围边界、§15.5 另类数据准入边界；新增约束 #45–#46。本周主题：实盘反馈→重校准→在线学习闭环作为第三类治理对象（与 §14 因子治理并列），并以 scope boundary 防 ML 组合器/另类数据范围蔓延 |
 | v2.9.0 | 2026-08-16 | SkillEvolver 周度自进化（arXiv 2026-08-10~16，约 120 篇扫描选 8 篇成 8 节 + 1 护栏）：新增 §13.12 — §13.12.1 regime 路由波动率集成(arXiv:2608.12251)、§13.12.2 校准期覆盖部署闸门(arXiv:2608.12259)、§13.12.3 解耦 alpha/beta 触发+认知协方差收缩(arXiv:2608.12283)、§13.12.4 规范满足回测验证(arXiv:2608.10410)、§13.12.5 部门间失衡监控(arXiv:2608.12023)、§13.12.6 下谱同步因子(arXiv:2608.09641)、§13.12.7 FOMC 预公告波动闸门(arXiv:2608.10693)、§13.12.8 分类边界邻近监控(arXiv:2608.12634)；+ 护栏 §13.12 TSI 同步态(arXiv:2608.10788)；新增约束 #47–#54。本周主题：波动率集成回归(regime路由+部署期校准)、信号解耦、回测可取性证明、结构网络、准入边界 |
 | v2.10.0 | 2026-08-23 | SkillEvolver 周度自进化（arXiv 2026-08-17~23，pastweek ~50+ 篇扫描选 8 篇成 8 节）：新增 §13.13 — §13.13.1 可解释 Itô 签名路径特征(arXiv:2608.18120)、§13.13.2 共动结构重构速率(arXiv:2608.20020)、§13.13.3 表征拥挤与惯例多重性(arXiv:2608.18299)、§13.13.4 跨资产粗糙波动率标尺(arXiv:2608.16749)、§13.13.5 CVaR 状态依赖非对称再配置(arXiv:2608.20179)、§13.13.6 LLM 校准可行性检查点护栏(arXiv:2608.20304)、§13.13.7 M3 微观结构反事实压力仿真(arXiv:2608.19227)、§13.13.8 自监督辅助任务稳定 RL(arXiv:2608.15841)；新增约束 #55–#62。本周主题：可解释/结构特征 + 证据完整性闸门（签名/重构速率/表征拥挤为透明特征，跨资产粗糙 vol/CVaR 非对称升级风险机器，校准可行性/微观仿真/稳定RL 为诊断或护栏） |
-| v2.11.0 | 2026-08-30 | SkillEvolver 周度自进化（arXiv 2026-08-24~28，pastweek ~60+ 篇扫描选 9 篇成 9 节 + 2 护栏/校准护栏）：新增 §13.14 — §13.14.1 MinervaScore 回测稳健性评级(arXiv:2608.23808)、§13.14.2 KellyBoost 增长最优树组合(arXiv:2608.23393)、§13.14.3 环路增益矩阵再平衡稳定性(arXiv:2608.22768)、§13.14.4 广义二次风险 Markowitz(arXiv:2608.24449)、§13.14.5 期权隐含崩盘 regime 闸门(arXiv:2608.26115)、§13.14.6 系统性风险多重图神经网络(arXiv:2608.27295)、§13.14.7 跨 regime 贝叶斯信号搜索(arXiv:2608.27076)、§13.14.8 时序相关随机矩阵谱护栏(arXiv:2608.23944)、§13.14.9 同日方向基准护栏(arXiv:2608.26106)；新增约束 #63–#71。本周主题：回测证据纪律升级 + 增长最优/广义风险配置 + 再平衡与系统性稳定监控 + 谱/区间校准护栏
+| v2.11.0 | 2026-08-30 | SkillEvolver 周度自进化（arXiv 2026-08-24~28，pastweek ~60+ 篇扫描选 9 篇成 9 节 + 2 护栏/校准护栏）：新增 §13.14 — §13.14.1 MinervaScore 回测稳健性评级(arXiv:2608.23808)、§13.14.2 KellyBoost 增长最优树组合(arXiv:2608.23393)、§13.14.3 环路增益矩阵再平衡稳定性(arXiv:2608.22768)、§13.14.4 广义二次风险 Markowitz(arXiv:2608.24449)、§13.14.5 期权隐含崩盘 regime 闸门(arXiv:2608.26115)、§13.14.6 系统性风险多重图神经网络(arXiv:2608.27295)、§13.14.7 跨 regime 贝叶斯信号搜索(arXiv:2608.27076)、§13.14.8 时序相关随机矩阵谱护栏(arXiv:2608.23944)、§13.14.9 同日方向基准护栏(arXiv:2608.26106)；新增约束 #63–#71。本周主题：回测证据纪律升级 + 增长最优/广义风险配置 + 再平衡与系统性稳定监控 + 谱/区间校准护栏 |
+| v2.12.0 | 2026-09-06 | SkillEvolver + Loop 周度自进化（arXiv 2026-08-31~09-04，pastweek 50 篇扫描选 8 篇成 8 节）：新增 §13.15 — §13.15.1 agentic 量化交易工作流综述(arXiv:2608.31041)、§13.15.2 熵因子模型稳健复制(arXiv:2609.03552)、§13.15.3 小盘含权神经协方差收缩(arXiv:2608.30446)、§13.15.4 订单流长记忆指数(arXiv:2609.02525)、§13.15.5 VRP 卖 Put 去风险(arXiv:2609.01183)、§13.15.6 披露 beta regime 条件 LLM(arXiv:2609.02900)、§13.15.7 诚实评估结构化无前视+搜索 deflation 护栏(arXiv:2608.27734)、§13.15.8 IlliQaR 流动性尾部(arXiv:2609.00943)；新增约束 #72–#79。本周主题：agentic 工作流纪律 + 稳健因子/协方差主干 + 诚实评估（证据纪律延续） | SkillEvolver 周度自进化（arXiv 2026-08-24~28，pastweek ~60+ 篇扫描选 9 篇成 9 节 + 2 护栏/校准护栏）：新增 §13.14 — §13.14.1 MinervaScore 回测稳健性评级(arXiv:2608.23808)、§13.14.2 KellyBoost 增长最优树组合(arXiv:2608.23393)、§13.14.3 环路增益矩阵再平衡稳定性(arXiv:2608.22768)、§13.14.4 广义二次风险 Markowitz(arXiv:2608.24449)、§13.14.5 期权隐含崩盘 regime 闸门(arXiv:2608.26115)、§13.14.6 系统性风险多重图神经网络(arXiv:2608.27295)、§13.14.7 跨 regime 贝叶斯信号搜索(arXiv:2608.27076)、§13.14.8 时序相关随机矩阵谱护栏(arXiv:2608.23944)、§13.14.9 同日方向基准护栏(arXiv:2608.26106)；新增约束 #63–#71。本周主题：回测证据纪律升级 + 增长最优/广义风险配置 + 再平衡与系统性稳定监控 + 谱/区间校准护栏
 | v2.4.0 | 2026-07-24 | SkillEvolver + Loop 演化（FTS 文章派生）：新增因子治理模块 `scripts/factor_governance.py`，实现 6 项工程化能力——契约先行(TypedDict)+原子持久化、三级评估链(L1回测/L2经济逻辑/L3多重检验)、走航验证(Walk-forward)、因子衰减检验(Decay Test)、熔断机制(Circuit Breaker)、正交化(去冗余)；接入 `scoring_engine`(正交化)、`signal_generator`(熔断网关)、`backtest`(走航/衰减报告)，全部 config 驱动默认关闭；SKILL.md 新增 §14 与约束 #19–#24 |
 | v1.x | 2026-06 | 初始版本：6-Category 多因子评分框架，支持 A股/港股/美股，含 2026 arXiv 研究集成 |
 
