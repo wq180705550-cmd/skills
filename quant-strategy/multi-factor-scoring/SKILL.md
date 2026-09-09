@@ -1,9 +1,9 @@
-﻿---
+---
 name: multi-factor-scoring
-description: "Multi-factor scoring quantitative trading system. Build quantitative trading strategies from multi-factor scoring (momentum, technical, volume, fundamentals, macro, sector rotation) across A-shares, HK stocks, US stocks, and futures/derivatives on daily/4H/1H/15M timeframes. Includes a 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules, a realized-volatility forecasting module (Log-HAR + TTM ensemble), a distribution-free uncertainty-quantification module (dependence-aware bootstrap + conformal intervals), and an FTS factor-governance module (3-level evaluation chain, walk-forward validation, decay test, circuit breaker, orthogonalization, atomic persistence), and a deployment-discipline layer (effective-sample-size gate, shadow-before-swap forward-gated model replacement, interval coherence projection, passive market-impact costing, herding/crowding read), and an uncertainty-to-sizing & robust-structure layer (conformal-Kelly interval-width position sizing, exposure-similarity factor-graph structure, non-Gaussian long-memory drawdown budgeting, certified Wasserstein distributionally-robust allocation, forecast-gap Shapley attribution, sentiment classification-vs-return-predictability guard, sector-embedding cross-sectional heterogeneity), and a production-feedback & scope-boundary layer (auto-recalibration trigger, online-learning guard, real-time cost calibration, ML-portfolio scope boundary, alternative-data admission), and a this-week arXiv integration layer (regime-gated MoE volatility routing, calibration-period-aware quantization deployment gate, disentangled alpha/beta trigger signals with epistemic covariance shrinkage, specification-satisfaction backtest verification, inter-sectoral signed-network imbalance monitor, lower-spectrum synchronization factor, FOMC pre-announcement volatility gate, classification-boundary proximity monitor, and a §13.13 this-week arXiv layer covering interpretable Itô-signature features, correlation-reconfiguration rate, representation crowding, cross-asset rough-volatility, CVaR state-dependent sizing, LLM calibration-viability checkpoint, microstructure stress simulation, and stable-RL auxiliary-task discovery). Triggers: multi-factor models, scoring systems, factor-based stock selection, rotation strategies, quantitative trading framework, 4-layer scoring, volatility forecasting/HAR, uncertainty quantification/conformal prediction, position confidence, risk thresholds, factor governance/admission gates, model promotion policy, backtest audit, conformal-Kelly sizing, distributionally-robust portfolio optimization, drawdown budgeting, forecast attribution. and a §13.14 this-week arXiv layer (backtest robustness grade MinervaScore, growth-optimal KellyBoost tree portfolio, loop-gain rebalancing-feedback stability, quadratic-risk Markowitz generalization, option-implied crash-risk regime gate, systemic-risk transmission multiplex GNN, cross-regime Bayesian signal search, temporally-correlated random-matrix spectral guard, same-day directional benchmark guard)"
+description: "Multi-factor scoring quantitative trading system across A/HK/US/futures, 1H-daily. Includes 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules; Log-HAR+TTM realized-volatility forecasting; bootstrap+conformal uncertainty quantification; FTS factor governance (walk-forward, decay test, circuit breaker, orthogonalization, atomic persistence); deployment discipline (ESS gate, shadow-before-swap model replacement); conformal-Kelly sizing, Wasserstein DRO allocation, Shapley attribution; production-feedback & scope-boundary; weekly arXiv layers (MoE volatility routing, CVaR sizing, backtest-robustness grading, option-implied crash-risk gate, spectral guard, benchmark guard). Triggers: multi-factor, factor selection, rotation, 4-layer scoring, volatility forecasting, conformal, Kelly sizing, robust allocation, drawdown budgeting, factor governance, backtest audit, attribution."
 
 agent_created: true
-version: 2.12.0
+version: 2.13.0
 language: zh
 type: strategy
 priority: high
@@ -75,7 +75,177 @@ triggers:
   - "跨regime贝叶斯优化/信号超参搜索/三regime联合目标/Hybrid集成"
   - "时序相关随机矩阵/谱校准护栏/非iid相关矩阵/Marchenko-Pastur偏离"
   - "同日方向预测基准/方向信号样本量核算/bootstrap CI护栏"
-keywords: [multi-factor, quantitative-trading, scoring-system, factor-selection, A-shares, HK-stocks, US-stocks, futures, derivatives, OI, ATR, OBV, CMF, Supertrend, HMA, Donchian, DMI, MACD, realized-volatility, HAR, Log-HAR, TTM, TSFM, ensemble, VOLARE, uncertainty-quantification, conformal-prediction, block-bootstrap, tsbootstrap, confidence-interval, position-confidence, risk-gate, EnbPI, cost-aware-allocation, SciPhyRL, base-rate, directional-significance, correlation-denoising, market-breadth, eigenvector-rotation, early-warning, tail-risk, CVaR, news-sentiment, alternative-data, trend-following, spectral-mass, cost-optimal-span, triple-gate-admission, backtest-audit, purged-split, calibration, Brier-score, Winkler-score, TDA, topological-clustering, retention-mechanism, GJR-GARCH, asymmetric-volatility, Rachev-ratio, CD-DFM, characteristic-covariance, zero-shot-onboarding, critical-slowing-down, event-heterogeneity, shadow-before-swap, forward-gated-promotion, effective-sample-size, skill-attribution, quantile-crossing, KQSP, coherence-projection, passive-market-impact, fill-probability, non-execution-risk, herding, CSAD, LSV, crowding, momentum-exhaustion, market-aligned-RL, FinSMART, conformal-kelly, fractional-kelly, interval-width-sizing, MINGLE, exposure-similarity-graph, factor-graph, drawdown-budget, fractional-brownian, long-memory-drawdown, wasserstein-dro, distributionally-robust, certified-approximation, forecast-gap-attribution, shapley-attribution, CCAR, CECL, sentiment-return-gap, QLoRA, forward-IC, newey-west, sector-embeddings, cross-sectional-heterogeneity, short-term-reversal, informed-flow, LHB-seat-persistence, auto-recalibration, live-feedback-loop, online-learning-guard, hot-weight-replacement, real-time-cost-monitoring, cost-calibration, ml-portfolio-layer, learning-to-rank, rl-allocation, portfolio-scope-boundary, alternative-data-admission, satellite-data, supply-chain-data, point-in-time-validation, capability-gap-matrix, fts-benchmark, regime-gated-moe, volatility-routing, ptq-calibration, quantization-deployment-gate, alpha-beta-trigger, epistemic-covariance-shrinkage, spec-satisfaction-verification, intersectoral-imbalance, signed-network, lower-spectrum-sync, fomc-preannouncement, volatility-gate, classification-boundary-proximity, eligibility-monitorminervascore, backtest-robustness-grade, post-selection-luck, dsr-pbo-spa-mtr, kellyboost, growth-optimal-portfolio, xgboost-kelly, exact-growth-loss, loop-gain-matrix, spectral-radius, rebalancing-feedback, leveraged-etf, quadratic-risk-measure, generalized-markowitz, tangency-maxsharpe, spd-risk-matrix, option-implied-crash, iv-spread, risk-neutral-skewness, regime-dependent-predictability, systemic-risk-gnn, multiplex-network, cds-spread, contagion-pathway, cross-regime-bo, bayesian-optimisation, regime-robust-hp, hybrid-ensemble, temporally-correlated-rmt, spectral-calibration-guard, non-iid-correlation, same-day-directional, sample-size-accounting, bootstrap-ci-guard]
+keywords:
+  - "multi-factor"
+  - "quantitative-trading"
+  - "scoring-system"
+  - "factor-selection"
+  - "A-shares"
+  - "HK-stocks"
+  - "US-stocks"
+  - "futures"
+  - "derivatives"
+  - "OI"
+  - "ATR"
+  - "OBV"
+  - "CMF"
+  - "Supertrend"
+  - "HMA"
+  - "Donchian"
+  - "DMI"
+  - "MACD"
+  - "realized-volatility"
+  - "HAR"
+  - "Log-HAR"
+  - "TTM"
+  - "TSFM"
+  - "ensemble"
+  - "VOLARE"
+  - "uncertainty-quantification"
+  - "conformal-prediction"
+  - "block-bootstrap"
+  - "tsbootstrap"
+  - "confidence-interval"
+  - "position-confidence"
+  - "risk-gate"
+  - "EnbPI"
+  - "cost-aware-allocation"
+  - "SciPhyRL"
+  - "base-rate"
+  - "directional-significance"
+  - "correlation-denoising"
+  - "market-breadth"
+  - "eigenvector-rotation"
+  - "early-warning"
+  - "tail-risk"
+  - "CVaR"
+  - "news-sentiment"
+  - "alternative-data"
+  - "trend-following"
+  - "spectral-mass"
+  - "cost-optimal-span"
+  - "triple-gate-admission"
+  - "backtest-audit"
+  - "purged-split"
+  - "calibration"
+  - "Brier-score"
+  - "Winkler-score"
+  - "TDA"
+  - "topological-clustering"
+  - "retention-mechanism"
+  - "GJR-GARCH"
+  - "asymmetric-volatility"
+  - "Rachev-ratio"
+  - "CD-DFM"
+  - "characteristic-covariance"
+  - "zero-shot-onboarding"
+  - "critical-slowing-down"
+  - "event-heterogeneity"
+  - "shadow-before-swap"
+  - "forward-gated-promotion"
+  - "effective-sample-size"
+  - "skill-attribution"
+  - "quantile-crossing"
+  - "KQSP"
+  - "coherence-projection"
+  - "passive-market-impact"
+  - "fill-probability"
+  - "non-execution-risk"
+  - "herding"
+  - "CSAD"
+  - "LSV"
+  - "crowding"
+  - "momentum-exhaustion"
+  - "market-aligned-RL"
+  - "FinSMART"
+  - "conformal-kelly"
+  - "fractional-kelly"
+  - "interval-width-sizing"
+  - "MINGLE"
+  - "exposure-similarity-graph"
+  - "factor-graph"
+  - "drawdown-budget"
+  - "fractional-brownian"
+  - "long-memory-drawdown"
+  - "wasserstein-dro"
+  - "distributionally-robust"
+  - "certified-approximation"
+  - "forecast-gap-attribution"
+  - "shapley-attribution"
+  - "CCAR"
+  - "CECL"
+  - "sentiment-return-gap"
+  - "QLoRA"
+  - "forward-IC"
+  - "newey-west"
+  - "sector-embeddings"
+  - "cross-sectional-heterogeneity"
+  - "short-term-reversal"
+  - "informed-flow"
+  - "LHB-seat-persistence"
+  - "auto-recalibration"
+  - "live-feedback-loop"
+  - "online-learning-guard"
+  - "hot-weight-replacement"
+  - "real-time-cost-monitoring"
+  - "cost-calibration"
+  - "ml-portfolio-layer"
+  - "learning-to-rank"
+  - "rl-allocation"
+  - "portfolio-scope-boundary"
+  - "alternative-data-admission"
+  - "satellite-data"
+  - "supply-chain-data"
+  - "point-in-time-validation"
+  - "capability-gap-matrix"
+  - "fts-benchmark"
+  - "regime-gated-moe"
+  - "volatility-routing"
+  - "ptq-calibration"
+  - "quantization-deployment-gate"
+  - "alpha-beta-trigger"
+  - "epistemic-covariance-shrinkage"
+  - "spec-satisfaction-verification"
+  - "intersectoral-imbalance"
+  - "signed-network"
+  - "lower-spectrum-sync"
+  - "fomc-preannouncement"
+  - "volatility-gate"
+  - "classification-boundary-proximity"
+  - "eligibility-monitorminervascore"
+  - "backtest-robustness-grade"
+  - "post-selection-luck"
+  - "dsr-pbo-spa-mtr"
+  - "kellyboost"
+  - "growth-optimal-portfolio"
+  - "xgboost-kelly"
+  - "exact-growth-loss"
+  - "loop-gain-matrix"
+  - "spectral-radius"
+  - "rebalancing-feedback"
+  - "leveraged-etf"
+  - "quadratic-risk-measure"
+  - "generalized-markowitz"
+  - "tangency-maxsharpe"
+  - "spd-risk-matrix"
+  - "option-implied-crash"
+  - "iv-spread"
+  - "risk-neutral-skewness"
+  - "regime-dependent-predictability"
+  - "systemic-risk-gnn"
+  - "multiplex-network"
+  - "cds-spread"
+  - "contagion-pathway"
+  - "cross-regime-bo"
+  - "bayesian-optimisation"
+  - "regime-robust-hp"
+  - "hybrid-ensemble"
+  - "temporally-correlated-rmt"
+  - "spectral-calibration-guard"
+  - "non-iid-correlation"
+  - "same-day-directional"
+  - "sample-size-accounting"
+  - "bootstrap-ci-guard"
 config:
   framework: "6-category"  # or "4-layer"
   ashare_data_source: "akshare"
@@ -1918,6 +2088,7 @@ This week's theme is **agentic workflow discipline + robust factor/correlation s
 77. **强制**：LLM 披露 regime-条件 beta（DisclosureBeta，arXiv:2609.02900）必须过**校准可行性检查点(#60)** + 前瞻收益秩 IC 校正(#43) 方可使用；价格历史薄标的作**零样本 beta 软确认**（§13.10.1/§13.12.3），**绝不**作 sizer；理论预印本+披露噪声下界 ⇒ 权重须小(#18)；默认 OFF 待实证。
 78. **强制**：任何 LLM/agentic 策略发现须做**结构化无前视 + 搜索 deflation**（arXiv:2608.27734）——(a) 注册表校验工具、特征空间按构造无前视（不冗余于统计校正）；(b) 按搜索试验次数对报告业绩 deflation，低于 agent 自身搜索驱动的阈值即拒绝；落位晋升前治理检查点，与 #25/#50/#63/#71 一致；是**护栏非 alpha**。
 79. **推荐**：流动性尾部风险可用 **IlliQaR**（跳跃感知实现 Amihud 尾部分位，arXiv:2609.00943）作 §13.8.5 尾部闸门与 §13.10.6 冲击的补充读数；S&P 500 IlliQaR 作系统性领先指标，个股违例聚集 ⇒ 收紧 risk_scale/冲击缓冲/否决项；无高频退化为 ADV 代理；与 #31/#35 一致；默认 OFF。
+80. **强制**：任何**观点/复盘/LLM 判断类信号源**在接入打分器或引擎前，必须运行 signal-attribution 契约（§16）——可证伪记录、独立行情源事后标签、基率诚实命中（Wilson CI vs 全市场基准）、样本 <30 不作结论、独立于动量的维度归因。CI 下界 ≤ 基率或样本不足 → 该源只能作软确认（#18 小权重），**禁止**以观点直接驱动仓位。
 
 ## §14 因子治理模块（FTS 派生的 6 项工程化能力）
 
@@ -2003,10 +2174,65 @@ signals = gen.generate_signals(scores, realized_ic=0.05, passed=True)  # 熔断�
 
 **本周主题**：把「实盘反馈 → 重校准 → 在线学习」闭环作为技能的**第三类治理对象**（与 §14 因子治理并列），并以 scope boundary 防止 ML 组合器 / 另类数据的范围蔓延。
 
+## §16 signal-attribution：观点/复盘类信号源的证据验证契约（2026-09-09）
+
+> **来源**：WQUANT 实盘复盘体系反补 —— report 每天生成"聪明数据"(板块观点+三维评分: 延续性/政策/美股映射)，
+> 但从不受验证 → 无法区分"叙事还是 alpha"。参照实现：`signal_attribution.py`(T日盘后 record → T+1 收盘归因 → 聚合报告)。
+> 本模块填补技能缺口：技能已有完整准入纪律(#27 三闸门 / #33 ESS / #43 情绪 IC / #71 方向怀疑论)教你**什么信号不允许直接上**，
+> 但没有标准契约教你**如何验证一个已经存在的定性判断型信号源**(复盘观点/板块轮动判断/LLM 判断)到底有没有预测力。
+> signal-attribution 就是这条"信号记录 → 事后归因"的流水线，任何观点类信号源接入引擎前的必经证据流程。
+
+### 16.1 契约定式（四步，全部时间门控、无前视）
+
+```
+T日盘后 观点生成(tomorrow_picks: 板块+方向+置信度)
+   └─① record   → signal_log.jsonl   {signal_date, 标的/板块, 方向, 维度标签, 置信度}
+T+1日收盘 ──────→ ② attribute 拉标的当日实际表现
+   └─③ label    → 命中判定: 表现 > 基准(基率诚实) → attribution_daily.jsonl
+   └─④ report   → 按维度/排位分组: 命中率 + Wilson 95% CI vs 基率 + 样本量声明
+累计 N 日 → 判定: 某维度 CI 下界 > 基率 且 样本≥30 → 才可申请接入引擎(走 #27/#33)
+              否则 → 诚实标注"无证据显示预测力", 停止对该源放权
+```
+
+1. **① record（可证伪预测记录）**：只记录**可事后检验**的预测 —— 明确 标的/板块、方向、失效日(T+1收盘)、来源维度。append-only JSONL，幂等(同日同标的只记一次)。判断型观点必须拆到"哪个维度打的信号"(如 policy vs 动量延续)，否则无法归因增量价值。
+2. **②③ attribute + label（事后贴标签）**：T+1 收盘用**独立于观点生成方的行情源**取实际表现。命中判定必须**基率诚实**(#14)：板块/标的方向信号用"跑赢基准"(中证全指当日涨幅)而非"涨幅>0" —— 普涨日 >0 命中虚高、普跌日虚低。天然无前视：信号记录于 T 日盘后、表现取自 T+1 收盘，时间严格门控(#25)。
+3. **④ report（诚实聚合）**：命中率必须带 **Wilson 95% CI**；**样本 <30 只作记录不作结论**(#33 ESS 精神)；CI 下界 ≤ 基率 → 判定无预测力，**明写失败不粉饰**。
+4. **准入闸**：观点信号源只有在其**独立维度**(不依赖价格动量的部分) CI 下界 > 基率 且样本足量后，才允许申请接入打分器/引擎 —— 复用 #27 三闸门与 #43(若为情绪/文本源则另须前瞻 IC 校正)。
+
+### 16.2 与既有约束的关系（不重复造轮子）
+
+| 本模块步骤 | 复用的既有纪律 | 新增点 |
+|-----------|--------------|--------|
+| record 幂等/时间门控 | #25 审计(无前视) | 观点类信号也要留痕, 不只是回测留痕 |
+| label 基率诚实 | #14(方向 CI vs 基率) | 用"跑赢全市场基准"而非 >0 做命中 |
+| report 样本门槛 | #33 ESS(不足不作结论) | Wilson CI 显式化, 维度分组归因 |
+| 动量共线警示 | #43(情绪≠收益, 须正交) | "延续性分"本质是动量 → 单独归因 policy/us_map 维度 |
+| 准入闸 | #27 三闸门 / #32 shadow-swap | 观点源先证据、后放权, 不静默上引擎 |
+
+### 16.3 常见失误（复用 S_appendix 结构）
+
+- ❌ **用观点生成方自己的复盘数据做标签**：T+1 表现必须来自独立行情源(quote/收盘接口)，禁止拿"次日复盘里自己写的延续性分"当结果 —— 自我确认无信息量。
+- ❌ **命中 = 涨**：普涨日所有板块都涨，命中率虚高到 ~100%；必须用"跑赢全市场基准"(中证全指/板块中位数)做判定。
+- ❌ **样本不足就下结论**：5 个样本 80% 命中率毫无意义；Wilson CI 会把小样本的不确定摊开 —— 报告必须同时给 CI，且 <30 样本禁作准入结论。
+- ❌ **忽略动量共线**：观点分常含"延续性=昨日强势"成分，它与价格动量因子高度共线；只归因"独立维度"(政策/事件/映射)的增量命中，否则会把动量延续误判为观点 alpha。
+- ❌ **观点源一次性接入**：归因是持续管道(每日 append)，不是一次性验证；命中率要滚动更新，源失效(CI 回落到基率)时须降权或摘除(#32 精神)。
+
+### 16.4 适用对象（何时用本契约）
+
+| 信号源类型 | 例子 | 是否适用 |
+|-----------|------|---------|
+| 复盘/日报类观点 | 每日板块主线推荐、明日策略 | ✅ 核心场景 |
+| LLM 判断类信号 | 大模型选股/看多理由 | ✅ 同契约(方向+置信度标签), 另过 #60 校准可行性 |
+| 情感/舆情分 | 新闻情绪分(§13.8.6) | ⚠️ 用 #43 前瞻 IC 校正替代命中率(连续分非二元方向) |
+| 量化因子(价格派生) | 动量/技术因子 | ❌ 走 §14 因子治理, 不需本契约(本契约针对"观点"类) |
+
+> ⚠️ **约束 #80**：任何**观点/复盘/LLM 判断类信号源**在接入打分器或引擎前，必须运行 signal-attribution 契约 —— 可证伪记录、独立行情源事后标签、基率诚实命中(Wilson CI vs 全市场基准)、样本 <30 不作结论、独立于动量的维度归因。CI 下界 ≤ 基率或样本不足 → 该源只能作**软确认**(#18 小权重)，**禁止**以观点直接驱动仓位。本契约产出的是"该源值不值得进一步验证"的证据，不是 alpha 本身。
+
 ## 版本历史
 
 | 版本 | 日期 | 变更说明 |
 |------|------|---------|
+| v2.13.0 | 2026-09-09 | WQUANT 实盘反补（signal-attribution 契约）：新增 §16 观点/复盘类信号源的证据验证契约（可证伪 record → 独立行情源事后 label → Wilson CI 基率诚实 → 独立维度归因 → 样本≥30 才准入）；新增约束 #80（观点/复盘/LLM 判断源接入前必须过本契约，未过只能软确认）；参照实现 WQUANT signal_attribution.py |
 | v2.0.0 | 2026-07-01 | SkillEvolver + Loop 演化：新增 4-Layer 评分框架（萌芽/量价/结构/确认）、否决项规则、期货/衍生品 OI 数据说明、4-Layer config 示例、S_appendix 双层结构 |
 | v2.1.0 | 2026-07-11 | SkillEvolver 演化（arXiv:2607.05291）：新增波动率预测模块 `volatility_forecaster.py`，实现 Log-HAR + TTM 等权集成（带 TTM 缺失优雅回退与 Mincer-Zarnowitz 重校准），接入 `MultiFactorScorer` 为可选 `volatility` 维度分数（config 驱动，默认关闭） |
 | v2.2.0 | 2026-07-11 | SkillEvolver 演化（arXiv:2607.06690）：新增无分布不确定性量化模块 `uncertainty_quantification.py`，实现依赖感知移动块自助法 CI（tsbootstrap 主路径 + 纯numpy回退）、split-conformal 预测半宽、仓位置信度映射与风控闸门（CI跨零则否决），接入 `MultiFactorScorer` 为可选 `confidence`/`ci_low`/`ci_high`/`edge_significant`/`risk_scale` 字段（config 驱动，默认关闭） |
