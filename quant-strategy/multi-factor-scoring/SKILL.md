@@ -1,9 +1,9 @@
 ---
 name: multi-factor-scoring
-description: "Multi-factor scoring quantitative trading system across A/HK/US/futures, 1H-daily. Includes 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules; Log-HAR+TTM realized-volatility forecasting; bootstrap+conformal uncertainty quantification; FTS factor governance (walk-forward, decay test, circuit breaker, orthogonalization, atomic persistence); deployment discipline (ESS gate, shadow-before-swap model replacement); conformal-Kelly sizing, Wasserstein DRO allocation, Shapley attribution; production-feedback & scope-boundary; weekly arXiv layers (MoE volatility routing, CVaR sizing, backtest-robustness grading, option-implied crash-risk gate, spectral guard, benchmark guard). Triggers: multi-factor, factor selection, rotation, 4-layer scoring, volatility forecasting, conformal, Kelly sizing, robust allocation, drawdown budgeting, factor governance, backtest audit, attribution."
+description: "Multi-factor scoring quantitative trading system across A/HK/US/futures, 1H-daily. Includes 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules; Log-HAR+TTM realized-volatility forecasting; bootstrap+conformal uncertainty quantification; FTS factor governance (walk-forward, decay test, circuit breaker, orthogonalization, atomic persistence); deployment discipline (ESS gate, shadow-before-swap model replacement); conformal-Kelly sizing, Wasserstein DRO allocation, Shapley attribution; production-feedback & scope-boundary; weekly arXiv layers (MoE volatility routing, CVaR sizing, backtest-robustness grading, option-implied crash-risk gate, spectral guard, benchmark guard, order-flow changepoint, ES factor model, EO proportion CI, EVaR parity). Triggers: multi-factor, factor selection, rotation, 4-layer scoring, volatility forecasting, conformal, Kelly sizing, robust allocation, drawdown budgeting, factor governance, backtest audit, attribution."
 
 agent_created: true
-version: 2.13.0
+version: 2.14.0
 language: zh
 type: strategy
 priority: high
@@ -75,6 +75,13 @@ triggers:
   - "跨regime贝叶斯优化/信号超参搜索/三regime联合目标/Hybrid集成"
   - "时序相关随机矩阵/谱校准护栏/非iid相关矩阵/Marchenko-Pastur偏离"
   - "同日方向预测基准/方向信号样本量核算/bootstrap CI护栏"
+  - "订单流变点检测/BOCPD/贝叶斯在线变点/regime 边界识别"
+  - "非对称长记忆GARCH/ALM-GARCH/level-memory通道/弱识别检验"
+  - "ES因子模型/共同损失严重度/尾部损失定价/EVaR风险平价"
+  - "信号相关性vs PnL相关性/transverse Gram/IC交叉矩/各向同性检验"
+  - "椭圆最优置信区间/EO CI/二元比例差/Wilson分数区间扩展"
+  - "联合极值网络/Hüsler-Reiss/JEAM/市场信息邻接矩阵"
+  - "regime稳健做市/C51分布式DQN/scenario-bandit/库存饱和"
 keywords:
   - "multi-factor"
   - "quantitative-trading"
@@ -246,6 +253,24 @@ keywords:
   - "same-day-directional"
   - "sample-size-accounting"
   - "bootstrap-ci-guard"
+  - "order-flow-changepoint"
+  - "bocpd"
+  - "alm-garch"
+  - "asymmetric-long-memory"
+  - "expected-shortfall-factor-model"
+  - "tail-loss-severity"
+  - "signal-pnl-correlation"
+  - "transverse-gram"
+  - "isotropy-check"
+  - "elliptically-optimal-ci"
+  - "proportion-difference"
+  - "joint-extremes-network"
+  - "husler-reiss"
+  - "jeam"
+  - "regime-robust-market-making"
+  - "c51-dqn"
+  - "evar-risk-parity"
+  - "tempered-stable"
 config:
   framework: "6-category"  # or "4-layer"
   ashare_data_source: "akshare"
@@ -1944,6 +1969,95 @@ This week's theme is **agentic workflow discipline + robust factor/correlation s
 
 > **本周集成小结**：8 篇全部 opt-in / config 驱动 / graceful-fallback 落位，无投机性新 `.py` 代码。信号设计以「函数签名 + 准入条件 + Caveat」表述，延续 §13.6–§13.14 的文档化范式。其中 §13.15.1 为 agentic 工作流元层（综述，框定本技能自身 skillevolver/loop 演化）、§13.15.7 为**诚实评估护栏**（结构化无前视 + 搜索 deflation，拒绝 LLM 发现策略）、§13.15.6 为另类数据 beta（须过校准闸门，理论预印本）——三者均非新 alpha；§13.15.2/3/4 升级因子/协方差主干，§13.15.5/8 升级风险机器（VRP 去风险 / 流动性尾部）。新增约束 #72–#79。
 
+## 13.16 This-Week arXiv Integration (2026-09-07 ~ 2026-09-13)
+
+Crawled the arXiv **q-fin** `pastweek` listing (announcements 2026-09-07 → 2026-09-11, ~50 papers across q-fin.{TR,ST,CP,PM,RM,MF,PR,GN} + cross-lists from math.ST / stat.ME / econ.EM / cs.LG) plus the September 2026 monthly listing; scanned all titles, read 8 abstracts verbatim, and selected 8 papers (submitted 2026-09-06 → 2026-09-10, no overlap with the §13.15 window) grouped into 8 subsections with a direct, non-speculative mapping. Follows the opt-in, config-driven, graceful-fallback pattern of §13.6–§13.15.
+
+This week's theme is **inference rigor + tail/regime risk-machinery refinement**: one paper supplies a *priced new factor dimension* (common tail-loss severity) and one generalizes the risk-parity risk measure (volatility → EVaR); four harden the regime/tail/execution risk machinery (order-flow changepoint detection, asymmetric long-memory variance, joint-extremes network, regime-robust market making); and two are *guards* on correlation and proportion inference (signal-correlation ≠ PnL-correlation non-identifiability, elliptically-optimal proportion-difference CI upgrading the #80 Wilson base-rate test). The week's discipline is explicit: most of these are **guards or equivalence-class replacements, not gains**.
+
+#### §13.16.1 Regimes in the Order Flow (arXiv:2609.07989)
+- **论文**：Regimes in the Order Flow（q-fin.TR；交叉 q-fin.CP/q-fin.MF/q-fin.ST，2026-09-07）。
+- **核心发现**：市场在相对稳定与不稳定之间交替，结构断点标记这些 regime 的转换；**实时识别此类断点是任何高频交易或风控系统的核心要求**。报告研究**贝叶斯在线变点检测（BOCPD）**及文献中的两个扩展，并将其应用于 NASDAQ 上市股票的**有符号订单流**（59 页 / 48 图，ENSTA 于 Scuola Normale Superiore 的暑期研究项目）。
+- **Framework mapping**：升级 **§13.15.4 订单流长记忆指数** 与 **§13.13.4 跨资产粗糙波动率标尺**——为 §13.12.1 regime 路由波动率集成提供**实时变点检测输入**；衔接 §13.13.3 表征拥挤（表征维持时长）与 §13.11.3 长记忆回撤预算（推断视界）。
+- **信号设计**（opt-in，默认 OFF）：
+  - `order_flow_changepoint(bocpd_hazard, signed_flow)` → 实时 regime 边界后验概率 → 路由进 §13.12.1 regime gate / 波动率 soft-routing 权重；
+  - 准入：变点概率**只作状态读数**，须与 §13.12.1 路由权重一致，**禁止**单独驱动仓位（#58：H/regime 为描述符非方向信号）；
+  - 优雅回退：无 BOCPD → 退化为滚动 z 分数变点（已实现波动率 regime）。
+- **Caveat**：**报告型**（暑期项目，非同行评审）、单市场（NASDAQ）；BOCPD 对 hazard 先验敏感 → 须做先验敏感性检查；属**同步状态读数非方向信号**（#58、#31 系统非外生领先）。
+
+#### §13.16.2 Asymmetric Long-Memory GARCH: Sign-Dependent Kernel Injection (arXiv:2609.06422)
+- **论文**：Asymmetric Long-Memory GARCH: Sign-Dependent Kernel Injection in a Two-Dimensional Markov Chain（q-fin.ST，2026-09-06）。
+- **核心发现**：提出 **ALM-GARCH**——正、负新息以**不同的注入幅度与核偏移**进入条件方差，这些偏离相对嵌套对称基准定义了可检验的 **level 通道**与 **memory 通道**。内点配置下，Foster-Lyapunov 条件保证**正 Harris 遍历**。在五个股指与 Bitcoin 上，**联合对称性被普遍拒绝**（主要由 level 通道驱动）；memory 通道在日经 225、KOSPI、Bitcoin 上得到支持，但**当正分支近乎不活跃时弱识别**。**样本外表现与标准基准大致可比**。
+- **Framework mapping**：升级 **§13.6 波动率预测（Log-HAR）** 与 **§13.13.4 跨资产粗糙波动率标尺**——提供非对称长记忆条件方差设定（level = 杠杆效应，memory = 长记忆核）；与 §13.15.4 订单流长记忆指数（Hurst）互为波动率/流两侧的证据。
+- **信号设计**（opt-in，默认 OFF）：
+  - `alm_garch_variance(returns, kernel_offsets)` → 非对称长记忆条件方差预测 → 路由进 §13.6 波动率维度 / §13.8.5 尾部闸门 / §13.13.4 Hurst 标尺；
+  - 准入：启用前**必须做通道可识别性检验**（正分支不活跃时 memory 通道弱识别）；
+  - 优雅回退：无拟合 → 退化为 GJR-GARCH（技能已有非对称）或 Log-HAR。
+- **Caveat**：**样本外与标准基准"大致可比"⇒ 等价替代而非增益**，不得因复杂度默认开启（#38 校准≠增长）；弱识别条件须显式检查。
+
+#### §13.16.3 Expected Shortfall Factor Models: Common Tail Losses and Expected Returns (arXiv:2609.10587)
+- **论文**：Expected Shortfall Factor Models: Common Tail Losses and Expected Returns（econ.EM；交叉 econ.GN/stat.ME，2026-09-06）。
+- **核心发现**：提出**期望损失因子模型（ESFM）**，估计并定价大面板资产收益**下尾损失严重度**的共同变动。**均值因子模型**刻画平均收益的共同变动，**分位数因子模型**刻画尾部阈值的共同变动，而 ESFM 刻画**阈值以下平均损失严重度**的共同变动；模型结合观测风险暴露与潜在共同因子，用**正交化两步估计**（一阶段分位数估计误差对 ES 系数无一阶影响），建立非渐近误差界、有限样本高斯近似与潜在因子数的一致选择。应用于大股票面板：ESFM 因子对市场压力反应剧烈，含均值/分位数因子未捕捉的信息。按 ESFM 暴露排序的组合**平均收益递增**，高低组合**年化 8.0%–11.7%**、Fama-French 五因子 alpha **10.3%–15.0%**；分别与联合控制均值/分位数因子暴露后仍显著；tail-by-tail spanning 检验显示 ESFM 因子在控制标准交易因子与对应均值/分位数因子后**仍有显著 alpha**；加入 ESFM 提高最大可达 Sharpe ratio。**共同损失严重度是下行风险的一个独立且被定价的维度**。
+- **Framework mapping**：**扩展 §2 因子库 / §13 因子集**——新增一个**独立因子维度（共同损失严重度）**；升级 **§13.8.5 尾部/CVaR 闸门** 与 **§13.15.8 IlliQaR 流动性尾部**；与 §13.14.4 广义二次风险 Markowitz（SPD 风险矩阵）在"尾部作可定价维度"上呼应；须经 §14 因子治理链后方可准入。
+- **信号设计**（**本周唯一带正 alpha 证据的候选**，仍 opt-in，默认 OFF）：
+  - `esfm_exposure(returns, quantile_factors)` → 共同损失严重度暴露（正交化两步估计 + 潜在因子数一致选择）；
+  - 准入：**必须**过 §14 三级评估链（L1 回测 / L2 经济逻辑 / L3 多重检验）+ 走航验证 + 衰减检验 + #25 审计 + #50 deflation；须与既有 CVaR/下行 beta 因子做**正交化归因**（#43）；
+  - 优雅回退：无 ESFM → 退化为 §13.8.5 CVaR 分位闸门 / 分位数因子暴露。
+- **Caveat**：**强证据但须治理**——8.0%–11.7% 年化与 10.3%–15.0% FF5 alpha 是**排序组合（long-short）证据，非单资产可交易信号**，且为美股大面板；A股迁移须重做 §14 三级评估；警惕共同损失严重度与既有尾部因子的**共线**（#43），避免把重复暴露记为新增 alpha。
+
+#### §13.16.4 Signal Correlation, IC, and PnL Dependence (arXiv:2609.09588)
+- **论文**：Signal Correlation, IC, and PnL Dependence（math.ST；交叉 q-fin.PM，2026-09-09，24 页）。
+- **核心发现**：信号相关性（**跨资产**、每个日期截面）与 PnL 相关性（**跨日期**、标量收益）是**不同索引集上的相关**，而实务常把前者当作后者的代理。给出**精确分解**：每个日期，归一化信号在已实现去均值收益方向上的投影即其**已实现横截面 Pearson IC**（故固定信号 PnL = 收益离散度 × IC，Qian & Hua 2004）；两信号在正交补上的归一化相似度 = **控制已实现收益后的偏相关**；残余旋转自由度是一个正交规范，其不变量是 **transverse Gram 矩阵**。于是**信号相关性 = 未中心化 IC 交叉矩 + transverse 相似度**，而 Pearson PnL 相关性**只**中心化并离散度加权 IC 序列。**主要结果是非可识别性定理**：若不对 transverse 几何施加约束，两个相关性**互不界定、也不互相排序**——把 Sørensen/Qian/Schoen/Hua (2004) 的模拟发现**强化为精确陈述**。归一化集合下 transverse Gram 经归一化分母回入；欧氏与一般协方差风险度量下的事后最优组合即经典多重相关界，且**两规则对每个纵向暴露一致，当且仅当风险度量在信号张量上各向同性**。另附各向同性下偏相关的经典精确零分布、弱 IC 尺度合成机制示例与时序依赖下的推断指引。
+- **Framework mapping**：**直接强化 §13.7 方向显著性 / #14 基率诚实**，并升级 **§13.11.2 MINGLE 因子暴露相似度建图**——为"多信号合成 / 因子去冗余"提供**信号相关性 ≠ PnL 相关性的精确数学**；衔接 #43（情绪 IC 校正）与 §13.14.8（时序相关随机矩阵谱护栏：各向同性假设的检验）。
+- **信号设计**（护栏 + 结构，opt-in，多信号组合推荐 ON）：
+  - `signal_corr_pnl_decomposition(signals, returns)` → 分解出 (a) 未中心化 IC 交叉矩、(b) transverse Gram（控制收益后的正交补相似度）；**禁止**用横截面信号相关性直接代理 PnL 相关性；
+  - `isotropy_check(signals, risk_metric)` → 检验风险度量在信号张量上的各向同性；**非各向同性时"最优组合 = 多重相关界"不成立**；
+  - 准入：多信号合成 / 因子去冗余前必须报告 IC 交叉矩与 transverse 相似度两项。
+- **Caveat**：**理论/方法论**（math.ST），非新 alpha；核心价值是**"信号相关性不能代理 PnL 相关性"的负结果护栏**，直接支持 §13.11.2 去冗余与 #43 正交归因；与 #71（方向信号怀疑论）、§13.14.8（谱护栏）同属**相关性推断纪律**。
+
+#### §13.16.5 The Elliptically Optimal Confidence Interval: A Bivariate Extension of Wilson's Score Method (arXiv:2609.10865)
+- **论文**：The Elliptically Optimal Confidence Interval: A Bivariate Extension of Wilson's Score Method（math.ST；交叉 q-fin.ST/stat.CO/stat.ME，2026-09-09）。
+- **核心发现**：两独立二项比例之差的置信区间涉及估计量**未识别**的 nuisance 方向。单样本 Wilson 分数区间反演标量分数检验，但**没有直接隔离差值的二元类比**：反演联合正态近似在单位正方形上给出椭圆区域，而估计量 p₁−p₂ 是一维的。定义**椭圆最优（EO）置信区间**为该区域上 p₁−p₂ 的取值范围，并**闭式求解**（六个互斥且完备情形）。解有紧凑刻画：**EO 区间 = 对 nuisance 方差取最大（而非估计）所得的分数区间**；因而是投影椭圆区域所得**最短**区间并继承覆盖保证。导出精确覆盖超额 2[Φ(zR) − Φ(z)]（R = 最不利与真实标准差之比）：超额在一条显式直线上消失、以 α 为界、对样本量成比例缩放不变。精确枚举显示 **Wald 区间**（其方差估计量在均衡分配下向下偏 1−1/n）**几乎处处低于名义覆盖**；而 **EO 区间在正态近似下从不高估覆盖不足**，且总给出容许的非退化界；代价是两比例都极端时的**过度覆盖**（可精确量化）。
+- **Framework mapping**：**直接升级 #80 的 Wilson CI 基率诚实** 与 **§16 signal-attribution 契约**的命中率区间方法——为 §13.11.6 / #14 的"方向命中率 vs 基率"提供**二元比例差**的正确区间（当基率本身含抽样误差时）。
+- **信号设计**（护栏，opt-in，所有 A/B 命中率比较推荐 ON）：
+  - `eo_proportion_diff_ci(k1, n1, k2, n2)` → 椭圆最优区间（对 nuisance 方差取最大），用于"信号命中率 vs 基率"的**差值**区间，**替代**直接相减两个 Wilson 区间；
+  - 准入：§16 契约 / #80 的命中率显著性判定须改用 EO 区间；
+  - 优雅回退：无 EO 求解 → 退化为两独立 Wilson 区间 + Bonferroni（保守）。
+- **Caveat**：**统计方法护栏**（math.ST），非 alpha；解决的是"命中率 vs 基率**差异**"的覆盖正确性，**不改变** §16 的样本 ≥30 门槛（#33 ESS）；极端比例下的过度覆盖代价须承认。
+
+#### §13.16.6 Market-Informed Networks for Modeling and Forecast Evaluation of Financial Extremes (arXiv:2609.11575)
+- **论文**：Market-Informed Networks for Modeling and Forecast Evaluation of Financial Extremes（stat.ME；交叉 econ.EM/q-fin.RM/stat.AP，2026-09-10）。
+- **核心发现**：高维金融时序极值的**联合分布**建模困难，因为极值稀疏、且**局部极端**的观测未必相对其完整边际分布极端。引入**时变网络 Hüsler-Reiss 模型**，其中**市场信息邻接矩阵**决定观测对估计的贡献强度；提出二值与加权两种设定，包括**联合极值邻接矩阵（JEAM）**——结合个体极端性与历史联合极端运动模式。预测评估（S&P 100 三个板块的一分钟股票收益）显示 JEAM 在**两个尾部方向**都取得最佳样本外 log score：**低尾提升 12.5–13.6%、高尾提升 11.4–14.9%**。结论是：在估计中纳入市场信息网络结构可改善金融极值的预测评估。
+- **Framework mapping**：升级 **§13.12.5 部门间失衡监控（有符号相关网络）** 与 **§13.14.6 系统性风险多重图神经网络**——把"市场信息邻接矩阵"作为极值联合分布估计的权重；为 **§13.8.5 尾部闸门** 与 **§13.15.8 IlliQaR** 提供联合极值的预测评估升级；衔接 §13.11.2 暴露图。
+- **信号设计**（opt-in，默认 OFF；风险调制/监控态）：
+  - `jeam_extreme_network(returns, sector_adj)` → 联合极值邻接矩阵（个体极端性 + 历史联合极端模式）→ 时变 Hüsler-Reiss 联合极值分布 → 尾部联合概率读数 → 收紧 `risk_scale` / 敞口上限；
+  - 准入：须报告样本外 log score 且相对基线的提升须**跨两个尾部方向稳定**；
+  - 优雅回退：无网络 → 退化为逐资产一元 EVT 或 §13.8.5 CVaR 分位闸门。
+- **Caveat**：评估指标是 **log score（概率校准）而非收益**；数据为一分钟 S&P 100，A股须重验；提升幅度（11–15%）须经 #25 审计与 #50 deflation，**禁止**把"预测评估改善"读作"可交易增益"；属**同步风险读数非方向信号**（#58、#31）。
+
+#### §13.16.7 Deep Learning of Robust Market Making under Regime-Switching Order Flow (arXiv:2609.11614)
+- **论文**：Deep Learning of Robust Market Making under Regime-Switching Order Flow（q-fin.TR，2026-09-10）。
+- **核心发现**：经典做市（Avellaneda-Stoikov 及 GLFT 扩展）提供闭式报价规则，但其假设在真实微观结构时间尺度上失效——其中之一是**订单流平稳**，而实证证据指向 regime 的存在（可能与 metaorder 的算法执行相关）；此时现有方法给出**负 PnL**。本文发展深度 RL 做市商（**RLMM**）——Rainbow 风格分布式 DQN（C51），在零智能限价簿中校准与测试。发现：**平稳设定**下 RLMM 在整个观察到的风险-收益前沿上**优于 GLFT**；RLMM 对流不对称更稳健，**但与任何平稳训练的策略一样，在持续性方向失衡下仍因库存饱和而承受大回撤**。给 RLMM 状态加入两个辅助信号——**方向流偏差上的贝叶斯在线变点滤波器** + **队列调整的报价-敞口失衡**——**恢复盈利**。最后的 **scenario-bandit** 步骤（对低收益 regime 情景重新加权）在随机持续与相关方向压力下进一步提升表现。
+- **Framework mapping**：升级 **§13.10.6 被动市场冲击与未成交风险** 与 **§13.15.4 订单流长记忆**——提供 (a) regime 下做市报价的稳健性证据、(b) **"平稳训练策略在 regime 切换下崩溃"的护栏**（呼应 §13.10.3 Shadow-Before-Swap 的"不静默换模"）；与 §13.16.1（订单流 regime）同源互补，其辅助信号可直接复用 BOCPD。
+- **信号设计**（opt-in，默认 OFF；执行层）：
+  - `regime_robust_maker_state(directional_bias, queue_imbalance)` → 两个辅助信号（BOCPD 方向流变点 + 队列调整暴露失衡）作为状态增广；
+  - `scenario_bandit_reweight(regime_scenarios)` → 对低收益 regime 情景重新加权；
+  - 准入：仅在执行/做市层启用；**禁止**把平稳假设下训练的策略直接部署到 regime 切换环境（论文给出负 PnL 证据）；
+  - 优雅回退：无 RL → 保持 GLFT + 显式 regime 闸门（§13.12.1），而非默认 RL。
+- **Caveat**：**零智能限价簿**（无真实做市竞争）；RLMM 在平稳设定优于 GLFT，但**库存饱和大回撤依旧存在**；属执行层研究，A股 T+1 与涨跌停约束下迁移性须重验；本论文最可迁移的结论是护栏——**"平稳假设是隐性地雷"**（#31、#38）。
+
+#### §13.16.8 Entropic Value-at-Risk parity for tempered stable returns (arXiv:2609.11905)
+- **论文**：Entropic Value-at-Risk parity for tempered stable returns（q-fin.PM；交叉 q-fin.RM，2026-09-10，20 页）。
+- **核心发现**：为 **tempered stable 收益**发展 **EVaR parity**。用多元正态 tempered stable 模型 + 独立成分分析（tempered stable 成分）构造基于 EVaR 的**逆风险平价（IRP）**与**等风险贡献（ERC）**组合。导出资产级 EVaR 与 **EVaR-deviation 贡献**，并用后者把拟合的**位置项**与 EVaR 风险贡献分离。**高斯收益下，EVaR-deviation 的 IRP 与 ERC 退化为常规波动率 IRP/ERC 权重**。在三个投资域评估：**EVaR 类 ERC 组合相对等权取得正 Sharpe 差异**。
+- **Framework mapping**：升级 **§5 仓位** / **§13.9.4 非对称波动 CVaR 配置** / **§13.13.5 CVaR 状态依赖非对称再配置**——把风险平价的风险度量从波动率推广到 **EVaR（凸、相干、含尾部）**，并给出**高斯退化一致性**；衔接 §13.8.5 尾部闸门 与 §13.15.2 熵因子模型（同一"熵"原则的另一路径）。
+- **信号设计**（opt-in，默认 OFF）：
+  - `evar_risk_parity(returns, ic_components)` → EVaR-deviation 贡献 + IRP/ERC 权重（含位置项分离）；
+  - 准入：启用前必须验证**高斯退化一致性**（高斯下回到波动率 IRP/ERC）作为实现正确性检查；相对等权的 Sharpe 差异须过 #25/#50；
+  - 优雅回退：无 tempered stable 拟合 → 退化为 §13.9.4 GJR/CVaR 配置或波动率平价（技能已有）。
+- **Caveat**：**"正 Sharpe 差异"是相对等权的弱基准**，未与风险平价/最小方差等强基准比较；20 页短文、无 A股验证；EVaR 需凸优化器 + tempered stable 拟合（数值成本）；默认关闭。
+
+> **本周集成小结**：8 篇全部 opt-in / config 驱动 / graceful-fallback 落位，无投机性新 `.py` 代码。信号设计以「函数签名 + 准入条件 + Caveat」表述，延续 §13.6–§13.15 的文档化范式。本周主题为**推断严格性与尾部/regime 风险机器的精化（inference rigor + tail/regime risk-machinery refinement）**：§13.16.3 ESFM 是唯一带**正 alpha 证据**的候选（共同损失严重度为独立且被定价的维度，仍须过 §14 治理链），§13.16.1/2/6/7 升级 regime 与尾部/执行风险机器（订单流变点、非对称长记忆方差、联合极值网络、regime 稳健做市），§13.16.8 推广风险平价度量（EVaR + 高斯退化检查），§13.16.4/5 为**推断护栏**（信号相关性 ≠ PnL 相关性的非可识别性定理；椭圆最优二元比例差区间，升级 #80 Wilson 基率检验）。需强调：§13.16.2（样本外"大致可比"）、§13.16.4（相关性不可识别）、§13.16.5（极端比例过度覆盖）、§13.16.7（平稳训练策略 regime 下负 PnL）的核心价值是**护栏或等价替代而非增益**，§13.16.6 的 log score 改善是概率校准证据而非收益证据。新增约束 #81–#88。
+
 # S_appendix：技能附录
 
 > **重要提示**：本附录包含使用 multi-factor-scoring 技能时的关键约束和常见失误。使用 4 层评分框架（萌芽/量价/结构/确认）时，必须严格遵守以下规则。
@@ -2228,10 +2342,27 @@ T+1日收盘 ──────→ ② attribute 拉标的当日实际表现
 
 > ⚠️ **约束 #80**：任何**观点/复盘/LLM 判断类信号源**在接入打分器或引擎前，必须运行 signal-attribution 契约 —— 可证伪记录、独立行情源事后标签、基率诚实命中(Wilson CI vs 全市场基准)、样本 <30 不作结论、独立于动量的维度归因。CI 下界 ≤ 基率或样本不足 → 该源只能作**软确认**(#18 小权重)，**禁止**以观点直接驱动仓位。本契约产出的是"该源值不值得进一步验证"的证据，不是 alpha 本身。
 
+> ⚠️ **约束 #81**：订单流/波动率**变点检测**（§13.16.1 BOCPD、§13.16.7）只作 **regime 状态描述符**，**禁止**单独驱动仓位或方向（#58）；变点后验概率须与 §13.12.1 regime 路由权重一致，且须做 hazard 先验敏感性检查。
+
+> ⚠️ **约束 #82**：**ALM-GARCH**（§13.16.2）的 memory 通道在**正分支近乎不活跃时弱识别**——启用前**必须**做通道可识别性检验；其样本外"与标准基准大致可比"⇒ 视为**等价替代而非增益**（#38），不得因模型更复杂而默认开启。
+
+> ⚠️ **约束 #83**：**ESFM 共同损失严重度因子**（§13.16.3）准入前**必须**过 §14 三级评估链（L1 回测 / L2 经济逻辑 / L3 多重检验）+ 走航验证 + 衰减检验 + #25 审计 + #50 deflation；须与既有 CVaR / 下行 beta 因子做**正交化归因**（#43）；**排序组合（long-short）证据不得读作单资产可交易信号**。
+
+> ⚠️ **约束 #84**：多信号合成 / 因子去冗余前，**禁止**用横截面**信号相关性**代理 **PnL 相关性**（§13.16.4 非可识别性定理）；必须报告「未中心化 IC 交叉矩 + transverse Gram 相似度」两项，并检验风险度量在信号张量上的**各向同性**——非各向同性时"最优组合 = 多重相关界"**不成立**。
+
+> ⚠️ **约束 #85**：§16 契约 / #80 的命中率显著性判定（信号命中率 **vs 基率**）**必须**用**椭圆最优（EO）区间**（§13.16.5），**禁止**用 Wald 区间或"两个 Wilson 区间直接相减"；EO 区间不改变 #33 的样本 ≥30 门槛，其极端比例下的过度覆盖代价须在报告中说明。
+
+> ⚠️ **约束 #86**：**联合极值网络**（§13.16.6）的 log score 改善是**概率校准证据而非收益证据**；仅作风险监控 / 敞口收缩输入，**禁止**作方向信号；提升幅度须过 #25 审计与 #50 deflation。
+
+> ⚠️ **约束 #87**：执行/做市层**禁止**把**平稳假设下训练**的策略直接部署到 regime 切换环境（§13.16.7 负 PnL 证据）；状态增广须含 **BOCPD 方向流变点**；无 RL 时保持 GLFT + 显式 regime 闸门（§13.12.1），不得默认启用 RL。
+
+> ⚠️ **约束 #88**：风险平价度量推广（**EVaR**，§13.16.8）须先验证**高斯退化一致性**（高斯下回到波动率 IRP/ERC）作为实现正确性检查；"相对等权取得正 Sharpe 差异"是**弱基准**，须补与风险平价 / 最小方差等强基准的对比后方可准入（#25/#50）。
+
 ## 版本历史
 
 | 版本 | 日期 | 变更说明 |
 |------|------|---------|
+| v2.14.0 | 2026-09-13 | SkillEvolver 周度自进化（arXiv 2026-09-07~11，pastweek ~50 篇扫描选 8 篇成 8 节，提交日 09-06~09-10 与 §13.15 窗口无重叠）：新增 §13.16 — §13.16.1 订单流 regime 变点检测 BOCPD(arXiv:2609.07989)、§13.16.2 ALM-GARCH 非对称长记忆方差(arXiv:2609.06422)、§13.16.3 ESFM 共同损失严重度因子(arXiv:2609.10587)、§13.16.4 信号相关性 vs PnL 相关性非可识别性(arXiv:2609.09588)、§13.16.5 椭圆最优二元比例差区间 EO CI(arXiv:2609.10865)、§13.16.6 市场信息联合极值网络 JEAM(arXiv:2609.11575)、§13.16.7 regime 切换下稳健深度 RL 做市(arXiv:2609.11614)、§13.16.8 EVaR 风险平价 parity(arXiv:2609.11905)；新增约束 #81–#88。本周主题：推断严格性 + 尾部/regime 风险机器精化（ESFM 为唯一带正 alpha 证据的候选；4 篇升级 regime/尾部/执行风险机器；2 篇为相关性推断与比例推断护栏） |
 | v2.13.0 | 2026-09-09 | WQUANT 实盘反补（signal-attribution 契约）：新增 §16 观点/复盘类信号源的证据验证契约（可证伪 record → 独立行情源事后 label → Wilson CI 基率诚实 → 独立维度归因 → 样本≥30 才准入）；新增约束 #80（观点/复盘/LLM 判断源接入前必须过本契约，未过只能软确认）；参照实现 WQUANT signal_attribution.py |
 | v2.0.0 | 2026-07-01 | SkillEvolver + Loop 演化：新增 4-Layer 评分框架（萌芽/量价/结构/确认）、否决项规则、期货/衍生品 OI 数据说明、4-Layer config 示例、S_appendix 双层结构 |
 | v2.1.0 | 2026-07-11 | SkillEvolver 演化（arXiv:2607.05291）：新增波动率预测模块 `volatility_forecaster.py`，实现 Log-HAR + TTM 等权集成（带 TTM 缺失优雅回退与 Mincer-Zarnowitz 重校准），接入 `MultiFactorScorer` 为可选 `volatility` 维度分数（config 驱动，默认关闭） |
