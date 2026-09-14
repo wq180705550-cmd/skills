@@ -31,6 +31,7 @@
 | [factorengine](./quant-framework/factorengine/) | 程序级知识注入因子挖掘框架 | v2.0 |
 | [agentic-factor-investing](./quant-framework/agentic-factor-investing/) | AI 自主因子发现与系统化投资框架 | v2.0 |
 | [embodiskill](./quant-framework/embodiskill/) | 面向具身技能自演化的技能感知反思与进化 | v2.0 |
+| [quant-data-bug-triage](./quant-framework/quant-data-bug-triage/) | 量化数据管道「取数失败/数值异常」归因诊断：先用最小脚本实测数据源，区分真故障与自身代码 bug（键名/量纲/字段名） | v1.0 |
 
 ### 📘 量化策略
 
@@ -93,7 +94,7 @@
 
 ## 统计
 
-- 总数：**86** 个自建 Skill（31 个独立技能 + financial-skill 合集内 55 个金融服务技能）
+- 总数：**87** 个自建 Skill（32 个独立技能 + financial-skill 合集内 55 个金融服务技能）
 - 脚本文件：200+ Python / Shell 脚本
 - 测试用例：200+ 单元测试
 - 覆盖市场：原油、贵金属、黑色系、有色、化工、农产品、股指等
