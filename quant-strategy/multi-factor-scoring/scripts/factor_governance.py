@@ -404,6 +404,134 @@ def govern_scores(
     }
 
 
+# =====================================================================
+# 7. 跑赢基准淘汰门控 (Beat-Benchmark Elimination Gate)
+#    实现 §13.9.2 承诺的 "beats-CSI300" 因子淘汰机制。
+# =====================================================================
+
+def stationary_bootstrap_ci(
+    x: pd.Series,
+    n_boot: int = 1000,
+    block: int = 5,
+    alpha: float = 0.05,
+) -> Dict[str, float]:
+    """
+    平稳自助 (Politis–Romano stationary bootstrap) 均值 CI。
+
+    用几何长度 blocks 重采样（避免 IID 重采样的虚假独立性），返回均值、
+    双侧 CI 与单测 p 值 p_gt0 = P(bootstrap mean <= 0)。p_gt0 越小，
+    越能拒绝"超额收益 <= 0"，即越有证据跑赢基准。
+    """
+    arr = np.asarray(x.dropna(), dtype=float)
+    n = len(arr)
+    if n < 20:
+        return {"mean": float("nan"), "lo": float("nan"), "hi": float("nan"),
+                "p_gt0": float("nan")}
+    rng = np.random.default_rng(0)
+    boot = np.empty(n_boot)
+    for b in range(n_boot):
+        idx_b = np.empty(n, dtype=int)
+        pos = 0
+        while pos < n:
+            L = min(int(rng.exponential(block)) + 1, n - pos)
+            start = int(rng.integers(0, n))
+            idx_b[pos:pos + L] = (start + np.arange(L)) % n
+            pos += L
+        boot[b] = arr[idx_b].mean()
+    return {
+        "mean": float(arr.mean()),
+        "lo": float(np.quantile(boot, alpha / 2)),
+        "hi": float(np.quantile(boot, 1 - alpha / 2)),
+        "p_gt0": float(np.mean(boot <= 0)),
+    }
+
+
+def triple_gate_admission(
+    factor_id: str,
+    factor_returns: pd.Series,
+    benchmark_returns: pd.Series,
+    cost_model: Optional[object] = None,
+    net_cost_rate: float = 0.0,
+    ic_history: Optional[pd.Series] = None,
+    trace_id: Optional[str] = None,
+) -> FactorEvaluation:
+    """
+    跑赢基准淘汰门控（Beat-Benchmark Elimination Gate）。
+
+    三级闸门，任一失败 ⇒ passed=False + failure_reasons，因子被淘汰，不进入打分器：
+      Gate 1 (统计): 因子对基准的超额收益 = factor - benchmark（市值中性对齐）
+                      stationary-bootstrap CI 下界 > 0 且 BY 校正 p < α
+      Gate 2 (经济净成本): 净超额收益(扣成本后) > 0
+                      （cost_model 返回年化成本拖累；否则用 net_cost_rate）
+      Gate 3 (生存/衰减): 若提供 ic_history，过 factor_decay_test（近期不显著衰减）
+
+    这是 §14 因子治理链在"因子准入"前的**前置硬门控**：先证明能跑赢沪深300，
+    再进入 L1/L2/L3 三级评估。对应任务"淘汰掉无法跑赢沪深300的因子"。
+
+    Args:
+        factor_returns: 因子组合日收益序列（与 benchmark 对齐）
+        benchmark_returns: 基准日收益（默认沪深300，市值中性）
+        cost_model: 可调用 f(ann_gross_excess) -> 年化成本拖累（浮点）
+        net_cost_rate: 无 cost_model 时的固定年化净成本拖累
+        ic_history: 因子 IC 时间序列（可选，用于 Gate 3）
+    """
+    df = pd.concat([factor_returns, benchmark_returns], axis=1).dropna()
+    df.columns = ["f", "b"]
+    n = len(df)
+    reasons: List[str] = []
+    if n < 20:
+        reasons.append("样本不足(<20)")
+        return FactorEvaluation(
+            factor_id=factor_id, trace_id=trace_id or "", passed=False,
+            failure_reasons=reasons,
+            evaluated_at=datetime.now(timezone.utc).isoformat())
+
+    excess = df["f"] - df["b"]
+    ann_gross = float(excess.mean() * 252)
+    sb = stationary_bootstrap_ci(excess)
+
+    # Gate 1: 超额收益显著 > 0（stationary bootstrap；BY 校正对单检验退化为 p 本身）
+    l3 = evaluate_level3([sb["p_gt0"]])
+    gate1 = bool(sb["lo"] > 0) and bool(sb["p_gt0"] < 0.05)
+    if not gate1:
+        reasons.append(
+            f"Gate1 超额收益不显著 (CI[{sb['lo']:.4f},{sb['hi']:.4f}], p={sb['p_gt0']:.3f}, BY={l3['passed']})")
+
+    # Gate 2: 净超额（扣成本）> 0
+    cost_drag = float(cost_model(ann_gross)) if callable(cost_model) else float(net_cost_rate)
+    net_edge = ann_gross - cost_drag
+    gate2 = bool(net_edge > 0)
+    if not gate2:
+        reasons.append(
+            f"Gate2 净超额收益<=0 (年化超额={ann_gross:.4f}, 成本={cost_drag:.4f}, 净={net_edge:.4f})")
+
+    # Gate 3: 若有 IC 历史，过衰减检验
+    gate3 = True
+    decay_info: Dict[str, float] = {}
+    if ic_history is not None:
+        d = factor_decay_test(ic_history)
+        gate3 = not d["remove"]
+        decay_info = d
+        if not gate3:
+            reasons.append(f"Gate3 因子衰减超阈值 (decay_rate={d['decay_rate']})")
+
+    passed = gate1 and gate2 and gate3
+    return FactorEvaluation(
+        factor_id=factor_id,
+        trace_id=trace_id or "",
+        level_1_backtest={
+            "excess_mean": round(float(excess.mean()), 4),
+            "ann_gross_excess": round(ann_gross, 4),
+            "cost_drag": round(cost_drag, 4),
+            "net_edge": round(net_edge, 4),
+            "ci_lo": sb["lo"], "ci_hi": sb["hi"], "p_gt0": sb["p_gt0"],
+            "decay": decay_info,
+        },
+        passed=passed,
+        failure_reasons=reasons,
+        evaluated_at=datetime.now(timezone.utc).isoformat())
+
+
 if __name__ == "__main__":
     # 轻量自测：合成数据验证 6 项能力可独立运行
     rng = np.random.default_rng(0)
@@ -436,3 +564,17 @@ if __name__ == "__main__":
     atomic_write("__govern_test.json", {"ok": True})
     os.remove("__govern_test.json")
     print("All governance capabilities OK.")
+
+    # --- 跑赢基准淘汰门控演示 (Beat-Benchmark Elimination Gate, §13.9.2) ---
+    # 合成沪深300 近似基准 + 一个跑赢因子、一个跑输噪声因子（独立 RNG，强分离）
+    rng_demo = np.random.default_rng(42)
+    bench = pd.Series(rng_demo.normal(0.0003, 0.012, 300), index=idx)
+    beat = bench + pd.Series(rng_demo.normal(0.0015, 0.008, 300), index=idx)   # 跑赢基准
+    lag = bench + pd.Series(rng_demo.normal(-0.0010, 0.008, 300), index=idx)   # 跑输基准
+    g_beat = triple_gate_admission("alpha_factor", beat, bench)
+    g_lag = triple_gate_admission("noise_factor", lag, bench)
+    print("triple_gate beat(passed):", g_beat["passed"], "lag(passed):", g_lag["passed"])
+    print("  beat net_edge:", g_beat.get("level_1_backtest", {}).get("net_edge"),
+          "lag reasons:", g_lag.get("failure_reasons"))
+    assert g_beat["passed"] and not g_lag["passed"], "beat-benchmark gate demo failed"
+    print("Beat-benchmark elimination gate OK — non-beating factor retired.")

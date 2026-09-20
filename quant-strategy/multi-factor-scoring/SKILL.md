@@ -3,7 +3,7 @@ name: multi-factor-scoring
 description: "Multi-factor scoring quantitative trading system across A/HK/US/futures, 1H-daily. Includes 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules; Log-HAR+TTM realized-volatility forecasting; bootstrap+conformal uncertainty quantification; FTS factor governance (walk-forward, decay test, circuit breaker, orthogonalization, atomic persistence); deployment discipline (ESS gate, shadow-before-swap model replacement); conformal-Kelly sizing, Wasserstein DRO allocation, Shapley attribution; production-feedback & scope-boundary; weekly arXiv layers (MoE volatility routing, CVaR sizing, backtest-robustness grading, option-implied crash-risk gate, spectral guard, benchmark guard, order-flow changepoint, ES factor model, EO proportion CI, EVaR parity). Triggers: multi-factor, factor selection, rotation, 4-layer scoring, volatility forecasting, conformal, Kelly sizing, robust allocation, drawdown budgeting, factor governance, backtest audit, attribution."
 
 agent_created: true
-version: 2.14.0
+version: 2.15.0
 language: zh
 type: strategy
 priority: high
@@ -2062,6 +2062,94 @@ This week's theme is **inference rigor + tail/regime risk-machinery refinement**
 
 > **重要提示**：本附录包含使用 multi-factor-scoring 技能时的关键约束和常见失误。使用 4 层评分框架（萌芽/量价/结构/确认）时，必须严格遵守以下规则。
 
+## 13.17 This-Week arXiv Integration (2026-09-14 ~ 2026-09-20)
+
+Crawled the arXiv **q-fin** `recent` listing (announcements 2026-09-15 → 2026-09-18, 50 papers across q-fin.{TR,ST,CP,PM,RM,MF,PR,GN} + cross-lists math.ST / stat.AP / cs.AI / cs.LG); scanned all titles, read 8 abstracts verbatim, and selected 8 papers (submitted 2026-09-14 → 2026-09-17; two re-announced this week but originally Jul 2026, flagged inline) with a direct, non-speculative mapping. Follows the opt-in, config-driven, graceful-fallback pattern of §13.6–§13.16.
+
+This week's theme is **signal-library engineering discipline + evidence-honesty guards + execution/volatility robustness**: the load-bearing addition is §13.17.4 (Separated Signal Libraries) — a mathematically precise answer to *how to grow a multi-factor library without saturating or canceling*, directly operationalizing the orthogonalization/combination step (§14 capability 6). The "beats-CSI300" elimination is codified as a 7th governance capability (§14.1) via `triple_gate_admission` in `factor_governance.py` (implements the §13.9.2 promise). Guard-rails: look-ahead/PIT (§13.17.1), heavy-tail inference (§13.17.3), "passing a gate ≠ skill" (§13.17.5).
+
+#### §13.17.1 Look-Ahead Bias in Pretrained Forecasting Models (arXiv:2609.20554)
+- **论文**：Does Training on Future Data Pay? Look-Ahead Bias in Forecasting with Pretrained Models（econ.GN，2026-09-17）。
+- **核心发现**：评估 5 组金融时序基础模型（各含独立训练的年度 vintages，U.S./global/factor-augmented 训练环境），跨 14 个股票市场、4 个预测视界。关键构造：每个替代预测都配一个 **origin-aligned point-in-time (PIT) 基准**（相同数值历史与推断协议）。结果：在美国训练环境下，post-origin vintages 系统性**降低**准确率——20 个"模型-视界"组合中 18 个的滚动比较 MSE 更高；在 1 月期预测 + 受限配置下，暴露减 PIT 的年化确定性等价收益差中位数为 **−1.77pp（美国）/ −2.14pp（国际）**。结论：时间暴露构成**信息集违反（information-set violation）**，而非预测力或投资者价值的充分证据。
+- **Framework mapping**：**直接强化 §14 因子治理 + §13.10.2 回测取证**。为 §13.16 的"断言性护栏"补上**最关键的 PIT 基准纪律**：任何使用预训练/基础模型的因子，其 vintages 必须严格以 forecast 的 origin 对齐，禁止用 post-origin 信息。升级 §8 Step 4 回测卫生 与 §13.9.2 triple_gate 的"暴露匹配"要求（暴露须 PIT 对齐）。
+- **信号设计**（护栏，opt-in，所有基础模型因子必须 ON）：
+  - `pit_alignment_check(factor_vintage, forecast_origin)` → 校验因子值是否仅用 origin 之前的信息；违例 → 标记 look-ahead，阻断准入；
+  - 准入：基础模型因子必须 paired with origin-aligned PIT benchmark，且 exposed-minus-PIT 差值 CI 下界 > 0 才计入（复用 §13.17.3 的厚尾稳健推断）；
+  - 优雅回退：无 PIT 基准 → 该因子**禁止**进入打分器（#89）。
+- **Caveat**：实证为美股 14 市场 + 基础模型；结论对 A股迁移方向一致（信息集纪律普适）；其"post-origin 更新平均更差"是**负结果护栏**，价值在于封死 look-ahead 而非提供 alpha。
+
+#### §13.17.2 Principal Component Error in High-Dimensional Factor Models (arXiv:2609.20550)
+- **论文**：Principal component error in high-dimensional factor models（math.ST；交叉 q-fin.PM/q-fin.ST，2026-09-17；35 页）。
+- **核心发现**：统计因子模型中，样本协方差的 PCA 主方向是真实**主方向（principal directions）**的估计，其误差可分解为**两项可解释成分**：(a) out-of-subspace error（估计到总体因子暴露张成子空间的距离，可由数据表达，是可估计的误差下界）；(b) in-subspace error（来自潜因子收益的固定样本量，**无法仅从数据估计**）。用美股三因子仿真展示误差随维度和样本量变化，且 **out-of-subspace error 主导**。
+- **Framework mapping**：升级 **§13.8.3 去噪相关矩阵 / §13.10.1 特征驱动协方差 / §2 因子库**——为"PCA 估计的协方差/因子暴露"提供**误差下界量化**：在下游用 PCA 协方差做广度、分散度、CVaR 预算前，先报告 out-of-subspace error 作为可靠性下界；与 §13.14.8 随机矩阵谱护栏（各向同性/特征值下谱）同源。
+- **信号设计**（opt-in，默认 OFF；协方差消费者）：
+  - `pca_error_floor(cov_sample, n_assets, n_samples)` → 返回 out-of-subspace error 下界，作为 §13.8.3/§13.10.1 协方差的可靠性标；
+  - 准入：当 out-of-subspace error 超过阈值（维度高/样本少）→ 协方差消费者降级为收缩估计或等权，禁止直接采信裸 PCA；
+  - 优雅回退：无误差估计 → 退化为 Ledoit-Wolf 收缩（技能已有路径）。
+- **Caveat**：理论/math.ST，非新 alpha；核心价值是**给 PCA 协方差加误差下界护栏**（高维小样本下 PCA 误差被低估是实盘常见坑）；与 #71 方向信号怀疑论同向。
+
+#### §13.17.3 Heavy-Tailed Trade and Factor Flows: m-out-of-n Bootstrap (arXiv:2609.18750)
+- **论文**：PPML and Heavy-Tailed Trade and Factor Flows: Why Standard Inference Fails and How to Fix It（econ.GN，2026-09-16）。
+- **核心发现**：PPML 估计量只要求条件均值正确即一致，但**常规推断还需有限方差得分与高斯极限**——而双边流量是 **Pareto 厚尾**的，PPML 得分在数据生成过程下呈**稳定分布极限**，sandwich 置信区间**过窄**；保留 PPML 做点估计，但把 sandwich 推断替换为**对厚尾稳健的 m-out-of-n bootstrap**。在三组双边数据上修正量很大，且**推翻了常规显著的引力系数**。
+- **Framework mapping**：**直接强化 §13.8.5 厚尾/CVaR 闸门 与 §14 L3 多重检验**——为因子流/收益流的推断提供**厚尾稳健 CI**（替代正态/sandwich 假设）；呼应 §13.16.5 的覆盖正确性纪律，但把对象从比例差扩展到厚尾流量；升级 #14 基率诚实的"显著性"判定在厚尾下的实现。
+- **信号设计**（护栏+推断，opt-in，厚尾流推断推荐 ON）：
+  - `heavy_tail_ci(flow_series, method="m_out_of_n")` → m-out-of-n bootstrap CI，替代 sandwich/正态 CI；
+  - 准入：因子流/资金流类信号的显著性判定**必须**用厚尾稳健 CI；sandwich/正态 CI 在流量型数据上**禁止**作为准入依据（#90）；
+  - 优雅回退：无 bootstrap → 退化为 §13.7 移动块 bootstrap（同为非 IID）。
+- **Caveat**：实证为双边贸易流（引力方程），但厚尾+稳定极限的机制对**资金流/成交量流/因子暴露流**直接适用；"推翻常规显著"是**推断护栏**，警告因子流上的假阳性。
+
+#### §13.17.4 Separated Signal Libraries: Packing, Saturation, Joint Spectral Limits (arXiv:2609.17609)
+- **论文**：Separated Signal Libraries: Packing, Saturation, and Joint Spectral Limits（q-fin.PM；交叉 cs.IT，2026-09-14；28 页，含验证脚本与 ancillary 数据）。
+- **核心发现**：研究横截面信号库——每期一个对 d 个资产下期收益的预测向量；去均值单位化后，信号是球面上的点，其 T 期历史是 T 个球面的积。对历史施加**成对相关性上限 = 积流形上的最小角分离**，成长库即**堆积问题（packing）**。核心结论：(a) **分离本身不保证任何事**——不固定极限分布，饱和库能覆盖球面却带偏计数；(b) 在 uniform product-volume 基准下，按**正平均 IC 筛选**得非零、与 target 对齐的均值，但二阶矩各向同性；而**正 IC 边际 β** 在每有限 T 给出**三级谱**：主导特征值 → β²，残差水平按 1/T 衰减；(c) Gilbert-Varshamov 编码显示分离允许两种结局：指数大的正 IC 库其 EWS 是 PC1，也有库其 EWS **正交于 PC1**；(d) log J = o(T) 足以从 T 个 iid 日期中对 J 个候选做一致估计。
+- **Framework mapping**：**直接回答 §14 能力 6（正交化去冗余）与多信号组合的核心问题**——*如何在不饱和/不抵消的前提下成长因子库*。为 §13.11.2 MINGLE 暴露图 / §13.16.4 IC 分解 提供**库成长的理论准则**：用成对 IC 历史角分离作堆积约束，用**正 IC 边际 β** 作准入阈值（β>0 才入库），用 EWS 的谱结构（主导特征 β²、残差 1/T）判断库是否已饱和（残差谱塌缩→停止加因子）。
+- **信号设计**（信号库成长准则，opt-in，多因子组合推荐 ON）：
+  - `signal_library_admit(signal_hist, target, beta_min)` → 按正 IC 边际 β≥beta_min 准入，记录与已有库的角分离（≥ packing 下限）；
+  - `library_saturation_spectrum(ews_hist)` → 估计 EWS 三级谱，残差水平 < 阈值 ⇒ 库饱和，停止加因子（避免 §13.16.4 的"信号相关性代理 PnL 相关性"陷阱）；
+  - 优雅回退：无历史 → 退化为 §14 能力 6 成对相关性 >0.7 贪心剔除。
+- **Caveat**：**理论/cs.IT，无市场数据**，但其结论对**任何横截面多信号组合普适**；这是本周**最接近"因子库工程化成长"的正面方法论**，直接可落到 §13/§14 的组合层；须搭配 §13.16.4 的 IC/PnL 非可识别性护栏，避免把"EWS=PC1"误读为已捕获 target。
+
+#### §13.17.5 Gate Design: Passing Is Not Standalone Evidence of Skill (arXiv:2609.14859)
+- **论文**：Gate Design and Stage-Dependent Incentives in Retail Proprietary-Trading Evaluations（q-fin.TR，2026-09-14；40 页，含代码）。
+- **核心发现**：零售自营的两阶段产品（付费评估→ funded 账户）合约几何在不同阶段制造**不同激励**，使"通过评估"成为**糟糕的独立技能信号**：trailing drawdown 下评估奖励快速 lump 节奏，而 funded 账户惩罚它（联合闸门下差 9 倍）；评估在**零技能下可被攻破**——仅靠仓位规模 pass 概率≈0.40（实测队列率 0.168）；pass 概率随技能上升，但真实 edge + 激进度几乎同等推高它，故 pass 率**混淆技能与激进度**；在所有观测策略空间内，**无任何配置能在观测漂移下 break-even**——盈亏平衡位于净成本后 40.5%–41.5% 胜率（1:1.5），而 driftless 为 40.0%。每个账户级结果都对照零 edge 控制。
+- **Framework mapping**：**直接强化 §13.8.2 基率诚实 与 §13.10 证据纪律**——把"通过回测门控"重新定性为**证据而非证明**：因子/策略过 §14 三级评估、过 §13.9.2 triple_gate，只说明"未证伪"，**不等于有 edge**；升级 #80 契约与 §16 信号归因"未过只能软确认"的哲学。
+- **信号设计**（护栏，opt-in，所有门控解释必须 ON）：
+  - `gate_interpretation(pass_prob_skill, pass_prob_sizing)` → 分离"技能贡献"与"仓位规模贡献"，报告两者对 pass 率的边际；
+  - 准入：任何单因子/策略的"通过门控"**禁止**直接读作可交易 edge；必须配 §16 契约（样本≥30、独立维度归因、基率诚实）才升级为软确认（#91）；
+  - 优雅回退：无分离 → 退化为 #80 软确认（小权重）。
+- **Caveat**：**实证为零售自营评估**，但其"通过≠技能/盈亏平衡须过成本后胜率阈值"的结论对**所有量化门控（含本技能的 §14 三级链）是元级护栏**；呼应 §13.16.7（平稳训练策略 regime 下负 PnL）：过门控不保证实盘正 EV。
+
+#### §13.17.6 Model-Free Passive Execution via Order-Level Shadowing (arXiv:2609.18019)
+- **论文**：Model-Free Passive Execution via Order-Level Shadowing（q-fin.TR，2026-09-16；29 页，开源 kaspar-hft）。
+- **核心发现**：自动执行算法分 schedule-based 与 liquidity-seeking 两类；前者（TWAP/VWAP/POV/IS）都**基于模型**（显式模型/预测/调度/控制）。本文提出 **Shadow-PPOV**——被动 POV，其挂单速率来自**观测到的订单流**而非成交量的模型预测：观测到第三方 add 时，在同一价格同一场所发自己的限价单，并记录观测单的交易所 ID 与自身单的关联；撤单由 ID 驱动（被跟随单撤销时跟随撤）。挂单决策因而**无模型**：价格与场所直接从观测单读取，计算为零，但**信息继承自 flow 而非模型**。在 CME ES 期货一整年确定性市场回放中评估滑点与延迟敏感性，并作为**被动挂单的 model-free 基准**提出（用以给预测型挂单模型打分）。
+- **Framework mapping**：升级 **§13.2 动态交易成本 / §13.10.6 被动市场冲击与未成交风险**——把 Shadow-PPOV 作为**执行基准**：任何预测型挂单/执行算法须相对它打分（slippage 不劣于 shadow 才准入）；为 §13.8.1 成本感知配置提供**无模型执行下界**。
+- **信号设计**（执行层基准，opt-in，默认 OFF）：
+  - `shadow_ppov_benchmark(order_flow, venue)` → 无模型被动挂单基准滑点，作为预测型执行算法的对照；
+  - 准入：预测型执行模型须相对 shadow-PPOV 不劣（slippage ≤ shadow + 容差）才准入；
+  - 优雅回退：无订单流回放 → 退化为 §13.2 VWAP/POV 成本估计。
+- **Caveat**：实证为 CME ES 期货 + 确定性回放；A股 T+1/涨跌停/集合竞价下迁移须重验；核心价值是**执行基准 + "信息继承而非模型"的范式**，对 §13.10.6 是补充而非 alpha。
+
+#### §13.17.7 Beyond Rough Volatility: GLE Decoupling Memory and Scaling (arXiv:2609.20293) *[re-announced this week; originally 2026-07-31]*
+- **论文**：Beyond Rough Volatility: Decoupling Memory and Scaling via a Generalized Langevin Equation（q-fin.MF，2026-07-31；44 页）。
+- **核心发现**：从非平衡统计力学借入 **GLE** 作为随机波动率框架，解决 rough volatility 标准引擎 fBm 的结构缺陷——fBm 用**单一参数同时设定两个逻辑独立的性质**（波动率如何 scaling + 如何记忆）。GLE 用 **memory kernel K + 势 U + 噪声协方差 C** 分离二者：记忆成为可测对象，非对称势提供价格-方差相关够不到的 variance skew 杠杆。对公开数据集的物理测度检验**决然拒绝**两个受约束角（无记忆杠杆效应、时间反演对称），而中心 rough scaling 约束因识别受限未被驳倒。作者诚实报告这些限制。
+- **Framework mapping**：升级 **§13.6 已实现波动率预测（Log-HAR+TTM）** 与 **§13.13.4 跨资产粗糙波动率标尺**——提供**记忆与 scaling 解耦**的波动率设定：用 memory kernel K 单独建模长记忆，用势 U 单独建模 skew，避免 fBm 把两者绑死；为 §13.8.5 尾部闸门 / §13.15.2 熵因子模型 提供更灵活的波动率动态。
+- **信号设计**（opt-in，默认 OFF）：
+  - `gle_volatility(memory_kernel, potential, noise_cov)` → 解耦记忆/scaling 的波动率路径 → 路由进 §13.6 波动率维度 / §13.13.4 Hurst 标尺；
+  - 准入：启用前须验证"记忆与 scaling 解耦"在目标资产上可识别（避免重蹈 §13.16.2 ALM-GARCH 弱识别）；
+  - 优雅回退：无 GLE 拟合 → 退化为 Log-HAR 或 §13.13.4 粗糙波动率。
+- **Caveat**：物理测度检验**拒绝**无记忆杠杆与时间反演对称，rough scaling 约束仅"识别受限未被驳倒"；风险中性构造与 SPX-VIX 联合校准在伴生论文；属**波动率动态升级**，A股须重验，默认关闭。
+
+#### §13.17.8 Financial Contagion Networks as Annealing-Ready Ising Systems (arXiv:2609.17415) *[re-announced this week; originally 2026-07-09]*
+- **论文**：Financial Contagion Networks as Annealing-Ready Ising Systems（math.OC；交叉 q-fin.CP/MF/ST，2026-07-09）。
+- **核心发现**：互联金融体系因交叉持有与非线性传染易级联失效。基于 Elliott-Golub-Jackson 网络模型，扩展均衡估值纳入阈值诱导失效，将**最大级联失效问题**表述为 QUBO，并把**最优救助分配**表述为受控 Ising 模型，转为单一联合 QUBO 同时决定均衡失效与预算约束下最优干预。引入 **bailout susceptibility（救助敏感性）** 作为基于响应的系统性重要度度量，并发展敏感性驱动的贪心干预策略。数值仿真展示均衡估值、最坏级联识别、最优救助分配与敏感性分析；Ising 表示兼容经典退火、量子启发优化与量子退火。
+- **Framework mapping**：升级 **§13.10.4 系统性风险 / §13.14.6 系统性风险多重图神经网络 / §13.8.4 危机领先指标**——把"传染网络 + 救助敏感性"作为**系统性风险/危机 regime 的尾部计量**：bailout susceptibility 可作 §13.8.5 尾部闸门的额外输入（系统性重要度高的节点暴露 → 收紧 risk_scale）；呼应 §13.16.6 联合极值网络（同为系统性风险网络视角）。
+- **信号设计**（opt-in，默认 OFF；系统性风险读数）：
+  - `contagion_susceptibility(network, bailout_budget)` → 节点级 bailout susceptibility → 系统性重要度排序 → 收紧高暴露资产的 risk_scale / 敞口上限；
+  - 准入：须与 §13.8.4 危机领先指标、§13.12.1 regime 闸门一致；只作风险读数，**禁止**作方向信号（#58、#31）；
+  - 优雅回退：无网络 → 退化为 §13.8.5 CVaR 分位闸门 / 板块集中度。
+- **Caveat**：数值仿真为主、无实盘市场数据；QUBO/量子退火是**优化框架**非预测；属**同步系统性风险读数非方向信号**（#58、#31）；与 §13.16.6 同属"网络视角系统性风险"，二选一即可避免重复。
+
+> **本周集成小结**：8 篇全部 opt-in / config 驱动 / graceful-fallback 落位，无投机性新 `.py` 代码（仅 §14 因子治理补 `triple_gate_admission` 实现 §13.9.2 承诺的"跑赢基准淘汰门控"）。主题为**信号库工程化纪律 + 证据诚实护栏 + 执行/波动率鲁棒性**：§13.17.4（Separated Signal Libraries）是本周**正面方法论核心**——用正 IC 边际 β 作因子库准入、用 EWS 三级谱判饱和，直接落地 §14 能力 6 的正交化/组合；§13.17.1/3/5 为**证据护栏**（PIT 基准封死 look-ahead、厚尾流量用 m-out-of-n bootstrap 替代 sandwich、过门控≠有 edge）；§13.17.2 给 PCA 协方差加误差下界；§13.17.6/7/8 升级执行基准与波动率/系统性风险机器。唯一可被读为"候选增益"的是 §13.17.4 的库成长准则（须过 §14 治理链 + §13.17.1 PIT 对齐后才准入）；其余多为护栏或等价替代。§14 新增第 7 项能力「跑赢基准淘汰门控」（`triple_gate_admission`，已自测：跑赢因子准入、跑输因子淘汰）。新增约束 #89–#91。
+
 ## 【必须执行】关键步骤
 
 ### 选择评分框架时
@@ -2358,11 +2446,18 @@ T+1日收盘 ──────→ ② attribute 拉标的当日实际表现
 
 > ⚠️ **约束 #88**：风险平价度量推广（**EVaR**，§13.16.8）须先验证**高斯退化一致性**（高斯下回到波动率 IRP/ERC）作为实现正确性检查；"相对等权取得正 Sharpe 差异"是**弱基准**，须补与风险平价 / 最小方差等强基准的对比后方可准入（#25/#50）。
 
+> ⚠️ **约束 #89**：使用**预训练/基础模型**（TSFM、LLM 等）生成的因子，其 vintages **必须**与预测 origin **point-in-time 对齐**（§13.17.1）；每个替代预测须配 origin-aligned PIT 基准，exposed-minus-PIT 差值 CI 下界 > 0 才计入，否则**禁止**进入打分器（时间暴露 = 信息集违反 = look-ahead，§13.17.1 实证显示 post-origin 更新平均降低准确率、暴露减 PIT 年化确定性等价差中位 −1.77pp）。
+
+> ⚠️ **约束 #90**：**因子流/资金流/成交量流**类信号的显著性判定**必须**用**厚尾稳健推断**（m-out-of-n bootstrap 或 §13.7 移动块 bootstrap），**禁止**用 sandwich/正态 CI（§13.17.3：双边流量为 Pareto 厚尾，PPML 得分呈稳定分布极限，sandwich 区间过窄、可推翻常规显著）。
+
+> ⚠️ **约束 #91**：任何因子/策略**通过 §14 三级评估链或 §13.9.2 triple_gate，只说明"未证伪"，不等于有 edge**（§13.17.5：零售自营评估在零技能下 pass 概率≈0.40、且 pass 率混淆技能与仓位激进度；盈亏平衡须过成本后 40.5%–41.5% 胜率阈值）。须配 §16 契约（样本≥30、独立维度归因、基率诚实）才升级为软确认（#80/#18），**禁止**把"过门控"直接读作可交易 edge。
+
 ## 版本历史
 
 | 版本 | 日期 | 变更说明 |
 |------|------|---------|
 | v2.14.0 | 2026-09-13 | SkillEvolver 周度自进化（arXiv 2026-09-07~11，pastweek ~50 篇扫描选 8 篇成 8 节，提交日 09-06~09-10 与 §13.15 窗口无重叠）：新增 §13.16 — §13.16.1 订单流 regime 变点检测 BOCPD(arXiv:2609.07989)、§13.16.2 ALM-GARCH 非对称长记忆方差(arXiv:2609.06422)、§13.16.3 ESFM 共同损失严重度因子(arXiv:2609.10587)、§13.16.4 信号相关性 vs PnL 相关性非可识别性(arXiv:2609.09588)、§13.16.5 椭圆最优二元比例差区间 EO CI(arXiv:2609.10865)、§13.16.6 市场信息联合极值网络 JEAM(arXiv:2609.11575)、§13.16.7 regime 切换下稳健深度 RL 做市(arXiv:2609.11614)、§13.16.8 EVaR 风险平价 parity(arXiv:2609.11905)；新增约束 #81–#88。本周主题：推断严格性 + 尾部/regime 风险机器精化（ESFM 为唯一带正 alpha 证据的候选；4 篇升级 regime/尾部/执行风险机器；2 篇为相关性推断与比例推断护栏） |
+| v2.15.0 | 2026-09-20 | SkillEvolver 周度自进化 + 因子治理补完（arXiv 2026-09-14~20，q-fin recent 50 篇扫描选 8 篇成 8 节，提交日 09-14~09-17）：新增 §13.17 — §13.17.1 look-ahead/PIT 基准(arXiv:2609.20554)、§13.17.2 高维因子模型 PCA 误差下界(arXiv:2609.20550)、§13.17.3 厚尾因子流 m-out-of-n bootstrap(arXiv:2609.18750)、§13.17.4 分离信号库堆积/饱和/联合谱(arXiv:2609.17609)、§13.17.5 过门控≠技能(arXiv:2609.14859)、§13.17.6 无模型被动执行 Shadow-PPOV(arXiv:2609.18019)、§13.17.7 超越粗糙波动率 GLE 解耦记忆/scaling(arXiv:2609.20293,本周重发原7月)、§13.17.8 传染网络 Ising/救助敏感性(arXiv:2609.17415,本周重发原7月)；**§14 因子治理新增第 7 项能力「跑赢基准淘汰门控」`triple_gate_admission`**，补完 §13.9.2 承诺的"beats-CSI300"因子淘汰机制（G1 超额收益 stationary-bootstrap CI>0、G2 净超额>0、G3 衰减检验；已 by `factor_governance.py` 自测验证：跑赢因子准入、跑输因子淘汰）；新增约束 #89–#91。本周主题：信号库工程化纪律 + 证据诚实护栏 + 执行/波动率鲁棒性（§13.17.4 库成长准则为正面方法论核心，其余多为护栏/等价替代） |
 | v2.13.0 | 2026-09-09 | WQUANT 实盘反补（signal-attribution 契约）：新增 §16 观点/复盘类信号源的证据验证契约（可证伪 record → 独立行情源事后 label → Wilson CI 基率诚实 → 独立维度归因 → 样本≥30 才准入）；新增约束 #80（观点/复盘/LLM 判断源接入前必须过本契约，未过只能软确认）；参照实现 WQUANT signal_attribution.py |
 | v2.0.0 | 2026-07-01 | SkillEvolver + Loop 演化：新增 4-Layer 评分框架（萌芽/量价/结构/确认）、否决项规则、期货/衍生品 OI 数据说明、4-Layer config 示例、S_appendix 双层结构 |
 | v2.1.0 | 2026-07-11 | SkillEvolver 演化（arXiv:2607.05291）：新增波动率预测模块 `volatility_forecaster.py`，实现 Log-HAR + TTM 等权集成（带 TTM 缺失优雅回退与 Mincer-Zarnowitz 重校准），接入 `MultiFactorScorer` 为可选 `volatility` 维度分数（config 驱动，默认关闭） |
