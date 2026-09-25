@@ -56,6 +56,7 @@
 | Skill | 说明 | 版本 |
 |-------|------|------|
 | [cfa-mastery](./finance-cert/cfa-mastery/) | CFA L1/L2/L3 统一备考助手：全 34 科目要点提炼（考纲权威）+ 网盘讲师资料映射（最近年份优先★）+ 跨级别递进索引，覆盖道德/数量/经济/财报/公司金融/权益估值/固收/衍生品/另类/组合管理 | v2.0.0 |
+| [cfa-image-to-xmind](./finance-cert/cfa-image-to-xmind/) | 截图/纯图片 PDF → 可编辑 XMind 思维导图：XMind 2020+ 文件格式规范（content.json 数组陷阱）、像素级标记定位、红旗与红星的轮廓判别（解 app.asar 官方 SVG）、原文逐字核对、纯英文不翻译、批量多树分文件 | v1.0.0 |
 
 ### 🏦 金融服务（Anthropic 官方技能包）
 
