@@ -31,7 +31,7 @@
 | [factorengine](./quant-framework/factorengine/) | 程序级知识注入因子挖掘框架 | v2.0 |
 | [agentic-factor-investing](./quant-framework/agentic-factor-investing/) | AI 自主因子发现与系统化投资框架 | v2.0 |
 | [embodiskill](./quant-framework/embodiskill/) | 面向具身技能自演化的技能感知反思与进化 | v2.0 |
-| [quant-data-bug-triage](./quant-framework/quant-data-bug-triage/) | 量化数据管道「取数失败/数值异常」归因诊断：先用最小脚本实测数据源，区分真故障与自身代码 bug（键名/量纲/字段名） | v1.0 |
+| [quant-data-bug-triage](./quant-framework/quant-data-bug-triage/) | 量化数据管道「取数失败/数值异常」归因诊断：先用最小脚本实测数据源，区分真故障与自身代码 bug（键名/量纲/字段名）；含「休市日取到上一交易日陈旧序列」的判日守卫方案 | v1.1 |
 
 ### 📘 量化策略
 
