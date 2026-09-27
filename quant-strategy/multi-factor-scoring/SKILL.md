@@ -3,7 +3,7 @@ name: multi-factor-scoring
 description: "Multi-factor scoring quantitative trading system across A/HK/US/futures, 1H-daily. Includes 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules; Log-HAR+TTM realized-volatility forecasting; bootstrap+conformal uncertainty quantification; FTS factor governance (walk-forward, decay test, circuit breaker, orthogonalization, atomic persistence); deployment discipline (ESS gate, shadow-before-swap model replacement); conformal-Kelly sizing, Wasserstein DRO allocation, Shapley attribution; production-feedback & scope-boundary; weekly arXiv layers (MoE volatility routing, CVaR sizing, backtest-robustness grading, option-implied crash-risk gate, spectral guard, benchmark guard, order-flow changepoint, ES factor model, EO proportion CI, EVaR parity). Triggers: multi-factor, factor selection, rotation, 4-layer scoring, volatility forecasting, conformal, Kelly sizing, robust allocation, drawdown budgeting, factor governance, backtest audit, attribution."
 
 agent_created: true
-version: 2.15.0
+version: 2.16.0
 language: zh
 type: strategy
 priority: high
@@ -2150,6 +2150,94 @@ This week's theme is **signal-library engineering discipline + evidence-honesty 
 
 > **本周集成小结**：8 篇全部 opt-in / config 驱动 / graceful-fallback 落位，无投机性新 `.py` 代码（仅 §14 因子治理补 `triple_gate_admission` 实现 §13.9.2 承诺的"跑赢基准淘汰门控"）。主题为**信号库工程化纪律 + 证据诚实护栏 + 执行/波动率鲁棒性**：§13.17.4（Separated Signal Libraries）是本周**正面方法论核心**——用正 IC 边际 β 作因子库准入、用 EWS 三级谱判饱和，直接落地 §14 能力 6 的正交化/组合；§13.17.1/3/5 为**证据护栏**（PIT 基准封死 look-ahead、厚尾流量用 m-out-of-n bootstrap 替代 sandwich、过门控≠有 edge）；§13.17.2 给 PCA 协方差加误差下界；§13.17.6/7/8 升级执行基准与波动率/系统性风险机器。唯一可被读为"候选增益"的是 §13.17.4 的库成长准则（须过 §14 治理链 + §13.17.1 PIT 对齐后才准入）；其余多为护栏或等价替代。§14 新增第 7 项能力「跑赢基准淘汰门控」（`triple_gate_admission`，已自测：跑赢因子准入、跑输因子淘汰）。新增约束 #89–#91。
 
+## 13.18 This-Week arXiv Integration (2026-09-21 ~ 2026-09-27)
+
+Crawled the arXiv **q-fin** `pastweek` listing (announcements 2026-09-21 → 2026-09-25, 74 papers across q-fin.{TR,ST,CP,PM,RM,MF,PR,GN} + cross-lists from cs.LG/cs.AI/cs.CL/econ.EM/math.OC/math.PR/stat.ME/stat.ML); scanned all titles, read 8 abstracts verbatim, and selected 8 papers (submitted 2026-09-20 → 2026-09-24; one re-announced this week but originally Aug 2026, flagged inline) with a direct, non-speculative mapping. This week's task additionally carries **real weekly attribution data** (`factor_attribution_latest.json`, generated 2026-09-27 10:16, benchmark sh000300): only `size` passes the triple_gate; 11 factors retired; `capitalflow` excluded (data gap). The integration therefore **prioritizes the capitalflow gap** (§13.18.4) by designing a proxy pipeline from liquidity-aware signals. Follows the opt-in, config-driven, graceful-fallback pattern of §13.6–§13.17.
+
+This week's theme is **evidence-discipline upgrades (validation trilemma, LLM-factor referee) + signal-library engineering (shared-target dilution) + capitalflow-gap remediation (liquidity-aware proxy) + risk-machinery refinement (drawdown invariance, OT tail risk, cost-aware window, concentrated-market PM)**.
+
+#### §13.18.1 The Impossible Trinity of Time-Series Validation (arXiv:2609.29530)
+- **论文**：The Impossible Trinity of Time-Series Validation: A Conservation Law among Training Sufficiency, Test Coverage, and Temporal Causality（cs.LG；交叉 q-fin.ST/stat.ML，2026-09-02 提交，本周 pastweek 重现）。
+- **核心发现**：时间序列验证同时要求三件事——训练充分(α=最小训练占比)、测试覆盖(β=测试覆盖占比)、因果(训练在测试之前)。证明三者不可兼得，给出守恒律 α+β≤1+Λ（Λ=测试点未来被用作训练的比例）与 α+min{β,δ/T}≤1（δ=测试点到其未来最近训练点的距离）。纯噪声下，shuffled 5-fold 报 IC +0.32，而 contiguous 5-fold（同等未来数据量）仅 +0.004——k-fold 的"未来数据"是假发现来源。结论：expanding walk-forward 是因果验证的 Pareto 前沿；k-fold CV 买的是未来数据（泄漏）；purged k-fold + embargo 用距离换因果，过程遗忘快时便宜但无法修复非平稳要求的因果。
+- **Framework mapping**：直接强化 **#25 `audit_checklist()`** 与 **#33 ESS**——把"验证方案须报告 (α, β, Λ, δ)"列为审计强制字段；k-fold（非 purge）在时间序列上**禁止**作为因子/策略准入依据（其 IC 在纯噪声上可达 +0.32，纯属泄漏）。expanding walk-forward 是推荐默认，purged k-fold 仅在过程遗忘快时择优。
+- **信号设计**（护栏，opt-in，所有时间序列验证推荐 ON）：
+  - `validation_conservation_report(scheme)` → 输出 (α, β, Λ, δ) 四元组；Λ>0 或 δ 异常小 ⇒ 标记泄漏，阻断准入；
+  - 准入：任何回测/门控必须用 expanding walk-forward 或 purge+embargo k-fold；shuffled/non-purged k-fold 结果**直接判 UNRELIABLE**（#25）。
+- **Caveat**：守恒律是**元级护栏**（证明 k-fold 不可信），非新 alpha；与 #71（方向信号怀疑论）、#50（搜索 deflation）同向。本周真实归因（§14.4）即基于 walk-forward 式 triple_gate，契合此律。
+
+#### §13.18.2 Propose-Don't-Judge: A Frozen Referee for LLM Factor Miners (arXiv:2609.27051)
+- **论文**：Propose, Don't Judge: An Anytime-Valid Referee for LLM Agents That Mine Investment Factors（cs.AI；交叉 q-fin.PM/q-fin.ST，2026-09-22）。
+- **核心发现**：LLM agent 已能跑完整个因子研究（提议→回测→选幸存→淘汰）。本文主张**受控自演化**：agent 可"提议"，但"评判"必须由**冻结的统计裁判**（agent 不可触碰）执行——裁判只用提交后揭示的市场结果、经 betting 打分，假发现保证对任意停止时刻、任意提议策略成立。三 proposer（脚本/bandit/LLM）× 冻结裁判 vs 三泄漏裁判：冻结裁判在 scripted proposer 下准入**少 5–11 倍**亚阈值因子，且无 proposer 能弥合该差距；LLM 提议优于脚本、匹敌 bandit，并补上 bandit 缺的能力（自写诊断探针）。代价是时间：一个真因子约等 **500 交易日**才被准入，认证组合 Sharpe 因而落后于未门控者。
+- **Framework mapping**：直接强化 **#78（结构化无前视+搜索 deflation）** 与 **#15.3 在线学习护栏 / §15.2 自动重校准**——把"LLM agent 挖因子 + 自判"拆成"提议(agent) / 评判(冻结裁判)"分离架构；裁判的 anytime-valid 假发现保证正是 #78 要的"无前视 + 搜索 deflation"的统计量实现。衔接 #91（过门控≠有 edge）：裁判只判"未证伪"，准入仍需时。
+- **信号设计**（护栏，opt-in，LLM 因子挖掘推荐 ON）：
+  - `frozen_referee(admitted_factor, horizon)` → 裁判仅在提交后 ≥ 某滞后窗口（论文 ~500 交易日）用市场结果 betting 打分；agent 不得读取/改写裁判；
+  - 准入：LLM 提议的因子须进 frozen referee 流水线（提交→等待→betting 打分），**禁止** agent 自行回测即准入（#78 精神）；
+  - 优雅回退：无 LLM agent → 退化为 §13.9.2 triple_gate 人工评判链。
+- **Caveat**：实证为合成世界 + CSI500 十年 walk-forward；"500 交易日等待"是**诚实代价**非缺陷——与 #38（校准≠增长）、#91 一致；LLM 提议虽好但**不能缩短验证等待**，禁止为快而跳过裁判。
+
+#### §13.18.3 Target Alignment, Dilution and Forecast Selection (arXiv:2609.26303)
+- **论文**：Target alignment, dilution and forecast selection when cross-sectional forecasts share a common target（econ.EM；交叉 cs.LG/q-fin.ST/stat.ME，2026-09-22）。
+- **核心发现**：预测者对同批单元、同一标准化已实现结果打分。证明每个标准化预测**精确分解为**(a) 与共同目标对齐的分量 + (b) 与目标不相关的分量。三推论：① 预测误差相关性主要镜像预测相关性，故是**多样性的差度量**；② 等权组合仅在平均对齐 >> 组合离散度时才优于无信息预测；③ 新增预测者的增益可拆为 genuine improvement vs mere dilution，等权准入会**误奖 dilution**。提出谨慎选择规则：选掉大部分 dilution 损失，但**无组合能击败无信息预测**。
+- **Framework mapping**：直接升级 **§13.16.4（信号相关性 ≠ PnL 相关性非可识别性）** 与 **§13.17.4（分离信号库堆积/饱和）**——给出"等权准入稀释"的精确机制：多信号组合须用 §13.17.4 的**正 IC 边际 β** 准入（β>0 才入库），而非等权；呼应 **#84**（禁止用信号相关性代理 PnL 相关性）。衔接 #43（正交归因）。
+- **信号设计**（opt-in，多信号组合推荐 ON）：
+  - `forecast_dilution_decompose(forecasts, target)` → 分解为对齐分量 + 正交分量；报告平均对齐 vs 离散度；
+  - `cautious_forecast_select(forecasts, target)` → 谨慎选择（去掉 dilution），替代等权；入门须过 §13.17.4 正 IC 边际 β；
+  - 优雅回退：无历史 → 退化为 §13.17.4 成对相关性 >0.7 贪心剔除。
+- **Caveat**：理论/econ.EM，无市场数据但结论普适；**"等权多信号"在弱对齐下会劣于无信息预测**——直接警告本技能"堆因子等权"的反模式，须用边际 β 准入。
+
+#### §13.18.4 Liquidity-Aware Signals → capitalflow 口径缺口补数 (arXiv:2609.25617)  ★优先
+- **论文**：Hierarchical Multi-Task Learning with Liquidity-Aware Signals for Stock Forecasting（LiMT；cs.CE，交叉 q-fin.CP，2026-09-22）。CSI300/CSI500 基准，APO 机制把多任务预测转为可部署组合权重（含交易成本+流动性约束）； realistic CSI300 回测年化 3.99%→10.01%、Sharpe 1.22→1.86。
+- **核心发现**：LiMT 用 Market Regime Encoder 抽同期跨股依赖 + 个股时序动态，得统一潜态；Liquidity-Driven Learning（MoE，跨任务门控）**联合预测价格运动/波动率/成交量**；Adaptive Portfolio Optimization 在交易成本+流动性约束下转组合权重。关键：**流动性感知信号（换手/turnover、成交量、Amihud 类非流动性）与价格/波动联合建模**可提升可部署收益。
+- **Framework mapping**：**直接针对本周 excluded 的 `capitalflow` 口径缺口**（东财 fflow 服务端硬截断 120 交易日，无法覆盖 600 日归因窗口）。设计**替代口径管道**：用流动性感知信号构造**合成资金流代理**——(1) 换手率 turnover（高频可得、长历史）；(2) Amihud 非流动性（本技能已有 `amihud` 候选因子，§13.17 窗口）；(3) 日内 order-flow imbalance（从 intraday 棒重建，§13.15.4/§13.16.1 同侧）。三者在"资金参与度"维度互补，合成长历史的资金流代理，绕开 120 日硬截断。该代理作为**新候选因子**重新进 §14 治理链。
+- **信号设计**（opt-in，默认 OFF；**capitalflow 替代口径**）：
+  - `synthetic_fundflow_proxy(turnover, amihud, orderflow_imbalance)` → 标准化合成资金流代理（流动性感知，非负权重混合）；
+  - 准入：代理须过 **#90 厚尾稳健推断**（flow 为 Pareto 厚尾，禁止 sandwich/正态 CI）+ §13.9.2 triple_gate（#27）；**禁止**直接填回 excluded 缺口冒充"已解决"——须以新候选身份重新走门控；
+  - 优雅回退：无 intraday → 退化为 turnover + amihud 两因子代理；
+  - 与既有 `amihud` 因子关系：amihud 已 retired（CI lo≤0），合成代理须证明**增量**（正交归因 #43）才独立准入，避免与 retired amihud 重复计数。
+- **Caveat**：LiMT 为 CSI300/500 深度学习实证（强于神经/树基线），但其**流动性感知是方法启示非现成因子**；本技能只取其"流动性信号代理资金流"的口径思路，落地为 §2 资金流因子的补数管道。代理仍须过 #90/#27，且**不得粉饰**——若代理仍无法跑赢 CSI300（triple_gate 失败），capitalflow 维持 EXCLUDED。
+
+#### §13.18.5 Robust Invariance and Optimality of Drawdown Control (arXiv:2609.23272)
+- **论文**：On Control of Drawdown: Robust Invariance and Optimality（math.OC；交叉 q-fin.MF/q-fin.RM，2026-09-20）。
+- **核心发现**：有限视界控制框架，在多资产随机系统强制预设最大回撤下限。第一结果：**鲁棒不变性定理**——刻画所有在与所有支持收益对抗下保住回撤下限的控制动作；每个鲁棒安全控制具**回撤调制形式** = 当前回撤 cushion × 可行归一化方向，给出鲁棒安全策略的**完整参数化**。stagewise-independent 收益下，最优鲁棒安全状态反馈策略化为一维 Bellman 递归；LTI 增益满足回撤下限，且**最优回撤调制在同一下限不降低期望收益**（视界≥2 阶段且 LTI 单阶段净收益为正时期望收益严格改善）。
+- **Framework mapping**：升级 **§13.11.3 长记忆回撤预算（T^(H−1/2) 标度）** 与 **#40（四项度量分别报告）**——把回撤预算从"蒙特卡洛标定阈值"升级为**路径依赖的鲁棒安全控制**（cushion × direction 参数化），与 **#21 CircuitBreaker** 协同：CircuitBreaker 触发即进入回撤调制降险。衔接 #31（尾部防线常备）。
+- **信号设计**（opt-in，默认 OFF；风控层）：
+  - `drawdown_modulated_control(cushion, direction, dd_limit)` → 鲁棒安全控制动作（cushion × normalized direction）；
+  - 准入：启用前须验证"同一下限不降期望收益"的实现正确性；与 #21 CircuitBreaker 串联（熔断→调制降险）；
+  - 优雅回退：无控制框架 → 退化为 §13.11.3 回撤预算阈值 + 对称 vol-target。
+- **Caveat**：理论/math.OC，有限视界；与 #40 四项度量一致（回撤深度/恢复时间须分别处理）；默认关闭，避免把理论控制直接当实盘指令。
+
+#### §13.18.6 Financial Tail Risk Beyond Lipschitz via Semi-Discrete Optimal Transport (arXiv:2609.27785)  *[re-announced this week; originally 2026-08-17]*
+- **论文**：Financial Tail Risk Beyond Lipschitz Continuity via Semi-Discrete Optimal Transport（q-fin.RM；交叉 cs.CE/q-fin.CP/stat.ML，2026-08-17，本周 pastweek 重现）。
+- **核心发现**：金融收益厚尾，尾部风险估计是组合风控核心。现代神经生成器（normalizing flow/GAN/diffusion）经 Lipschitz 组件映射，而 **Lipschitz 映射的高斯必为次高斯**——更重尾目标在任何有限 Lipschitz 常数下无精确匹配（Monge-Ampère：目标密度越深谷需越高增益映射、方差越大）。Semi-Discrete Optimal Transport（SDOT）放宽映射正则而非源尾类：power diagram 给每训练点一 cell 恰含 1/N 源测度，尾部点靠**跨 cell 边界**抵达而非拉伸。主实验扫 Merton jump-diffusion kurtosis 94→1679：SDOT 尾部比 0.85–0.94（跨种子 std<0.025），而所有学习生成器要么压缩要么膨胀尾部且方差随动增长；21 年回测 SDOT 在 CVaR 优化下给最佳风险调整市场中性策略（Sharpe 0.70、最大回撤 −2.60% vs 次优 0.40）。
+- **Framework mapping**：升级 **§13.8.5 厚尾/CVaR 闸门** 与 **§13.15.2 熵因子模型**——为"生成模型尾部不可信"提供**机制解释**（Lipschitz 约束→推不出重尾）与**修复路径**（SDOT 等放宽正则的尾部分层方法）；衔接 #17（禁止 IID/高斯假设）。
+- **信号设计**（护栏，opt-in，尾部风险读数）：
+  - `sdot_tail_estimate(returns)` → SDOT 尾部分层估计（替代 Lipschitz 生成器）；
+  - 准入：任何用神经网络生成器估尾部的模块须**显式报告尾部压缩/膨胀**（论文证明 Lipschitz 必偏），或改用 SDOT；与 §13.8.5 CVaR 闸门串联；
+  - 优雅回退：无 SDOT → 退化为 §13.7 移动块 bootstrap / §13.8.5 分位 CVaR。
+- **Caveat**：8 页短文、S&P500 实证；**"生成模型尾部不可信"是负面结果护栏**，非新 alpha；与 #17/#31 尾部防线常备一致。
+
+#### §13.18.7 Cost-Sensitive Online Window Size Selection (arXiv:2609.29887)
+- **论文**：Cost-Sensitive Online Window Size Selection for Portfolio Management（math.OC；交叉 cs.LG/q-fin.PM，2026-09-24）。
+- **核心发现**：变化市况下成本敏感的在线窗口选择。两层级框架：用候选窗口尺寸构建组合，经在线学习**动态聚合**（把候选窗口当"专家"）。用**含换手损失**更新聚合权重；推导有限视界**成本敏感 tracking-regret 界**（含聚合组合换手），static regret 为特例。有界损失+成本率下，适当调参的 Fixed Share 对次线性切换预算达**渐近零 tracking-regret**，Hedge 覆盖 static 情形。
+- **Framework mapping**：升级 **§13.2 动态交易成本** 与 **§13.12.1 regime 路由波动率集成**——窗口尺寸选择须**成本感知**（含换手），而非固定窗口或纯 IC 最优；把"候选窗口=专家"的在线聚合直接落到 §13.12.1 的 regime 路由与 §13.6 波动率预测的窗口管理。衔接 #35（冲击建模）。
+- **信号设计**（opt-in，默认 OFF）：
+  - `cost_sensitive_window_aggregate(candidate_windows, turnover_loss)` → 含换手损失的在线聚合权重（Fixed Share / Hedge）；
+  - 准入：启用前须验证 tracking-regret 界（有界损失+成本率）；与 §13.12.1 regime 路由串联（窗口随 regime 切换）；
+  - 优雅回退：无在线学习 → 退化为 §13.9.1 成本最优 span / 固定窗口。
+- **Caveat**：理论/math.OC，无市场数据；"窗口=专家"在线聚合是方法启示，须过 #25/#33 再实盘；默认关闭。
+
+#### §13.18.8 Active Portfolio Management in Concentrated Equity Markets (arXiv:2609.27113)
+- **论文**：Active Portfolio Management in Concentrated Equity Markets（q-fin.PM；交叉 math.OC/q-fin.MF，2026-09-22）。S&P500 历史 1995–2024 OOS，15bp 比例成本从财富直接扣。
+- **核心发现**：等权组合长期难被战胜，但**相对表现 regime 依赖**——市场集中度上升+高相关（尤其泡沫期）等权跑输。据此建随机控制问题：投资者在等权与市值加权间按**随机多样性-离散度（SDD）模型**预测主动配置；二次代理刻画摩擦，线性 FBSDE 给最优配置，显式"aiming in front of a moving target"交易率（Gârleanu-Pedersen 风）。OOS 1995–2024：策略累积净收益高于等权与市值加权，信息比高于等权（扣 15bp 后）。
+- **Framework mapping**：升级 **§5 仓位** 与 **#30 单标的/行业上限**——提供"集中度上升期主动超配小市值/等权"的配置层解释，与**本周真实归因 admitted 的 `size` 因子（小市值跑赢 CSI300）形成互补**：size 因子在集中度上升期更易跑赢，SDD 模型给出"何时加大小市值暴露"的 regime 信号。衔接 #31（regime 读数）。
+- **信号设计**（opt-in，默认 OFF；配置层）：
+  - `concentration_aware_alloc(sdd_forecast, ew_port, cap_port)` → 按 SDD 在等权/市值加权间主动配置；
+  - 准入：须过 #25（OOS 扣成本）/ #33（ESS）；与 size 因子正交（size 已 admitted，SDD 作其 regime 调制而非重复）；
+  - 优雅回退：无 SDD 模型 → 退化为等权/市值加权静态混合。
+- **Caveat**：S&P500 实证（1995–2024，15bp 成本），A股须重验（小市值溢价结构不同）；"集中度上升期等权跑输"正解释 size 因子为何本周跑赢——**证据互证而非独立 alpha**。
+
+> **本周集成小结**：8 篇全部 opt-in / config 驱动 / graceful-fallback 落位，无投机性新 `.py` 代码。信号设计以「函数签名 + 准入条件 + Caveat」表述，延续 §13.6–§13.17 的文档化范式。本周主题为**证据纪律升级（验证不可能三角、LLM 因子冻结裁判）+ 信号库工程化（共享目标稀释）+ capitalflow 缺口补数（流动性感知代理）★ + 风险机器精化（回撤不变性、OT 尾部、成本敏感窗口、集中市场 PM）**：§13.18.1 把"k-fold 在时间序列上不可信"证明为守恒律（expanding walk-forward 是 Pareto 前沿）；§13.18.2 把 LLM 因子挖掘拆为"提议/冻结裁判"分离（anytime-valid 假发现保证）；§13.18.3 揭示"等权多信号会误奖 dilution"（须用正 IC 边际 β 准入）；§13.18.4 **优先针对 excluded capitalflow 设计流动性感知合成代理管道**（须过 #90/#27，不得冒充已解决）；§13.18.5/6/7/8 升级回撤控制/尾部 OT/成本敏感窗口/集中市场 PM。须强调：§13.18.1（验证守恒律）、§13.18.2（冻结裁判等待 500 日）、§13.18.6（生成模型尾部不可信）的核心价值是**护栏**（证据纪律），非新 alpha；§13.18.4 的合成代理仍须过 triple_gate 才准入。新增约束 #92–#99。
+
 ## 【必须执行】关键步骤
 
 ### 选择评分框架时
@@ -2333,6 +2421,17 @@ gen = SignalGenerator(circuit_breaker=cb)
 signals = gen.generate_signals(scores, realized_ic=0.05, passed=True)  # 熔断则空
 ```
 
+### 14.4 真实归因记录（WQUANT 周度回灌，triple_gate 实证）
+
+> **数据来源**：自动化「WQUANT 全因子归因（周度）」每周日 14:00 回灌 `C:\Users\Administrator\.workbuddy\skills\multi-factor-scoring\factor_attribution_latest.json`（由 `F:\workbuddy\2026-06-24-10-35-11\factor_attribution.py` 生成）。本技能**只采纳该 JSON 的 admitted/retired/excluded 作为"跑赢沪深300"的真实结论**，不凭印象宣称某因子跑赢。
+
+- **最新窗口**：`generated_at = 2026-09-27 10:16:25`（10 天内有效）；基准 `sh000300`；窗口 `2024-04-10 ~ 2026-09-24`（600 日、25 独立期）；`net_cost_rate = 0.02`。
+- **admitted（跑赢）**：`["size"]`（小市值；`ci_lo=0.000109>0`、`p_gt0=0.010`、`net_edge=0.2109`、strict passed=true）——唯一通过 triple_gate 的因子，证据为小市值溢价。
+- **retired（淘汰，11 个，Gate1 失败 ci_lo≤0）**：`trend`、`volume`、`marketbreadth`、`volatility`、`momentum`、`new_high`、`momentum_lr`、`idio_vol`、`amihud`、`value`、`quality`。（其中 `marketbreadth`/`idio_vol`/`value`/`volatility` 额外 Gate2 失败 net_edge≤0；`amihud`/`quality`/`new_high`/`momentum_lr` 方向为正但 CI 下界仍≤0 仅上界跨零，属"方向正但统计不显著"，非"跑赢"。）
+- **excluded（口径缺口，非淘汰）**：`capitalflow`——免费源仅可回溯最近 120 交易日（东财 fflow 服务端硬截断），无法覆盖 600 日归因窗口；**不伪造代理口径**，须另建日累积管道或改用付费源（补数方案见 §13.18.4 / 约束 #95）。
+- **治理复核**：用 `scripts/factor_governance.py` 的 `triple_gate_admission` 重跑，12/12 因子一致率 100%（size replay=True=json=True；其余 11 replay=False=json=False；capitalflow EXCLUDED）；引擎冒烟 beat passed=True、lag passed=False、engine_ok=True。
+- **解读纪律**：`size` 为长仓 top 分位对指数的真实检验结果，须持续过 §14 治理链 + 周度归因复核（#91），不得外推为"小市值永远溢价"；其余 11 因子本周未跑赢，不代表未来不能，仅代表当前窗口证据不足。
+
 ## §15 FTS 差距矩阵映射：能力演进路线（2026-08-11）
 
 > **来源**：FTS 能力差距总览矩阵（L1~L4 × T1/T2/T3 机构对标）。本技能已覆盖多数 T1/T2 维度；以下仅就 T3（海外顶级）差距中**属于技能范畴**的 5 项给出演进路线，明确哪些纳入技能、哪些标注为外部依赖（呼应 skillevolver「精准修订、不过拟合单实例」原则）。
@@ -2452,10 +2551,27 @@ T+1日收盘 ──────→ ② attribute 拉标的当日实际表现
 
 > ⚠️ **约束 #91**：任何因子/策略**通过 §14 三级评估链或 §13.9.2 triple_gate，只说明"未证伪"，不等于有 edge**（§13.17.5：零售自营评估在零技能下 pass 概率≈0.40、且 pass 率混淆技能与仓位激进度；盈亏平衡须过成本后 40.5%–41.5% 胜率阈值）。须配 §16 契约（样本≥30、独立维度归因、基率诚实）才升级为软确认（#80/#18），**禁止**把"过门控"直接读作可交易 edge。
 
+> ⚠️ **约束 #92**（§13.18.1，arXiv:2609.29530）：时间序列验证存在**不可能三角守恒律** α+β ≤ 1+Λ（α=前视防护、β=样本外保险、Λ=过拟合面/自由度消耗）；**k-fold 交叉验证在时间序列上结构性泄漏**（折叠间时序依赖使 test 含 train 信息），**禁止**用于因子/模型 OOS 评估；须用 **expanding walk-forward**（rolling origin 仅向未来扩窗），其为该守恒律下 Pareto 前沿的唯一可行解（与 #25 审计、#33 ESS 一致）。
+
+> ⚠️ **约束 #93**（§13.18.2，arXiv:2609.27051）：任何 **LLM/agent 因子挖掘**须采用 **propose-don't-judge 分离架构**——提议者（agent）与裁判（冻结、anytime-valid 假发现保证）**分离**，**禁止**同一 LLM 既挖因子又判自己通过；冻结裁判仅判"未证伪"，其 CSI500 十年 walk-forward 实证显示**少准入 5–11 倍 sub-threshold 因子**（更严格），准入仍须等待 500 交易日验证，**禁止**为快而跳过裁判（与 #38 校准≠增长、#91 过门控≠edge 一致）。
+
+> ⚠️ **约束 #94**（§13.18.3，arXiv:2609.26303）：多信号**等权集成仅在 avg alignment ≫ dispersion 时才优于无信息预测**；当信号目标对齐度低/分散度高时，等权会**误奖稀释信号**（稀释有效预测）。新信号准入须用**正 IC 边际 β**（对现有组合的 Incremental IC 贡献为正）而非"加了不差"；**禁止**以等权融合掩盖低质量信号（与 #27/#33 一致）。
+
+> ⚠️ **约束 #95**（★优先，§13.18.4，arXiv:2609.25617，针对 excluded capitalflow 缺口）：**禁止**用合成代理直接填回 excluded 缺口冒充"已解决"。流动性感知合成资金流代理（`synthetic_fundflow_proxy`：turnover/|Δprice| 或 amount/|ret| 等）只作**新候选因子**，须过 **#90 厚尾稳健推断**（flow 为 Pareto 厚尾）+ §13.9.2 triple_gate（#27）；若代理仍无法跑赢 CSI300（triple_gate 失败），capitalflow **维持 EXCLUDED** 状态，不得粉饰。流动性信号仅作方法启示非现成因子。
+
+> ⚠️ **约束 #96**（§13.18.5，arXiv:2609.23272）：回撤控制须采用 **回撤调制不变性控制** `drawdown_modulated_control(cushion, direction, dd_limit)`——在回撤 cushion 收缩时自动降险/反向收紧，保持对回撤状态的**不变性响应**（非对称于 drawdown 与 drawup）；替换一刀切去风险（呼应 #59 状态依赖非对称再配置），须过 #25 审计，无回撤预算优雅回退对称 vol-target。
+
+> ⚠️ **约束 #97**（§13.18.6，arXiv:2609.27785）：半离散最优传输（SDOT）尾部风险估计 `sdot_tail_estimate(returns)` 仅作**尾部不可信护栏**——Lipschitz 生成器在尾部**结构性不可信**（生成模型尾部覆盖不足），其尾部 VaR/CVaR 估计**不得**直接驱动仓位/保证金；须与 §13.8.5 厚尾闸门、#17 时间感知采样并列作监控态（与 #11/#17 无 IID 规则一致）。
+
+> ⚠️ **约束 #98**（§13.18.7，arXiv:2609.29887）：在线窗口选择须**成本敏感**——`cost_sensitive_window_aggregate(candidate_windows, turnover_loss)` 在候选窗口间用 Fixed Share / Hedge 专家组合，把**换手成本**显式计入窗口选择目标（非仅 OOS 误差）；**禁止**为最小误差而频繁换窗导致隐性高换手（与 #21 CircuitBreaker、#45 自动重校准范围边界一致）。
+
+> ⚠️ **约束 #99**（§13.18.8，arXiv:2609.27113，呼应本周 size 准入）：集中（低广度/高集中度）市场主动配置须用 `concentration_aware_alloc(sdd_forecast, ew_port, cap_port)`——在集中度升高时**降主动权重**回等权/市值，防主动管理在低效集中市场被拥挤度吞噬；呼应本周实盘归因 **size（小市值）为唯一准入因子**（小市值溢价证据），但**禁止**把单因子准入外推为"集中市场必配小市值"——size 仍须过 §14 治理链 + WQUANT 周度归因复核（#91）。
+
 ## 版本历史
 
 | 版本 | 日期 | 变更说明 |
 |------|------|---------|
+| v2.16.0 | 2026-09-27 | SkillEvolver 周度自进化 + 真实归因接入（arXiv 2026-09-21~25，q-fin pastweek 74 篇扫描选 8 篇成 8 节）：新增 §13.18 — §13.18.1 时序验证不可能三角守恒律(arXiv:2609.29530)、§13.18.2 冻结裁判 LLM 因子挖掘 propose-don't-judge(arXiv:2609.27051)、§13.18.3 横截面预测稀释/正 IC 边际 β 准入(arXiv:2609.26303)、§13.18.4 流动性感知合成资金流代理补 capitalflow 缺口★优先(arXiv:2609.25617)、§13.18.5 回撤调制不变性控制(arXiv:2609.23272)、§13.18.6 半离散 OT 尾部不可信护栏 SDOT(arXiv:2609.27785,本周重发原 2026-08-17)、§13.18.7 成本敏感在线窗口 Fixed Share/Hedge(arXiv:2609.29887)、§13.18.8 集中市场主动配置 SDD(arXiv:2609.27113)；新增约束 #92–#99（#95 专指 capitalflow 替代口径、#99 呼应本周 size 准入）；**§14.4 新增真实归因记录（WQUANT 周度回灌）**：本周 admitted=["size"]、retired=11、excluded=["capitalflow"]，governance triple_gate 重跑 12/12 一致率 100%。本周主题：证据纪律升级（验证守恒律+冻结裁判）+ 信号库工程化（共享目标稀释）+ capitalflow 缺口补数（流动性感知代理）★ + 风险机器精化（回撤不变性/OT 尾部/成本敏感窗口/集中市场 PM）；护栏类（§13.18.1/2/6）核心价值是证据纪律非新 alpha |
 | v2.14.0 | 2026-09-13 | SkillEvolver 周度自进化（arXiv 2026-09-07~11，pastweek ~50 篇扫描选 8 篇成 8 节，提交日 09-06~09-10 与 §13.15 窗口无重叠）：新增 §13.16 — §13.16.1 订单流 regime 变点检测 BOCPD(arXiv:2609.07989)、§13.16.2 ALM-GARCH 非对称长记忆方差(arXiv:2609.06422)、§13.16.3 ESFM 共同损失严重度因子(arXiv:2609.10587)、§13.16.4 信号相关性 vs PnL 相关性非可识别性(arXiv:2609.09588)、§13.16.5 椭圆最优二元比例差区间 EO CI(arXiv:2609.10865)、§13.16.6 市场信息联合极值网络 JEAM(arXiv:2609.11575)、§13.16.7 regime 切换下稳健深度 RL 做市(arXiv:2609.11614)、§13.16.8 EVaR 风险平价 parity(arXiv:2609.11905)；新增约束 #81–#88。本周主题：推断严格性 + 尾部/regime 风险机器精化（ESFM 为唯一带正 alpha 证据的候选；4 篇升级 regime/尾部/执行风险机器；2 篇为相关性推断与比例推断护栏） |
 | v2.15.0 | 2026-09-20 | SkillEvolver 周度自进化 + 因子治理补完（arXiv 2026-09-14~20，q-fin recent 50 篇扫描选 8 篇成 8 节，提交日 09-14~09-17）：新增 §13.17 — §13.17.1 look-ahead/PIT 基准(arXiv:2609.20554)、§13.17.2 高维因子模型 PCA 误差下界(arXiv:2609.20550)、§13.17.3 厚尾因子流 m-out-of-n bootstrap(arXiv:2609.18750)、§13.17.4 分离信号库堆积/饱和/联合谱(arXiv:2609.17609)、§13.17.5 过门控≠技能(arXiv:2609.14859)、§13.17.6 无模型被动执行 Shadow-PPOV(arXiv:2609.18019)、§13.17.7 超越粗糙波动率 GLE 解耦记忆/scaling(arXiv:2609.20293,本周重发原7月)、§13.17.8 传染网络 Ising/救助敏感性(arXiv:2609.17415,本周重发原7月)；**§14 因子治理新增第 7 项能力「跑赢基准淘汰门控」`triple_gate_admission`**，补完 §13.9.2 承诺的"beats-CSI300"因子淘汰机制（G1 超额收益 stationary-bootstrap CI>0、G2 净超额>0、G3 衰减检验；已 by `factor_governance.py` 自测验证：跑赢因子准入、跑输因子淘汰）；新增约束 #89–#91。本周主题：信号库工程化纪律 + 证据诚实护栏 + 执行/波动率鲁棒性（§13.17.4 库成长准则为正面方法论核心，其余多为护栏/等价替代） |
 | v2.13.0 | 2026-09-09 | WQUANT 实盘反补（signal-attribution 契约）：新增 §16 观点/复盘类信号源的证据验证契约（可证伪 record → 独立行情源事后 label → Wilson CI 基率诚实 → 独立维度归因 → 样本≥30 才准入）；新增约束 #80（观点/复盘/LLM 判断源接入前必须过本契约，未过只能软确认）；参照实现 WQUANT signal_attribution.py |
