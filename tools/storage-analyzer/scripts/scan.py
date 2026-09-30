@@ -155,14 +155,27 @@ def scan_macos():
 # ======================================================================
 # Windows  (UNTESTED on this build — stdlib only: os, shutil, ctypes)
 # ======================================================================
+# os.path.isjunction 仅 Python 3.12+ 提供，早期版本回退为恒 False。
+# 必须与 is_symlink 一起判断：大目录常被用 `mklink /J` 做成 junction（如
+# %USERPROFILE%\.workbuddy\projects -> D:\.workbuddy\projects），此时
+# os.path.islink() 返回 False，只判 symlink 会递归进去、把链接目标
+# 重复计入本盘大小，导致该目录体积被严重高估。
+_isjunction = getattr(os.path, "isjunction", lambda _p: False)
+
+
+def is_reparse_link(path):
+    """True for symlinks AND junctions (both are reparse points)."""
+    return os.path.islink(path) or _isjunction(path)
+
+
 def dir_size_bytes(path):
-    """Recursive size in bytes via os.scandir. Skips symlinks and unreadable."""
+    """Recursive size in bytes via os.scandir. Skips links/junctions and unreadable."""
     total = 0
     try:
         with os.scandir(path) as it:
             for e in it:
                 try:
-                    if e.is_symlink():
+                    if is_reparse_link(e.path):
                         continue
                     if e.is_file(follow_symlinks=False):
                         total += e.stat(follow_symlinks=False).st_size
@@ -187,7 +200,7 @@ def scandir_children(path, min_kb=51200, limit=40):
                  "size_kb": 0, "size_h": "?", "denied": True}]
     for name in entries:
         child = os.path.join(path, name)
-        if os.path.islink(child):
+        if is_reparse_link(child):
             continue
         try:
             kb = (os.path.getsize(child) if os.path.isfile(child)

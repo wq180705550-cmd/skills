@@ -95,7 +95,9 @@ pills 只渲染解析出的纯数字（如"约 5.5 GB"），不显示数据里�
 ## 平台状态
 
 - **macOS**：完整实现并实测（扫描 / 报告 / 一键删除全验证过）。
-- **Windows**：代码已写（`scan.py` 的 `scan_windows`、`server.py` 的 `_trash_windows` 走 `SHFileOperationW`），但**未在真实 Windows 上实测**。首次在 Windows 跑要核对：目标目录路径、`os.scandir` 大小、回收站删除是否正常。多盘符已支持（主盘分段条 + 其他盘列表）。
+- **Windows**：代码已写（`scan.py` 的 `scan_windows`、`server.py` 的 `_trash_windows` 走 `SHFileOperationW`），并已在 Windows 10 上实跑验证（扫描正常、无 denied 目录）。已确认路径与 `os.scandir` 大小统计可用；回收站删除仍建议首次人工确认。多盘符已支持（主盘分段条 + 其他盘列表）。
+  - **junction 陷阱（已修）**：把大目录用 `mklink /J` 迁到别的盘时（如 `%USERPROFILE%\.workbuddy\projects -> D:\...`），`os.path.islink()` 对 junction 返回 **False**，只判 symlink 会递归进去、把链接目标重复计入本盘，导致该目录体积被严重高估（实测 `.workbuddy` 虚高到 6.9 GB，真实仅 3.1 GB）。`dir_size_bytes` / `scandir_children` 现已用 `is_reparse_link()`（`islink() or os.path.isjunction()`）一并跳过。
+  - 若报告里某目录大小明显大于 `du -sh` 结果，先怀疑 junction 重复计入；用 `du` 口径为准。
 
 ## 长期优化建议素材（写进报告 summary.long_term）
 
