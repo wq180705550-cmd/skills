@@ -84,7 +84,7 @@
 |-------|------|------|
 | [wb-hooks](./system/wb-hooks/) | WorkBuddy 事件驱动 Hook 系统，约定式注入实现工具调用拦截 | - |
 | [dspark-inference](./system/dspark-inference/) | DSpark 分布式投机解码推理部署 — 双 DGX Spark 节点，vLLM, TP=2, FP8 KV Cache, InfiniBand/RoCE | v1.0.0 |
-| [tencent-docs-connector-recovery](./system/tencent-docs-connector-recovery/) | 腾讯文档写入报 `no_token` 的三段式定位（会话连接器态 → env 票据 → 网关凭据端点直查 reason）与「先落盘待写值 → 等连接器恢复 → 幂等补写」恢复流程 | v1.0.0 |
+| [tencent-docs-connector-recovery](./system/tencent-docs-connector-recovery/) | 腾讯文档写入报 `no_token` 的三段式定位（会话连接器态 → env 票据 → 网关凭据端点直查 reason）与「先落盘待写值 → 等连接器恢复 → 幂等补写」恢复流程 | v1.0.1 |
 
 ### ✍️ 内容创作
 

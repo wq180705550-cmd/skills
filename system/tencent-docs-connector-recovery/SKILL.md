@@ -21,12 +21,23 @@ agent_created: true
    import os, json, urllib.request
    cfg = json.loads(os.environ["CODEBUDDY_MCP_CONFIG"])
    srv = cfg["mcpServers"]["connector-proxy"]        # 旧名 "workbuddy" 兜底
-   req = urllib.request.Request(
-       srv["url"] + "/internal/tencent-docs/tokens",
-       headers=srv["headers"], method="GET")          # Authorization + X-WorkBuddy-MCP-Context 必须整组透传
+   base = srv["url"].rsplit("/", 1)[0]               # http://127.0.0.1:<port>
    op = urllib.request.build_opener(urllib.request.ProxyHandler({}))   # 走宿主本地，固定不走代理
-   print(json.load(op.open(req, timeout=10)))
+   # 路径会随网关版本变化：旧的 /internal/... 已 404，新路径为 /mcp/internal/...
+   for p in ("/mcp/internal/tencent-docs/tokens", "/internal/tencent-docs/tokens"):
+       req = urllib.request.Request(base + p, headers=srv["headers"], method="GET")
+       # ↑ Authorization + X-WorkBuddy-MCP-Context 必须整组透传（只带前者会 401）
+       try:
+           print(p, "->", json.load(op.open(req, timeout=10)))
+           break
+       except Exception as e:
+           print(p, "->", type(e).__name__, e)
    ```
+
+   ⚠️ **端点路径已变更（2026-10-06 实测）**：`/internal/tencent-docs/tokens` 现返回
+   `404 {"error":"not_found"}`，有效路径为 **`/mcp/internal/tencent-docs/tokens`**（即平台
+   `url` 的 `/mcp` 段**保留**后再拼 `/internal/...`）。`404 not_found` **不等于** `no_token`：
+   遇到 404 应换路径重试，勿据此下"未连接"结论。
 
    读法：
 
