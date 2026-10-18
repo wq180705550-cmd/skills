@@ -3,7 +3,7 @@ name: multi-factor-scoring
 description: "Multi-factor scoring quantitative trading system across A/HK/US/futures, 1H-daily. Includes 4-layer scoring framework (sprout/volume-price/structure/confirmation) with veto rules; Log-HAR+TTM realized-volatility forecasting; bootstrap+conformal uncertainty quantification; FTS factor governance (walk-forward, decay test, circuit breaker, orthogonalization, atomic persistence); deployment discipline (ESS gate, shadow-before-swap model replacement); conformal-Kelly sizing, Wasserstein DRO allocation, Shapley attribution; production-feedback & scope-boundary; weekly arXiv layers (MoE volatility routing, CVaR sizing, backtest-robustness grading, option-implied crash-risk gate, spectral guard, benchmark guard, order-flow changepoint, ES factor model, EO proportion CI, EVaR parity). Triggers: multi-factor, factor selection, rotation, 4-layer scoring, volatility forecasting, conformal, Kelly sizing, robust allocation, drawdown budgeting, factor governance, backtest audit, attribution."
 
 agent_created: true
-version: 2.17.0
+version: 2.19.0
 language: zh
 type: strategy
 priority: high
@@ -2338,6 +2338,56 @@ This week's theme is **evidence-discipline upgrades (validation trilemma, LLM-fa
 
 > **本周集成小结（§13.20）**：8 篇全部 opt-in / config 驱动 / graceful-fallback 落位，无投机性新 `.py` 代码。主题为**因子挖掘基准纪律 + 市场冲击微观基础补 capitalflow 缺口 + 证据纪律延续**：§13.20.1 把自动因子挖掘置于**组合感知基准契约**下（无范式占优 ⇒ 技能不偏好任一挖掘范式，须过 triple_gate+#78/#93）；§13.20.2★ 把 excluded capitalflow 缺口从"净流/流构成"推进到"**流→价因果 all-pass 传播子**"微观基础（衰减 50–60% 带，呼应 #95/#100，须过 triple_gate 才准入）；§13.20.3 把神经资产定价深化锚定**残差学习**（避免纯深度 OOS 崩塌）；§13.20.4 把 RL 执行锚定**解析基准诊断**（critic 排序可靠性 + 因果地板，呼应 #87/#103/#104）；§13.20.5 把 regime 指标重构为**低维连续应力坐标**（离散化连续统损失 OOS，呼应 #81/#31）；§13.20.6/7 升级尾部风险组合（expectile 替 CVaR / reward-penalty CVaR，呼应 #44/#59）；§13.20.8 把 proxy 选取的方法论护栏落到**相关采样误差排序信息量**（呼应 #78/#95/#25）。须强调：§13.20.4/5/8 核心价值是**证据纪律与护栏**（RL 须基准诊断、regime 须连续、proxy 须防过度校正），非新 alpha；§13.20.2 的因果传播子代理仍须过 triple_gate 才准入，capitalflow 维持 EXCLUDED。新增约束 #108–#115。
 
+#### §13.21.1 Market Impact Estimation via Causal Foundation Models (arXiv:2610.12537) ★优先（针对 excluded capitalflow 缺口）
+- **关键发现**：市场冲击本质是**因果量**（"若我没交易，价格会是多少？"），但经典模型（Almgren–Chriss、propagator）把价格对 flow 做回归，当**知情流经信息渠道也推动价格**时估计有偏。作者构建 Causal Market Simulator（连续时间因果 PFN，训练于含隐藏信息流的合成市场先验，混淆强度为每 episode 精确旋钮）：朴素估计器偏差有闭式解、实证达 **最高 68% 高估**；PFN 在高混淆下追踪无偏 oracle；其 **do-ablated 孪生**（去掉干预输入）塌缩到窗口前均值。零样本下对 ABIDES LOB 中 metaorder 以真值尺度响应（+0.38 前兆标准差 vs 反事实），并在 BTC/ETH/SOL 永续 ~2,300 个、Nasdaq ~3,800 个流突增上复现（"与因果迁移一致但非证明"）。迁移关键在于**把 metaorder 编码为新增 flow 而非钳制价格水平**；循环状态空间变体使冲击沿执行时长累积（与 transformer 的平坦响应相反），与实测 metaorder 冲击相关从 +0.68 升至 +0.92~+0.96。
+- **Framework mapping**：直接补强 **§13.20.2 / §13.19.1 / §13.18.4 流动性感知代理** 与 **#44（知情流持续性）/ #95（合成资金流代理）/ #100（流构成异质性）/ #109（因果 all-pass 传播子）**——把 capitalflow 缺口从"因果传播子"再推进到"**因果基础模型 + do-intervention 去混淆**"：朴素 price-on-flow 回归因知情流混淆而高估达 68%，代理必须以 do-ablated 反事实价（去混淆冲击）为口径，而非净流回归。
+- **信号设计**（capitalflow 补数路线，opt-in 默认 OFF）：`causal_market_impact_proxy(metaorder, lob)`——metaorder 编码为新增 flow，用 do-ablated 因果模型估反事实价（去混淆冲击，呼应 #109）；代理仍须过 #90 厚尾稳健推断 + §13.9.2 triple_gate，失败则 capitalflow **维持 EXCLUDED**；循环状态空间变体优先（冲击沿执行时长累积，相关 +0.92~+0.96）。
+- **Caveat**：合成先验 + crypto/Nasdaq 概念验证；"与因果迁移一致但非证明"；朴素 flow→price 回归高估 68% ⇒ capitalflow 朴素代理须 do-ablation 去混淆（呼应 #95/#109）；A股须重验。
+
+#### §13.21.2 Common Signals, Spurious Cross-Excitation, and Identification in Multivariate Hawkes Processes (arXiv:2610.19428)
+- **关键发现**：多元 Hawkes 广泛用于测度事件数据的内生交互，但**潜在共同信号**可凭空制造表观激励（apparent excitation）而无结构交互——作者刻画该线性投影，构造与 common-signal 模型**共享均值强度与 Bartlett 谱**却激励机制不同的稳定非负 Hawkes，确立**二阶不可辨识**的具体形式；导出 Cox 移民 Hawkes 的**三阶累积量**，在 2/3 维系统建立归一化结构参数的局部辨识；三阶信息可区分二阶结构相同的机制（弱信号下有限样本局限显著）；受限参数族用分箱计数 Whittle 估计，建一致性+渐近正态+可行三明治标准误；crypto 应用显示推断激励对模型设定极敏感、仅凭谱拟合作结构解释不足。
+- **Framework mapping**：直接补强 **#78（LLM 因子挖掘 proxy）/ #95（capitalflow 合成代理选取）/ #44（知情流持续性）/ #25（审计）/ #90（厚尾推断）**——capitalflow 代理（#95）或任何 proxy 若把"共同信号制造的表观流激励"误读为真实结构流，即落入二阶不可辨识；须用三阶累积量 / 分箱 Whittle 结构辨识 + 三明治 SE，拒绝"激励≈common-signal 替代"的伪流信号。
+- **信号设计**：`hawkes_structural_identification(events)`——要求三阶累积量 / 分箱 Whittle 结构辨识 + 三明治 SE；若 proxy 激励可被 common-signal 替代 Hawkes 复现则判伪流信号；映射到 capitalflow 代理 (#95)：synthetic_fundflow_proxy 须过三阶结构辨识，否则维持 EXCLUDED。
+- **Caveat**：仅 2/3 维局部辨识；弱信号下有限样本局限显著（crypto 实证）；A股须重验；谱拟合 alone 不足以结构解释（呼应 #25 审计）。
+
+#### §13.21.3 Neural Estimation of Irreversibility in Real and Simulated LOB Paths (arXiv:2610.16151)
+- **关键发现**：路径不可与其逆区分则无时间箭头，故**时间不可逆性是"从轨迹 alone 读出有向机制"的必要条件**；作者定义粗粒度 LOB 路径的**不可逆率 = 每事件前向/反向 log-密度比**，用 order-invariant MLP + TCN 估 3 周 Nasdaq MBO：NVDA 的 order-invariant / order-sensitive 估计为 0.036 / 0.054 nats/事件，**ordering increment = 0.018**；保留单步转移表的 surrogate 仅恢复 30% 不可逆性；increment 对 12 只标的每个 held-out 日均为正、随粗粒度尺度变化 >10 倍；queue-reactive 模拟器匹配有序率 0.052 vs 0.054，但 ordering increment 0.0006 vs 0.018（用 block 构成而非 block 顺序构建非对称）。提出以**不可逆性的 ordering & scale profile** 作 LOB 模拟器基准。
+- **Framework mapping**：直接补强 **§13.20.5 regime 连续潜应力 / §13.19.1 / #44（知情流持续性）/ #95（合成资金流代理）/ #100（流构成异质性）/ #109（因果传播子）**——不可逆性的 **ordering increment**（order-sensitive − order-invariant）是**流方向性读数**（非净流），把 capitalflow 代理从"净流"再推进到"流时序不对称性"；scale profile 作鲁棒性维度（呼应 §13.20.5 连续应力坐标）。
+- **信号设计**（capitalflow 补数路线，opt-in 默认 OFF）：`lob_irreversibility_profile(lob_path)`——算 ordering increment（流方向性）作流质量而非净流向信号；粗粒度 scale profile 作鲁棒性报告；代理仍须过 #90 厚尾稳健推断 + §13.9.2 triple_gate，失败则 capitalflow **维持 EXCLUDED**。
+- **Caveat**：Nasdaq MBO 3 周 / 12 标的；ordering increment 随尺度 >10 倍变化 ⇒ proxy 须报粗粒度 scale profile 防单尺度过拟合；A股 L2 须重验。
+
+#### §13.21.4 Where Backtests and Live Trading Part Ways: Six Defects from One Intraday System (arXiv:2610.21846) ★
+- **关键发现**：日内策略回测会漂离实盘，且漂移**从不在汇总统计量中显现**。作者报告实盘一个美股日内系统与其回测 replay 对比发现的 **6 个缺陷**：数据类 3（默认行情仅含真实开盘量极小部分、历史价做了分红复权而实盘单从未见、实盘下载但回测从未用到的数据）、代码类 2（仓位步超过实盘账户限制、UTC 时间戳按纽约时间读）、配置类 1（开关开启但从未到达下单代码）；每例给症状/误差量级/成因/现守卫测试；收尾 10 点清单。不声称系统盈利。
+- **Framework mapping**：核心**证据纪律护栏**——强化 **#91（过门控≠edge）/ #25（审计）/ #50（搜索 deflation）/ #78 / §14 治理 / §16 信号归因**：回测-实盘漂移是**静默**的（不进汇总统计），任何因子/策略准入前须有回测-实盘 parity 守卫（replay 实盘日、与回测比对、对 6 类缺陷断言相等）；呼应 §13.20.4（RL 执行须基准诊断）但推广到**所有策略**。
+- **信号设计**：`backtest_live_parity_guard(strategy)`——replay 实盘日，与回测比对 (a) 行情量覆盖 (b) 分红/拆细复权 parity (c) 代码路径可达性 (d) 配置可达性 (e) 时区 (f) 仓位限制；对 6 类缺陷断言 parity；接入 #25 审计 + §16 replay（呼应 #91）。
+- **Caveat**：单一美股日内系统实证；不声称盈利；10 点清单通用 ⇒ 技能须把 parity guard 设为因子/策略准入**硬前置**（呼应 #91/#25），不靠汇总统计自证。
+
+#### §13.21.5 AlphaRLM: Literature-Grounded Symbolic Factor Discovery (arXiv:2610.14959)
+- **关键发现**：公式化 alpha 挖掘用 **RL 框架训练 LLM 从金融文献构造可执行符号因子**（无需输入因子表达式）；LEGO（Literature-Guided Operator Assembly）以文献衍生思路 + 可执行算子为条件提供语义先验；用 **executable-validity + grouped-return-separation 奖励**（捕捉因子分位间非单调结构）把生成策略与市场反馈对齐。CSI300 / CSI1000 / S&P500 实验显示年化超额收益优于强因子挖掘与 LLM 基线；**8B 模型即获强跨市场表现**。
+- **Framework mapping**：直接强化 **#78（LLM 因子挖掘须结构化无前视+搜索 deflation）/ #93（propose-don't-judge 冻结裁判）/ #108（组合感知基准契约）/ §13.9.2 triple_gate**——LLM 从文献+市场反馈生成因子，但须过 triple_gate + **组合感知基准（after-cost 纯多 & 多空）** + **冻结裁判**（LEGO 文献锚定、不自评）；CSI300/CSI1000 实证可直接作 A股校验。
+- **信号设计**：`alpharlm_pipeline(literature, operators)`——文献引导算子装配 + grouped-return-separation 奖励；产出因子须过 #93 冻结裁判（不自评）+ #108 组合感知基准 + #27 triple_gate；8B 跨市场仅作初筛非准入证据。
+- **Caveat**：文献锚定但策略与市场反馈对齐 ⇒ 仍须 #78 搜索 deflation + #93 冻结裁判；跨市场 8B 须 A股重验；"优于基线"须 after-cost 复核（呼应 #108）。
+
+#### §13.21.6 Realized Tail-Risk Conditional Autoregressive Expectile Models (arXiv:2610.13446)
+- **关键发现**：提出 **RTCARE** 模型联合预测 VaR 与 ES：把由日内高频收益构造的**实现尾部测度**（realized quantile、realized ES）纳入条件 expectile 的动态与测量方程，使下尾风险信息进入预测；MCMC 估计；美国股收益实证中 RTCARE 在多数尾部水平 **competitive 且常优于**已有替代，MC 复现与滚动预测下结果稳定。
+- **Framework mapping**：升级 **#113（expectile 替 CVaR 于 Wasserstein-DRO）/ §13.11.4 / §13.13.5（CVaR 状态依赖非对称）/ §5 仓位尾部闸门**——把 #113 的 expectile 推进到**实现高频 expectile CARE 尾部风险预测**；与 §13.9.2 triple_gate / #44 MCS 共用尾部风险治理。
+- **信号设计**：`rtcare_tail_risk(ret, hf_intraday)`——realized quantile/ES feed 入条件 expectile → 联合 VaR/ES；须过 #44 MCS/多重检验 + #17 厚尾；退化检查（呼应 #113 ground metric 退化）。
+- **Caveat**：美国股收益实证；MCMC 重算成本；A股厚尾须放宽分布集（呼应 #17）；realized HF 须 tick/L2 数据（A股限制）。
+
+#### §13.21.7 Regime Detection in Latent Factor Models — A Bayesian Decision-Theoretic Approach (arXiv:2610.20366)
+- **关键发现**：regime-switching 多因子模型常用，但过滤本身不决定"何时该对推断的 regime 变动作出反应"；作者把**含潜因子与隐藏 regime 的在线 regime 检测**表述为**贝叶斯决策问题**（权衡 false alarm / 检测延迟 / 误分类）；后验非 Markov ⇒ 表为测度值最优停止问题，用粒子滤波 + MC 动态规划近似；单变点 Heston 作基准；潜信息程序可优于可行的 plug-in 规则。
+- **Framework mapping**：强化 **#31（regime 作描述符）/ #81（BOCPD 变点）/ #112（regime 连续潜应力坐标）/ #104（regime RL 须跨 regime 验证）/ #59（非对称再配置）**——regime 检测是**决策问题**（行动阈值），非仅过滤；连续 stress 坐标驱动（呼应 §13.20.5 / #112）。
+- **信号设计**：`regime_decision_threshold(latent_factor, posterior)`——贝叶斯决策（false-alarm vs delay vs misclass）设 regime 变动作出反应的阈值；粒子滤波后验；连续 stress 坐标驱动（呼应 #112）。
+- **Caveat**：Heston / regime-switching Vasicek 数值；A股须重验；决策阈值须校准 false-alarm/delay 权衡（呼应 #59/#31）。
+
+#### §13.21.8 Algorithmic Collusion Without Deterrence: Auditing the Punishment Mechanism in Q-Learning Pricing Agents (arXiv:2610.21867)
+- **关键发现**：独立表格 Q-learning 在 Bertrand 双寡头中收敛到超竞争价格，经典归因归为"习得奖励-惩罚（undercut→报复）"。作者复现 Calvano(2020) 脉冲响应，但在**冻结策略（学习关闭）**下审计发现该模式**不识别机制**（回报过定而非选择性）；10 对中 9（914/1024）单吸引子盆=整个状态空间，任何扰动都返回所激者、强制提价触发与 undercut 相同报复；co-training 产生窄 dyad-specific 盆，重配对冻结智能体协调崩塌 80%；惩罚主张不自洽：1 期 undercut 不盈利（92% 对）但**对冻结伙伴 DP 最优偏离平均盈利 +17.5%**——合谋因"偏离从未被试"而非"偏离不划算"存续。
+- **Framework mapping**：强化 **#103（RL 执行共谋稳健）/ #104（regime RL）/ #87（RL 部署警示）/ §13.20.4（RL 执行须基准诊断）**——RL "习得的惩罚机制"读入价格 ≠ 真实机制；审计须 **冻结策略 + DP 最优偏离测试**，而非仅脉冲响应；把 §13.20.4 的诊断基准推进到"机制审计"。
+- **信号设计**：`rl_collusion_audit(policy, env)`——冻结策略，对冻结伙伴算 DP 最优偏离；若最优偏离盈利 ⇒ 惩罚机制假（合谋靠惯性非威慑）；重配对测试（协调崩塌 %）作鲁棒性；呼应 #103/#104/#87。
+- **Caveat**：Bertrand 双寡头仿真（非金融 LOB）；最优偏离 +17.5%；A股须重验；脉冲响应 alone 不足以判定 RL 机制（须 DP 最优偏离）。
+
+> **本周集成小结（§13.21）**：8 篇全部 opt-in / config 驱动 / graceful-fallback 落位，无投机性新 `.py` 代码。主题为**因果市场冲击补 capitalflow 缺口 + 流信号结构辨识 + 证据纪律延续（回测-实盘 parity / RL 机制审计）**：§13.21.1★ 把 excluded capitalflow 缺口从"因果传播子"推进到"**因果基础模型 + do-intervention 去混淆**"（朴素 flow→price 回归高估 68%，呼应 #95/#109/#100）；§13.21.2 把流信号辨识锚定**三阶累积量结构辨识**（Hawkes 二阶不可辨识 ⇒ common-signal 伪流，强化 #78/#95/#25）；§13.21.3 把流质量从"净流"推进到**LOB 路径不可逆性 ordering increment**（流方向性读数，呼应 #44/#100/#109）；§13.21.4★ 把"过门控≠edge"落到**回测-实盘 parity 守卫**（6 类静默漂移，强化 #91/#25/#50）；§13.21.5 把 LLM 因子挖掘锚定**文献引导 + 冻结裁判 + 组合感知基准**（强化 #78/#93/#108）；§13.21.6 把尾部风险推进到**实现高频 expectile CARE**（强化 #113/#44）；§13.21.7 把 regime 检测重构为**贝叶斯决策阈值**（强化 #31/#81/#112）；§13.21.8 把 RL 执行审计推进到**机制审计（冻结策略 + DP 最优偏离）**（强化 #103/#104/#87）。须强调：§13.21.4/8 核心价值是**证据纪律与护栏**（回测须 parity、RL 机制须审计），非新 alpha；§13.21.1/2/3 的因果/结构/不可逆性代理仍须过 triple_gate 才准入，capitalflow 维持 EXCLUDED。新增约束 #116–#123。
+
 ## 【必须执行】关键步骤
 
 ### 选择评分框架时
@@ -2525,12 +2575,12 @@ signals = gen.generate_signals(scores, realized_ic=0.05, passed=True)  # 熔断�
 
 > **数据来源**：自动化「WQUANT 全因子归因（周度）」每周日 14:00 回灌 `C:\Users\Administrator\.workbuddy\skills\multi-factor-scoring\factor_attribution_latest.json`（由 `F:\workbuddy\2026-06-24-10-35-11\factor_attribution.py` 生成）。本技能**只采纳该 JSON 的 admitted/retired/excluded 作为"跑赢沪深300"的真实结论**，不凭印象宣称某因子跑赢。
 
-- **最新窗口**：`generated_at = 2026-10-10 10:12:51`（10 天内有效，本自动化 2026-10-11 经 `factor_attribution.py --no-refresh --dry-run` 重跑复核一致）；基准 `sh000300`；窗口 `2024-04-17 ~ 2026-10-09`（600 日、25 独立期）；`net_cost_rate = 0.02`。
-- **admitted（跑赢）**：`["size"]`（小市值；基线 `ci_lo=0.000190>0`、`p_gt0=0.006`、`net_edge=0.2179`，严格口径周期CI下界=0.0011、周期p=0.018，strict passed=true）——唯一通过 triple_gate 的因子，证据为小市值溢价（历史市值重构近似，置信度受限，未写入实盘因子库）。
-- **retired（淘汰，11 个）**：`trend`、`volume`、`marketbreadth`、`volatility`、`momentum`、`new_high`、`momentum_lr`、`idio_vol`、`amihud`、`value`、`quality`。（`marketbreadth`/`idio_vol`/`value`/`volatility` 额外 Gate2 失败 net_edge≤0；`amihud`/`quality`/`new_high`/`momentum_lr` 方向为正但 CI 下界仍≤0 仅上界跨零、或独立周期数<20 样本不足，属"方向正但统计不显著/样本不足"，非"跑赢"。）
-- **excluded（口径缺口，非淘汰）**：`capitalflow`——免费源仅可回溯最近 120 交易日（东财 fflow 服务端硬截断），无法覆盖 600 日归因窗口；**不伪造代理口径**，须另建日累积管道或改用付费源（补数方案见 §13.18.4 / §13.19.1 / 约束 #95 / #100）。
-- **治理复核**：2026-10-11 经 `factor_attribution.py --no-refresh --dry-run` 重跑全因子归因（同窗口、调用 `triple_gate_admission`），结果与回灌 JSON **完全吻合**：12/12 一致率 100%（size 准入 replay 一致、其余 11 淘汰 replay 一致、capitalflow EXCLUDED）；引擎冒烟 beat passed=True、lag passed=False、engine_ok=True。
-- **解读纪律**：`size` 为长仓 top 分位对指数的真实检验结果，须持续过 §14 治理链 + 周度归因复核（#91/#101），不得外推为"小市值永远溢价"；其余 11 因子本周未跑赢，不代表未来不能，仅代表当前窗口证据不足；capitalflow 缺口仍须按 #95/#100 走代理路线，未过 triple_gate 前维持 EXCLUDED。
+- **最新窗口**：`generated_at = 2026-10-17 10:12:17`（10 天内有效，本自动化 2026-10-18 经 `factor_attribution.py --no-refresh --dry-run` 重跑复核一致）；基准 `sh000300`；窗口 `2024-04-24 ~ 2026-10-16`（600 日、25 独立期）；`net_cost_rate = 0.02`。
+- **admitted（跑赢）**：`["volume"]`（量能放大 MA5(vol)/MA60(vol)；基线 `ci_lo=0.000152>0`、`p_gt0=0.008`、`net_edge=0.1656`，严格口径周期CI下界=0.0054、周期p=0.003、等权p=0.011，strict passed=true）——**本周唯一通过 triple_gate 的因子**；方向为正且统计显著（基线+严格长块 bootstrap+周期聚合双基准一致），为量能放大溢价。★ 本周显著变化：上周 admitted 为 `size`（小市值），本周窗口滚动后 `size` 严格长块/bootstrap 口径 CI 下界转负（`size` 严格 long_block_ci_lo=-0.0001、p=0.034）从准入掉至淘汰——实证印证 #101（alpha 有经济寿命、过门控≠永久 edge）。
+- **retired（淘汰，11 个）**：`trend`、`marketbreadth`、`volatility`、`momentum`、`new_high`、`momentum_lr`、`idio_vol`、`amihud`、`value`、`quality`、`size`。（`marketbreadth`/`idio_vol`/`value`/`volatility` 额外 Gate2 失败 net_edge≤0；`amihud`/`quality` 方向为正但 CI 下界仍≤0（仅上界跨零）；`new_high`/`momentum_lr` 独立周期数<20 样本不足；`size` 基线方向正但严格长块/bootstrap 口径 CI 下界≤0 不显著——**量能放大 `volume` 本周替代 `size` 成为唯一跑赢因子**。）
+- **excluded（口径缺口，非淘汰）**：`capitalflow`——免费源仅可回溯最近 120 交易日（东财 fflow 服务端硬截断），无法覆盖 600 日归因窗口；**不伪造代理口径**，须另建日累积管道或改用付费源（补数方案见 §13.18.4 / §13.19.1 / §13.20.2 / §13.21.1–§13.21.3 / 约束 #95 / #100 / #109 / #116–#118）。
+- **治理复核**：2026-10-18 经 `factor_attribution.py --no-refresh --dry-run` 重跑全因子归因（同窗口、调用 `triple_gate_admission`），结果与回灌 JSON **完全吻合**：12/12 一致率 100%（volume 准入 replay 一致、其余 11 淘汰 replay 一致、capitalflow EXCLUDED）。
+- **解读纪律**：`volume` 为量能放大对指数的真实检验结果，须持续过 §14 治理链 + 周度归因复核（#91/#101），不得外推为"量能永远溢价"；`size` 本周掉出准入即 #101 的实证——过门控≠永久 edge，须按 KL 证据→衰减时钟周期重验；其余 10 因子本周未跑赢，不代表未来不能，仅代表当前窗口证据不足；capitalflow 缺口仍须按 #95/#100/#109/#116–#118 走因果/结构/不可逆性代理路线，未过 triple_gate 前维持 EXCLUDED。
 
 ## §15 FTS 差距矩阵映射：能力演进路线（2026-08-11）
 
@@ -2699,10 +2749,27 @@ T+1日收盘 ──────→ ② attribute 拉标的当日实际表现
 
 > ⚠️ **约束 #115**（★优先，§13.20.8，arXiv:2610.08194，针对 excluded capitalflow 代理选取）：构造 proxy 指标（含 capitalflow 合成代理 #95）时，**相关采样误差对 proxy 排序有信息量**——**禁止**过度校正共享误差（过度校正丢弃信号、留下主要排序噪声）；须在 **disjoint 随机半样本**上验证 proxy 排序（避免共享误差偏置）；呼应 #78 因子挖掘 proxy / #25 审计 / #90 厚尾推断。
 
+> ⚠️ **约束 #116**（★优先，§13.21.1，arXiv:2610.12537，针对 excluded capitalflow 缺口）：capitalflow 合成代理须以 **do-intervention 因果基础模型**估反事实价（去混淆冲击），**而非**朴素 price-on-flow 回归（知情流混淆下高估达 68%）；metaorder 须编码为新增 flow 而非钳制价格水平；循环状态空间变体优先（冲击沿执行时长累积）。仍须叠加 #109 因果传播子 + #100 流构成 + #90 厚尾推断 + §13.9.2 triple_gate，失败则 capitalflow **维持 EXCLUDED**（呼应 #95/#109）。
+
+> ⚠️ **约束 #117**（§13.21.2，arXiv:2610.19428）：capitalflow 代理（#95）或任何 proxy 若把**潜在共同信号制造的表观流激励**误读为真实结构流，即落入 **Hawkes 二阶不可辨识**；须用**三阶累积量 / 分箱 Whittle 结构辨识 + 三明治 SE** 拒伪流信号，仅凭谱拟合作结构解释不足（呼应 #78/#95/#25/#90）。
+
+> ⚠️ **约束 #118**（§13.21.3，arXiv:2610.16151，针对 excluded capitalflow 缺口）：capitalflow 流质量读数须捕获 **LOB 路径不可逆性的 ordering increment**（order-sensitive − order-invariant 率，流方向性非净流），并报告**粗粒度 scale profile** 作鲁棒性；单尺度估计随尺度 >10 倍变化 ⇒ 禁止单尺度 proxy（呼应 #44/#100/#109/#95）。
+
+> ⚠️ **约束 #119**（★优先，§13.21.4，arXiv:2610.21846）：任何因子/策略准入前须过 **回测-实盘 parity 守卫**——replay 实盘日、与回测比对 (a) 行情量覆盖 (b) 分红/拆细复权 parity (c) 代码路径可达性 (d) 配置可达性 (e) 时区 (f) 仓位限制，对 6 类静默缺陷断言相等；漂移不进汇总统计量 ⇒ 不靠汇总统计自证（强化 #91 过门控≠edge / #25 审计 / #50 搜索 deflation / §16 replay）。
+
+> ⚠️ **约束 #120**（§13.21.5，arXiv:2610.14959）：LLM 符号因子挖掘（含 AlphaRLM 类）产出须过 **文献引导 + 冻结裁判（不自评，#93）+ 组合感知基准（after-cost 纯多&多空，#108）+ §13.9.2 triple_gate**；跨市场 8B 仅作初筛非准入证据，"优于基线"须 after-cost 复核（强化 #78 搜索 deflation / #93）。
+
+> ⚠️ **约束 #121**（§13.21.6，arXiv:2610.13446）：尾部风险预测可用 **实现高频 expectile CARE（RTCARE）** 替 CVaR（呼应 #113）；须过 #44 MCS/多重检验 + #17 厚尾 + ground metric 退化检查；realized HF 须 tick/L2 数据（A股限制），分布集须放宽（呼应 #113/#44）。
+
+> ⚠️ **约束 #122**（§13.21.7，arXiv:2610.20366）：regime 检测（含 #81 BOCPD）须表述为 **贝叶斯决策问题**（权衡 false alarm / 检测延迟 / 误分类）设行动阈值，非仅过滤；连续 stress 坐标驱动（呼应 #31/#81/#112）；阈值须校准 false-alarm/delay 权衡（呼应 #59/#31）。
+
+> ⚠️ **约束 #123**（§13.21.8，arXiv:2610.21867）：任何 RL 执行/定价策略机制审计须 **冻结策略 + 对冻结伙伴 DP 最优偏离测试**，而非仅脉冲响应；若最优偏离盈利 ⇒ "习得惩罚机制"假（合谋靠惯性非威慑）；重配对测试作鲁棒性（强化 #103 共谋稳健 / #104 regime RL / #87 RL 部署警示 / §13.20.4）。
+
 ## 版本历史
 
 | 版本 | 日期 | 变更说明 |
 |------|------|---------|
+| v2.19.0 | 2026-10-18 | SkillEvolver 周度自进化 + 真实归因复核（arXiv 2026-10-12~10-18，q-fin recent 87 篇扫描选 8 篇成 8 节）：新增 §13.21 — §13.21.1 因果基础模型市场冲击去混淆补 capitalflow 缺口★优先(arXiv:2610.12537)、§13.21.2 Hawkes 三阶结构辨识拒伪流(arXiv:2610.19428)、§13.21.3 LOB 路径不可逆性 ordering increment 流方向性(arXiv:2610.16151)、§13.21.4 回测-实盘 parity 守卫★(arXiv:2610.21846)、§13.21.5 文献引导 LLM 符号因子挖掘(arXiv:2610.14959)、§13.21.6 实现高频 expectile CARE 尾部风险(arXiv:2610.13446)、§13.21.7 regime 检测贝叶斯决策阈值(arXiv:2610.20366)、§13.21.8 RL 机制审计冻结策略+DP 最优偏离(arXiv:2610.21867)；新增约束 #116–#123（#116 专指 capitalflow 因果去混淆、#119 专指回测-实盘 parity）。**§14.4 真实归因记录复核更新**：2026-10-17 回灌数据（窗口 2024-04-24~2026-10-16，600 日/25 期）经 `factor_attribution.py --no-refresh --dry-run` 重跑 triple_gate 12/12 一致率 100%——admitted=["volume"]、retired=11（含上周准入的 size 本周掉出）、excluded=["capitalflow"]；★本周显著变化：量能放大 volume 替代小市值 size 成为唯一跑赢因子（size 严格长块/bootstrap CI 下界转负），实证印证 #101 alpha 经济寿命（同步校正 frontmatter 版本漂移 2.17.0→2.19.0）。本周主题：因果市场冲击补 capitalflow 缺口 + 流信号结构辨识 + 证据纪律延续（回测-实盘 parity / RL 机制审计）★ + 尾部风险 expectile / regime 决策阈值；护栏类（§13.21.4/8）核心价值是证据纪律非新 alpha |
 | v2.18.0 | 2026-10-11 | SkillEvolver 周度自进化 + 真实归因复核（arXiv 2026-10-05~10，q-fin recent 104 篇扫描选 8 篇成 8 节）：新增 §13.20 — §13.20.1 组合感知因子挖掘基准契约(arXiv:2610.06947)、§13.20.2 市场冲击因果 all-pass 传播子补 capitalflow 缺口★优先(arXiv:2610.11691)、§13.20.3 残差学习深化神经资产定价(arXiv:2610.09613)、§13.20.4 RL 执行解析基准诊断(arXiv:2610.03598)、§13.20.5 regime 连续潜应力坐标(arXiv:2610.05740)、§13.20.6 Wasserstein expectile 组合(arXiv:2610.11917)、§13.20.7 reward-penalty CVaR(arXiv:2610.09246)、§13.20.8 相关采样误差 proxy 排序信息量(arXiv:2610.08194)；新增约束 #108–#115（#109 专指 capitalflow 因果传播子、#115 呼应代理选取防过度校正）。**§14.4 真实归因记录复核更新**：2026-10-10 回灌数据（窗口 2024-04-17~2026-10-09，600 日/25 期）经 `factor_attribution.py --no-refresh --dry-run` 重跑 triple_gate 12/12 一致率 100%——admitted=["size"]、retired=11、excluded=["capitalflow"]，与上周结论一致（size 小市值溢价持续有效，net_edge=0.2179、p_gt0=0.006）。本周主题：因子挖掘基准纪律 + 市场冲击微观基础补 capitalflow 缺口 + 证据纪律延续（RL 须基准诊断/regime 须连续/proxy 须防过度校正）★ + 尾部风险组合升级（expectile/reward-penalty CVaR）；护栏类（§13.20.4/5/8）核心价值是证据纪律非新 alpha |
 | v2.17.0 | 2026-10-04 | SkillEvolver 周度自进化 + 真实归因复核（arXiv 2026-09-28~10-04，q-fin recent 25 篇扫描选 8 篇成 8 节）：新增 §13.19 — §13.19.1 订单流构成异质性补 capitalflow 缺口★优先(arXiv:2610.01897)、§13.19.2 alpha 经济寿命 KL 证据→衰减时钟(arXiv:2610.01115)、§13.19.3 条件信息可接纳+look-ahead 硬定理(arXiv:2610.00147,原 2026-09-10)、§13.19.4 RL 执行共谋稳健性检查(arXiv:2610.00619)、§13.19.5 regime 感知 RL 交易混合先验(arXiv:2610.01325)、§13.19.6 证据审计 claim-level verdict(arXiv:2610.01348)、§13.19.7 双向拍卖价格发现基桩(arXiv:2610.01562)、§13.19.8 搜索摩擦再平衡(arXiv:2610.00998)；新增约束 #100–#107（#100 专指 capitalflow 流构成、#101 呼应 alpha 寿命/#91）。**§14.4 真实归因记录复核更新**：2026-10-03 回灌数据（窗口 2024-04-15~2026-09-30，600 日/25 期）经 `factor_attribution.py --no-refresh` 重跑 triple_gate 12/12 一致率 100%——admitted=["size"]、retired=11、excluded=["capitalflow"]，与上周结论一致（size 小市值溢价持续有效）。本周主题：资金流微观结构 + 证据纪律升级（alpha 有寿命/条件信息须可接纳/RL 执行须共谋校验/审计审证据）★ + RL regime 交易 / 搜索摩擦再平衡；护栏类（§13.19.2/3/4/6）核心价值是证据纪律非新 alpha |
 | v2.16.0 | 2026-09-27 | SkillEvolver 周度自进化 + 真实归因接入（arXiv 2026-09-21~25，q-fin pastweek 74 篇扫描选 8 篇成 8 节）：新增 §13.18 — §13.18.1 时序验证不可能三角守恒律(arXiv:2609.29530)、§13.18.2 冻结裁判 LLM 因子挖掘 propose-don't-judge(arXiv:2609.27051)、§13.18.3 横截面预测稀释/正 IC 边际 β 准入(arXiv:2609.26303)、§13.18.4 流动性感知合成资金流代理补 capitalflow 缺口★优先(arXiv:2609.25617)、§13.18.5 回撤调制不变性控制(arXiv:2609.23272)、§13.18.6 半离散 OT 尾部不可信护栏 SDOT(arXiv:2609.27785,本周重发原 2026-08-17)、§13.18.7 成本敏感在线窗口 Fixed Share/Hedge(arXiv:2609.29887)、§13.18.8 集中市场主动配置 SDD(arXiv:2609.27113)；新增约束 #92–#99（#95 专指 capitalflow 替代口径、#99 呼应本周 size 准入）；**§14.4 新增真实归因记录（WQUANT 周度回灌）**：本周 admitted=["size"]、retired=11、excluded=["capitalflow"]，governance triple_gate 重跑 12/12 一致率 100%。本周主题：证据纪律升级（验证守恒律+冻结裁判）+ 信号库工程化（共享目标稀释）+ capitalflow 缺口补数（流动性感知代理）★ + 风险机器精化（回撤不变性/OT 尾部/成本敏感窗口/集中市场 PM）；护栏类（§13.18.1/2/6）核心价值是证据纪律非新 alpha |
